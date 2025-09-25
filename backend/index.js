@@ -46,7 +46,7 @@ app.use(session({
 app.use('/api/admin', adminRoutes);
 app.use('/api/user', userRoutes);
 
-// Start Server
+// Start Server - Restart trigger
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
