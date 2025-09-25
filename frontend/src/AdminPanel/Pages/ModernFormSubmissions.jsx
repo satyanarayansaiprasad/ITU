@@ -82,7 +82,7 @@ const ModernFormSubmissions = () => {
   const fetchForms = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('API_ENDPOINTS.GET_FORM');
+      const response = await axios.get(API_ENDPOINTS.GET_FORM);
       const formsData = Array.isArray(response.data) ? response.data : (response.data.forms || []);
       setForms(formsData);
     } catch (error) {
@@ -124,7 +124,7 @@ const ModernFormSubmissions = () => {
       const password = generatePassword(state);
       setGeneratedPassword(password);
       
-      await axios.put('API_ENDPOINTS.APPROVE_FORM', {
+      await axios.put(API_ENDPOINTS.APPROVE_FORM, {
         formId,
         email,
         password

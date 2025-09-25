@@ -83,7 +83,7 @@ const ModernGalleryMng = () => {
   const fetchGallery = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('API_ENDPOINTS.GET_GALLERY');
+      const response = await axios.get(API_ENDPOINTS.GET_GALLERY);
       setGalleryImages(response.data || []);
     } catch (error) {
       console.error('Error fetching gallery:', error);
@@ -149,7 +149,7 @@ const ModernGalleryMng = () => {
 
     try {
       setUploadLoading(true);
-      await axios.post('API_ENDPOINTS.UPLOAD_GALLERY', formData, {
+      await axios.post(API_ENDPOINTS.UPLOAD_GALLERY, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       

@@ -73,7 +73,7 @@ const ModernSliderManager = () => {
   const fetchSliders = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('API_ENDPOINTS.GET_SLIDER');
+      const response = await axios.get(API_ENDPOINTS.GET_SLIDER);
       setSliderImages(response.data || []);
     } catch (error) {
       console.error('Error fetching sliders:', error);
@@ -136,7 +136,7 @@ const ModernSliderManager = () => {
 
     try {
       setUploadLoading(true);
-      await axios.post('API_ENDPOINTS.UPLOAD_SLIDER', formData, {
+      await axios.post(API_ENDPOINTS.UPLOAD_SLIDER, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
