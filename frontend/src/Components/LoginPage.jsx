@@ -3,6 +3,7 @@ import React from 'react';
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
+import { API_ENDPOINTS } from "../config/api";
 import { Lock, UserCog, UserPlus, Users, X, Eye, EyeOff } from "lucide-react";
 
 const modalVariants = {
@@ -34,9 +35,9 @@ const LoginPage = () => {
     
     try {
       const endpointMap = {
-        admin: `http://localhost:3001/api/admin/login`,
-        stateunion: `http://localhost:3001/api/user/stateunionlogin`,
-        player: `http://localhost:3001/api/player/login`
+        admin: API_ENDPOINTS.ADMIN_LOGIN,
+        stateunion: API_ENDPOINTS.STATE_UNION_LOGIN,
+        player: API_ENDPOINTS.PLAYER_LOGIN
       };
 
       const redirectMap = {
