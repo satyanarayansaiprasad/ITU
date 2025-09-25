@@ -63,7 +63,7 @@ const ViewContact = () => {
   const fetchContacts = useCallback(async (signal) => {
     try {
       const res = await axios.get(
-        `API_ENDPOINTS.GET_CONTACT`,
+        API_ENDPOINTS.GET_CONTACT,
         { withCredentials: true, signal }
       );
       setContacts(res.data);

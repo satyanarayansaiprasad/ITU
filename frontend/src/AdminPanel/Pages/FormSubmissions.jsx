@@ -16,7 +16,7 @@ const FormSubmissions = () => {
   const fetchForms = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`API_ENDPOINTS.GET_FORM`);
+      const response = await axios.get(API_ENDPOINTS.GET_FORM);
       setForms(response.data);
     } catch (error) {
       console.error("Error fetching forms:", error);
@@ -36,7 +36,7 @@ const FormSubmissions = () => {
       setApprovingId(formId);
       const password = generatePassword(state);
       
-      await axios.put(`API_ENDPOINTS.APPROVE_FORM`, {
+      await axios.put(API_ENDPOINTS.APPROVE_FORM, {
         formId,
         email,
         password

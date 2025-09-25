@@ -142,9 +142,9 @@ const ModernAdminDash = () => {
       });
       
       const [analyticsRes, engagementRes, contentRes] = await Promise.all([
-        axios.get(`API_ENDPOINTS.DASHBOARD_ANALYTICS?${params}`),
-        axios.get(`API_ENDPOINTS.ENGAGEMENT_ANALYTICS?${params}`),
-        axios.get(`API_ENDPOINTS.CONTENT_ANALYTICS?${params}`)
+        axios.get(`${API_ENDPOINTS.DASHBOARD_ANALYTICS}?${params}`),
+        axios.get(`${API_ENDPOINTS.ENGAGEMENT_ANALYTICS}?${params}`),
+        axios.get(`${API_ENDPOINTS.CONTENT_ANALYTICS}?${params}`)
       ]);
 
       const newAnalytics = analyticsRes.data.data;

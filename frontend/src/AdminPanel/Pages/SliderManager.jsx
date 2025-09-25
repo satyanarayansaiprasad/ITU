@@ -14,7 +14,7 @@ const SliderManager = () => {
 
   const fetchSliders = async () => {
     try {
-      const response = await axios.get(`API_ENDPOINTS.GET_SLIDER`);
+      const response = await axios.get(API_ENDPOINTS.GET_SLIDER);
       setSliderImages(response.data);
     //   console.log('Fetched sliders:', response.data); // Debugging
     } catch (error) {
@@ -35,7 +35,7 @@ const SliderManager = () => {
     formData.append('image', newImage);
 
     try {
-      await axios.post(`API_ENDPOINTS.UPLOAD_SLIDER`, formData, {
+      await axios.post(API_ENDPOINTS.UPLOAD_SLIDER, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -53,7 +53,7 @@ const SliderManager = () => {
     if (!window.confirm("Are you sure you want to delete this slider?")) return;
 
     try {
-      await axios.delete(`API_ENDPOINTS.DELETE_SLIDER(${id}`);
+      await axios.delete(API_ENDPOINTS.DELETE_SLIDER(id));
       fetchSliders();
     } catch (error) {
       console.error('Delete failed:', error);
@@ -75,7 +75,7 @@ const SliderManager = () => {
     // Choose one of these options:
     
     // Option 1: If images are served from a specific route (recommended)
-    return `GET_UPLOAD_URL(${filename}`;
+    return GET_UPLOAD_URL(filename);
     
     // Option 2: If images are in public folder
     // return `/uploads/${filename}`;

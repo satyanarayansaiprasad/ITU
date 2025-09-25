@@ -173,7 +173,7 @@ const ModernGalleryMng = () => {
 
     try {
       setDeleteLoading(id);
-      await axios.delete(`API_ENDPOINTS.DELETE_GALLERY(${id}`);
+      await axios.delete(API_ENDPOINTS.DELETE_GALLERY(id));
       await fetchGallery();
       showNotification('Image deleted successfully!');
     } catch (error) {
@@ -190,7 +190,7 @@ const ModernGalleryMng = () => {
 
     try {
       await Promise.all(
-        selectedImages.map(id => axios.delete(`API_ENDPOINTS.DELETE_GALLERY(${id}`))
+        selectedImages.map(id => axios.delete(API_ENDPOINTS.DELETE_GALLERY(id)))
       );
       setSelectedImages([]);
       await fetchGallery();
@@ -444,7 +444,7 @@ const ModernGalleryMng = () => {
 
                       <div className="relative aspect-square">
                         <img
-                          src={`GET_UPLOAD_URL(${image.filename}`}
+                          src={GET_UPLOAD_URL(image.filename)}
                           alt={image.title || `Gallery image ${index + 1}`}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           onError={(e) => {
@@ -456,7 +456,7 @@ const ModernGalleryMng = () => {
                         <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
                             <button
-                              onClick={() => setShowPreview(`GET_UPLOAD_URL(${image.filename}`)}
+                              onClick={() => setShowPreview(GET_UPLOAD_URL(image.filename))}
                               className="p-2 bg-white bg-opacity-20 rounded-full text-white hover:bg-opacity-30 transition-all"
                             >
                               <ZoomIn size={16} />
@@ -510,7 +510,7 @@ const ModernGalleryMng = () => {
                       />
                       
                       <img
-                        src={`GET_UPLOAD_URL(${image.filename}`}
+                        src={GET_UPLOAD_URL(image.filename)}
                         alt={image.title || `Gallery image ${index + 1}`}
                         className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
                         onError={(e) => {
@@ -534,7 +534,7 @@ const ModernGalleryMng = () => {
                       
                       <div className="flex items-center gap-1">
                         <button
-                          onClick={() => setShowPreview(`GET_UPLOAD_URL(${image.image}`)}
+                          onClick={() => setShowPreview(GET_UPLOAD_URL(image.image))}
                           className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                         >
                           <Eye size={16} />

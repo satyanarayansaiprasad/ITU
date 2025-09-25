@@ -94,7 +94,7 @@ const ModernNewsManager = () => {
   const fetchNews = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`API_ENDPOINTS.GET_ALL_NEWS`);
+      const res = await axios.get(API_ENDPOINTS.GET_ALL_NEWS);
       setNewsList(res.data.news || []);
     } catch (error) {
       console.error("Error fetching news:", error);
@@ -154,12 +154,12 @@ const ModernNewsManager = () => {
       setSubmitLoading(true);
       
       if (editId) {
-        await axios.put(`API_ENDPOINTS.EDIT_NEWS(${editId}`, submitData, {
+        await axios.put(API_ENDPOINTS.EDIT_NEWS(editId), submitData, {
           headers: { "Content-Type": "multipart/form-data" }
         });
         showNotification("Blog post updated successfully!");
       } else {
-        await axios.post(`API_ENDPOINTS.ADD_NEWS`, submitData, {
+        await axios.post(API_ENDPOINTS.ADD_NEWS, submitData, {
           headers: { "Content-Type": "multipart/form-data" }
         });
         showNotification("Blog post created successfully!");
@@ -198,7 +198,7 @@ const ModernNewsManager = () => {
 
     try {
       setDeleteLoading(id);
-      await axios.delete(`API_ENDPOINTS.DELETE_NEWS(${id}`);
+      await axios.delete(API_ENDPOINTS.DELETE_NEWS(id));
       showNotification("Blog post deleted successfully!");
       fetchNews();
     } catch (error) {
@@ -458,7 +458,7 @@ const ModernNewsManager = () => {
                     <>
                       <div className="relative h-48">
                         <img
-                          src={`GET_UPLOAD_URL(${news.image}`}
+                          src={GET_UPLOAD_URL(news.image)}
                           alt={news.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           onError={(e) => {
@@ -533,7 +533,7 @@ const ModernNewsManager = () => {
                   ) : (
                     <div className="flex items-start gap-4">
                       <img
-                        src={`GET_UPLOAD_URL(${news.image}`}
+                        src={GET_UPLOAD_URL(news.image)}
                         alt={news.title}
                         className="w-24 h-16 object-cover rounded-lg flex-shrink-0"
                         onError={(e) => {
@@ -855,7 +855,7 @@ const ModernNewsManager = () => {
               >
                 <div className="relative">
                   <img
-                    src={`GET_UPLOAD_URL(${selectedPost.image}`}
+                    src={GET_UPLOAD_URL(selectedPost.image)}
                     alt={selectedPost.title}
                     className="w-full h-64 object-cover"
                   />
