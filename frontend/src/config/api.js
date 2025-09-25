@@ -41,7 +41,9 @@ export const API_ENDPOINTS = {
   
   // Uploads
   UPLOADS: `${API_BASE_URL}/uploads`,
-  GET_UPLOAD_URL: (filename) => `${API_BASE_URL}/uploads/${filename}`,
 };
+
+// Helper function for upload URLs
+export const GET_UPLOAD_URL = (filename) => `${API_BASE_URL}/uploads/${filename}`;
 
 export default API_BASE_URL;
