@@ -1,5 +1,6 @@
 import { Home, Menu, X, MoreHorizontal, Shield, Info, Phone, Activity, Newspaper, Image, Users, User, Lock, UserCog, UserPlus } from "lucide-react";
 import React, { useState } from "react";
+  import { Link } from "react-router-dom"; // Make sure this import is at the top
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom"; // Added for navigation
 
@@ -60,230 +61,184 @@ export default function Mainnav() {
   return (
     <>
       <motion.header 
-        className="fixed top-0 left-0 w-full h-auto z-50 bg-[#0B2545] shadow-lg"
+        className="sticky top-0 left-0 w-full h-auto z-50 bg-[#0B2545]/95 backdrop-blur-md shadow-lg border-b border-white/10"
         initial="hidden"
         animate="visible"
       >
-        <div className="flex w-full">
-          {/* Left Section - Logo with Home navigation */}
-          <div 
-            className="w-[32%] md:w-[20%] flex items-center justify-center p-2 min-h-[70px] cursor-pointer"
-            onClick={() => handleNavigation("/")}
-          >
-            <motion.img
-              src="/ITU LOGO.png"
-              alt="SDDI Logo"
-              className="h-auto w-auto max-w-[90px] max-h-[90px] sm:max-w-[100px] sm:max-h-[100px] md:max-w-[110px] md:max-h-[110px] rounded-full shadow-md object-cover"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            />
-          </div>
+        <div className="container-responsive">
+          <div className="flex items-center justify-between py-3 sm:py-4">
+            
+            {/* Logo Section - Enhanced */}
+            <motion.div 
+              className="flex items-center gap-3 cursor-pointer touch-friendly"
+              onClick={() => handleNavigation("/")}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <div className="relative">
+                <div className="absolute -inset-1 bg-gradient-to-r from-orange-400 to-green-400 rounded-full opacity-20 blur"></div>
+                <img
+                  src="/ITU LOGO.png"
+                  alt="Indian Taekwondo Union Logo"
+                  className="relative h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 rounded-full object-cover border-2 border-white/20"
+                />
+              </div>
+              <div className="hidden sm:block">
+                <h1 className="text-white font-bold text-base md:text-lg leading-tight">
+                  Indian Taekwondo
+                </h1>
+                <p className="text-orange-300 text-sm font-semibold">Union</p>
+              </div>
+            </motion.div>
 
-          {/* Right Section - Navigation */}
-          <div className="w-[70%] md:w-[80%] flex relative items-center px-4 md:px-6 lg:px-12 py-4">
-            {/* Mobile Menu Button */}
+            {/* Desktop Navigation - Enhanced */}
+            <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
+              {[
+                { icon: <Home size={20} />, title: "HOME", path: "/", desc: "Welcome" },
+                { icon: <Info size={20} />, title: "ABOUT", path: "/about", desc: "Learn More", hasDropdown: true },
+                { icon: <Shield size={20} />, title: "STATE UNION", path: "/state-union", desc: "Regional" },
+                { icon: <Phone size={20} />, title: "CONTACT", path: "/contact", desc: "Get in Touch" },
+                { icon: <Activity size={20} />, title: "SELF DEFENCE", path: "/self-defence", desc: "Protection Skills" },
+                { icon: <MoreHorizontal size={20} />, title: "MORE", path: "#", desc: "Others", hasDropdown: true }
+              ].map((item, index) => (
+                <div 
+                  key={index} 
+                  className="relative group"
+                  onMouseEnter={() => {
+                    if (item.title === "ABOUT") setAboutOpen(true);
+                    if (item.title === "MORE") setOthersOpen(true);
+                  }}
+                  onMouseLeave={() => {
+                    if (item.title === "ABOUT") setAboutOpen(false);
+                    if (item.title === "MORE") setOthersOpen(false);
+                  }}
+                >
+                  <motion.div 
+                    className="flex flex-col items-center px-3 py-2 cursor-pointer rounded-lg hover:bg-white/10 transition-all duration-300"
+                    whileHover={{ y: -1 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => !item.hasDropdown && handleNavigation(item.path)}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="text-white group-hover:text-orange-300 transition-colors">
+                        {item.icon}
+                      </div>
+                      <div className="text-center">
+                        <div className="text-sm font-bold text-white group-hover:text-orange-300 transition-colors leading-tight">
+                          {item.title}
+                        </div>
+                        <div className="text-xs text-gray-400 group-hover:text-orange-200 transition-colors">
+                          {item.desc}
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                  
+                  {/* Dropdown Menus */}
+                  {item.title === "ABOUT" && (
+                    <AnimatePresence>
+                      {aboutOpen && (
+                        <motion.div
+                          className="absolute top-full left-1/2 transform -translate-x-1/2 w-56 bg-white/95 backdrop-blur-md shadow-xl rounded-xl py-3 mt-2 border border-white/20 z-[60]"
+                          initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          {[
+                            { title: "Union Of Directors", path: "/about/directors" },
+                            { title: "Referee & Instructors", path: "/about/referees" }
+                          ].map((subItem, subIndex) => (
+                            <motion.div 
+                              key={subIndex}
+                              className="px-4 py-3 text-sm text-gray-700 hover:bg-orange-50 cursor-pointer transition-colors border-l-4 border-transparent hover:border-orange-400 touch-friendly relative z-[70]"
+                              whileHover={{ x: 4 }}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setAboutOpen(false);
+                                handleNavigation(subItem.path);
+                              }}
+                            >
+                              {subItem.title}
+                            </motion.div>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  )}
+                  
+                  {item.title === "MORE" && (
+                    <AnimatePresence>
+                      {othersOpen && (
+                        <motion.div
+                          className="absolute top-full left-1/2 transform -translate-x-1/2 w-48 bg-white/95 backdrop-blur-md shadow-xl rounded-xl py-3 mt-2 border border-white/20 z-[60]"
+                          initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          {[
+                            { icon: <Newspaper size={16} />, title: "News", path: "/news" },
+                            { icon: <Image size={16} />, title: "Gallery", path: "/gallery" },
+                            { icon: <Users size={16} />, title: "Players", path: "/players" },
+                            { icon: <User size={16} />, title: "Forms", path: "/forms" }
+                          ].map((subItem, subIndex) => (
+                            <motion.div 
+                              key={subIndex}
+                              className="px-4 py-3 text-sm text-gray-700 hover:bg-orange-50 cursor-pointer transition-colors flex items-center gap-3 touch-friendly relative z-[70]"
+                              whileHover={{ x: 4 }}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setOthersOpen(false);
+                                handleNavigation(subItem.path);
+                              }}
+                            >
+                              <div className="text-orange-500">{subItem.icon}</div>
+                              {subItem.title}
+                            </motion.div>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  )}
+                </div>
+              ))}
+              
+              {/* Enhanced Login Button */}
+              <Link to="/login">
+                <motion.button 
+                  className="ml-4 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg font-bold text-base hover:shadow-lg transition-all duration-300 flex items-center gap-2 focus-custom"
+                  whileHover={{ scale: 1.05, y: -1 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Lock size={18} />
+                  <span>Login</span>
+                </motion.button>
+              </Link>
+            </nav>
+
+            {/* Mobile Menu Button - Enhanced */}
             <button 
               onClick={() => setIsOpen(!isOpen)} 
-              className="lg:hidden text-gray-100 ml-auto"
+              className="lg:hidden text-white p-2 rounded-lg hover:bg-white/10 transition-colors touch-friendly focus-custom"
               aria-label="Toggle menu"
             >
               <motion.div
                 animate={isOpen ? "open" : "closed"}
                 transition={{ duration: 0.3 }}
               >
-                {isOpen ? <X size={30} /> : <Menu size={30} />}
+                {isOpen ? <X size={24} /> : <Menu size={24} />}
               </motion.div>
             </button>
-
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex gap-8 items-center w-full justify-center">
-              {/* Home */}
-              <motion.div 
-                className="relative flex flex-col items-center cursor-pointer"
-                whileHover={{ y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handleNavigation("/")}
-              >
-                <div className="flex items-center gap-2 transition duration-300">
-                  <Home size={20} className="text-white" />
-                  <div className="flex flex-col group">
-                    <div className="text-sm font-semibold text-white relative after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-white after:transition-all after:duration-300 group-hover:after:w-full">
-                      HOME
-                    </div>
-                    <div className="text-xs py-1 text-gray-400 min-h-[16px]">Welcome to ITU</div>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* About with Dropdown */}
-              <div 
-                className="relative" 
-                onMouseEnter={() => setAboutOpen(true)} 
-                onMouseLeave={() => setAboutOpen(false)}
-              >
-                <motion.div 
-                  className="relative flex flex-col items-center cursor-pointer"
-                  whileHover={{ y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handleNavigation("/about")}
-                >
-                  <div className="flex items-center gap-2 transition duration-300">
-                    <Info size={20} className="text-white" />
-                    <div className="flex flex-col group">
-                      <div className="text-sm font-semibold text-white relative after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-white after:transition-all after:duration-300 group-hover:after:w-full">
-                        ABOUT
-                      </div>
-                      <div className="text-xs py-1 text-gray-400 min-h-[16px]">Learn about ITU</div>
-                    </div>
-                  </div>
-                </motion.div>
-
-                {/* About Dropdown Menu */}
-                <AnimatePresence>
-                  {aboutOpen && (
-                    <motion.div
-                      className="absolute top-12 left-1/2 transform -translate-x-1/2 w-48 bg-white shadow-lg rounded-md py-2 z-20"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <motion.div 
-                        className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                        whileHover={{ x: 5 }}
-                        onClick={() => handleNavigation("/about/directors")}
-                      >
-                        Union Of Directors
-                      </motion.div>
-                      <motion.div 
-                        className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                        whileHover={{ x: 5 }}
-                        onClick={() => handleNavigation("/about/referees")}
-                      >
-                        Referee & Instructors Profile
-                      </motion.div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* State Taekwondo Union */}
-              <motion.div 
-                className="relative flex flex-col items-center cursor-pointer"
-                whileHover={{ y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handleNavigation("/state-union")}
-              >
-                <div className="flex items-center gap-2 transition duration-300">
-                  <Shield size={20} className="text-white" />
-                  <div className="flex flex-col group">
-                    <div className="text-sm font-semibold text-white relative after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-white after:transition-all after:duration-300 group-hover:after:w-full">
-                      STATE TAEKWONDO UNION
-                    </div>
-                    <div className="text-xs py-1 text-gray-400 min-h-[16px]">State-level representation</div>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Contact Us */}
-              <motion.div 
-                className="relative flex flex-col items-center cursor-pointer"
-                whileHover={{ y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handleNavigation("/contact")}
-              >
-                <div className="flex items-center gap-2 transition duration-300">
-                  <Phone size={20} className="text-white" />
-                  <div className="flex flex-col group">
-                    <div className="text-sm font-semibold text-white relative after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-white after:transition-all after:duration-300 group-hover:after:w-full">
-                      CONTACT US
-                    </div>
-                    <div className="text-xs py-1 text-gray-400 min-h-[16px]">Get in touch</div>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Self Defence */}
-              <motion.div 
-                className="relative flex flex-col items-center cursor-pointer"
-                whileHover={{ y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handleNavigation("/self-defence")}
-              >
-                <div className="flex items-center gap-2 transition duration-300">
-                  <Activity size={20} className="text-white" />
-                  <div className="flex flex-col group">
-                    <div className="text-sm font-semibold text-white relative after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-white after:transition-all after:duration-300 group-hover:after:w-full">
-                      SELF DEFENCE
-                    </div>
-                    <div className="text-xs py-1 text-gray-400 min-h-[16px]">Training programs</div>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* OTHERS Section - Dropdown */}
-              <motion.div
-                className="relative flex items-center gap-2 cursor-pointer"
-                onMouseEnter={() => setOthersOpen(true)}
-                onMouseLeave={() => setOthersOpen(false)}
-                whileHover={{ y: -2 }}
-              >
-                <MoreHorizontal size={20} className="text-white" />
-                <div className="flex flex-col group">
-                  <div className="text-sm font-semibold text-white relative after:content-[''] after:absolute after:left-0 after:bottom-[-4px] after:w-0 after:h-[2px] after:bg-white after:transition-all after:duration-300 group-hover:after:w-full">
-                    OTHERS
-                  </div>
-                </div>
-
-                <AnimatePresence>
-                  {othersOpen && (
-                    <motion.div
-                      className="absolute top-8 left-0 w-40 bg-white shadow-lg rounded-md py-2 z-20"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <motion.div 
-                        className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                        whileHover={{ x: 5 }}
-                        onClick={() => handleNavigation("/news")}
-                      >Upcoming News</motion.div>
-                      <motion.div 
-                        className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                        whileHover={{ x: 5 }}
-                        onClick={() => handleNavigation("/gallery")}
-                      >Gallery</motion.div>
-                      <motion.div 
-                        className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
-                        whileHover={{ x: 5 }}
-                        onClick={() => handleNavigation("/players")}
-                      >Players</motion.div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-
-              {/* Login Button */}
-              <motion.button 
-                onClick={() => {
-                  setIsLoginModalOpen(true);
-                  setLoginType(null);
-                }}
-                className="ml-2 px-3 py-2 bg-white text-[#0B2545] rounded font-medium text-xs hover:bg-gray-100 transition duration-300 flex items-center gap-1"
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Lock size={14} />
-                Login
-              </motion.button>
-            </nav>
           </div>
         </div>
+
       </motion.header>
 
       {/* Login Modal */}
-      <AnimatePresence>
+      {/* <AnimatePresence>
         {isLoginModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-opacity-10 backdrop-blur-sm">
             <motion.div
@@ -435,74 +390,131 @@ export default function Mainnav() {
             </motion.div>
           </div>
         )}
-      </AnimatePresence>
+      </AnimatePresence> */}
 
-      {/* Mobile Navigation - Fullscreen Overlay Menu */}
+      {/* Enhanced Mobile Navigation */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="fixed inset-0 mt-[50px] bg-[#0B2545] z-40 flex flex-col items-center justify-start pt-10 pb-10 px-4 h-[calc(100vh-30px)]"
-            initial={{ opacity: 0, x: "100%" }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: "100%" }}
+            className="fixed inset-0 bg-[#0B2545]/98 backdrop-blur-md z-40 flex flex-col safe-area-padding"
+            initial={{ opacity: 0, y: "-100%" }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: "-100%" }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
           >
-            {/* Close Button */}
-            <button
-              onClick={() => setIsOpen(false)}
-              className="absolute top-5 right-5 text-white"
-              aria-label="Close menu"
-            >
-              <X size={30} />
-            </button>
-
-            {/* Mobile Menu Items */}
-            <nav className="flex flex-col gap-4 w-full max-w-md mt-4">
-              {[
-                { icon: <Home size={20} />, title: "HOME", path: "/" },
-                { icon: <Info size={20} />, title: "ABOUT", path: "/about" },
-                { icon: <Shield size={20} />, title: "STATE TAEKWONDO UNION", path: "/state-union" },
-                { icon: <Phone size={20} />, title: "CONTACT US", path: "/contact" },
-                { icon: <Activity size={20} />, title: "SELF DEFENCE", path: "/self-defence" },
-                { icon: <Newspaper size={20} />, title: "UPCOMING NEWS", path: "/news" },
-                { icon: <Image size={20} />, title: "GALLERY", path: "/gallery" },
-                { icon: <Users size={20} />, title: "PLAYERS", path: "/players" },
-              ].map((item, index) => (
-                <motion.div 
-                  key={index} 
-                  className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-[#13315C] transition-colors"
-                  variants={menuItemVariants}
-                  custom={index}
-                  onClick={() => handleNavigation(item.path)}
-                >
-                  <div className="text-white">
-                    {item.icon}
-                  </div>
-                  <span className="text-white text-base font-medium">{item.title}</span>
-                </motion.div>
-              ))}
-
-              {/* Mobile Login Button */}
-              <motion.button 
-                onClick={() => {
-                  setIsOpen(false);
-                  setIsLoginModalOpen(true);
-                  setLoginType(null);
-                }}
-                className="mt-6 px-5 py-2 bg-white text-[#0B2545] rounded-lg font-medium hover:bg-gray-100 transition duration-300 flex items-center justify-center gap-2"
-                variants={menuItemVariants}
-                custom={8}
+            {/* Mobile Menu Header */}
+            <div className="flex items-center justify-between p-6 border-b border-white/10">
+              <div className="flex items-center gap-3">
+                <img
+                  src="/ITU LOGO.png"
+                  alt="ITU Logo"
+                  className="h-10 w-10 rounded-full"
+                />
+                <div>
+                  <h2 className="text-white font-bold text-lg">ITU</h2>
+                  <p className="text-orange-300 text-sm">Navigation Menu</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="text-white p-2 rounded-lg hover:bg-white/10 transition-colors touch-friendly"
+                aria-label="Close menu"
               >
-                <Lock size={18} />
-                <span className="font-semibold">Login</span>
-              </motion.button>
-            </nav>
+                <X size={24} />
+              </button>
+            </div>
+
+            {/* Mobile Menu Content */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <nav className="space-y-2">
+                {[
+                  { icon: <Home size={22} />, title: "Home", path: "/", desc: "Welcome to ITU" },
+                  { icon: <Info size={22} />, title: "About", path: "/about", desc: "Learn about us" },
+                  { icon: <Shield size={22} />, title: "State Union", path: "/state-union", desc: "Regional offices" },
+                  { icon: <Phone size={22} />, title: "Contact", path: "/contact", desc: "Get in touch" },
+                  { icon: <Activity size={22} />, title: "Self Defence", path: "/self-defence", desc: "Protection & martial arts" },
+                  { icon: <Newspaper size={22} />, title: "Blog", path: "/news", desc: "Latest articles & insights" },
+                  { icon: <Image size={22} />, title: "Gallery", path: "/gallery", desc: "Photo gallery" },
+                  { icon: <Users size={22} />, title: "Players", path: "/players", desc: "Our athletes" },
+                  { icon: <User size={22} />, title: "Forms", path: "/forms", desc: "Registration forms" },
+                ].map((item, index) => (
+                  <motion.div
+                    key={index}
+                    className="group"
+                    variants={menuItemVariants}
+                    initial="closed"
+                    animate="open"
+                    custom={index}
+                  >
+                    <div
+                      className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/10 cursor-pointer transition-all duration-300 touch-friendly"
+                      onClick={() => handleNavigation(item.path)}
+                    >
+                      <div className="flex-shrink-0 w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center group-hover:bg-orange-500/20 transition-colors">
+                        <div className="text-white group-hover:text-orange-300 transition-colors">
+                          {item.icon}
+                        </div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-white font-semibold text-lg group-hover:text-orange-300 transition-colors">
+                          {item.title}
+                        </h3>
+                        <p className="text-gray-400 text-sm group-hover:text-orange-200 transition-colors">
+                          {item.desc}
+                        </p>
+                      </div>
+                      <div className="text-white/50 group-hover:text-orange-300 transition-colors">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </nav>
+            </div>
+
+            {/* Mobile Menu Footer */}
+            <div className="p-6 border-t border-white/10">
+              <Link to="/login">
+                <motion.button
+                  className="w-full btn-responsive bg-gradient-to-r from-orange-500 to-red-600 text-white font-semibold justify-center"
+                  onClick={() => setIsOpen(false)}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className="flex items-center justify-center gap-3">
+                    <Lock size={20} />
+                    <span>Login to Account</span>
+                  </div>
+                </motion.button>
+              </Link>
+              
+              {/* Social Links */}
+              <div className="flex items-center justify-center gap-4 mt-4">
+                <div className="text-gray-400 text-sm">Follow us:</div>
+                <div className="flex gap-3">
+                  {[
+                    { icon: "📘", label: "Facebook" },
+                    { icon: "📷", label: "Instagram" },
+                    { icon: "🐦", label: "Twitter" },
+                    { icon: "📺", label: "YouTube" }
+                  ].map((social, index) => (
+                    <button
+                      key={index}
+                      className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors"
+                      aria-label={social.label}
+                    >
+                      <span className="text-sm">{social.icon}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Add padding to content to account for fixed navbar */}
-      <div className="pt-[90px]"></div>
     </>
   );
 }

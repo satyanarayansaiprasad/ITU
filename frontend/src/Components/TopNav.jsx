@@ -34,30 +34,36 @@ function TopNav() {
   const text = " An ISO Certified Taekwondo Organization  •••  KUKKIWON 2019 Top Ranked Taekwondo Organization  •••  MEMBER & PROMOTED BY: KUKKIWON - WORLD TAEKWONDO HEADQUARTER (SOUTH KOREA)  ";
 
   return (
-    <div 
-      data-scroll 
-      data-scroll-section 
-      data-scroll-speed="4" 
-      className='w-full max-w-full md:mt-8 mt-4   bg-gradient-to-r from-[#FF9933] via-white to-[#138808]'
-    >
-      <div className='flex overflow-hidden whitespace-nowrap px-4 sm:px-6'>
+    <div className='w-full bg-gradient-to-r from-[#FF9933] via-white to-[#138808] relative overflow-hidden'>
+      {/* Decorative elements */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-0 left-1/4 w-32 h-32 bg-[#00008B] rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-1/4 w-24 h-24 bg-[#FF9933] rounded-full blur-2xl"></div>
+      </div>
+      
+      <div className='relative flex overflow-hidden whitespace-nowrap py-1'>
         <motion.div
-          initial={{ x: 100 }}
+          initial={{ x: "0%" }}
           animate={{ x: "-100%" }}
-          transition={{ repeat: Infinity, ease: "linear", duration: 400 }}
-          className='flex'
+          transition={{ repeat: Infinity, ease: "linear", duration: 60 }}
+          className='flex items-center'
           style={{ whiteSpace: 'nowrap' }}
         >
-          {[...Array(20)].map((_, i) => (
-            <h1
+          {[...Array(3)].map((_, i) => (
+            <div
               key={i}
-              className='text-xs sm:text-sm md:text-lg lg:text-lg leading-none font-semibold py-4 px-4 sm:px-6 text-[#00008B]' // Dark Blue for Ashoka Chakra color
+              className='flex items-center px-8 sm:px-12 md:px-16'
             >
-              {text}
-            </h1>
+              <span className='text-responsive-sm font-bold text-[#00008B] drop-shadow-sm'>
+                {text}
+              </span>
+            </div>
           ))}
         </motion.div>
       </div>
+      
+      {/* Bottom border with Indian flag pattern */}
+      <div className="h-1 bg-gradient-to-r from-[#FF9933] via-white to-[#138808]"></div>
     </div>
   );
 }

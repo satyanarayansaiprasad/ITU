@@ -4,11 +4,60 @@ import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaMapMarkerAlt, FaPhone
 import { SiGooglemaps } from 'react-icons/si';
 import { GiIndiaGate, GiTigerHead, GiLotus } from 'react-icons/gi';
 import { BsFillChatSquareQuoteFill } from 'react-icons/bs';
-
-// For GiPeacockFeather, we'll use an alternative since it might not be available
-// Or you can install the specific package that contains it: npm install react-icons/gi
+import { useState } from "react";
+import axios from "axios";
 
 const Contact = () => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subjects: "",
+    message: "",
+  });
+
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSuccess("");
+    setError("");
+
+    const { name, email, subjects, message } = formData;
+
+    // Frontend validation
+    if (!name || !email || !subjects || !message) {
+      setError("All fields are required");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `http://localhost:3001/api/user/contactus`,
+        formData
+      );
+
+      setSuccess(response.data.message || "Message sent successfully!");
+      setFormData({
+        name: "",
+        email: "",
+        subjects: "",
+        message: "",
+      });
+
+      setTimeout(() => {
+        setSuccess("");
+      }, 3000);
+    } catch (err) {
+      setError(err.response?.data?.error || "Something went wrong");
+    }
+  };
+
   // Animation variants
   const container = {
     hidden: { opacity: 0 },
@@ -63,7 +112,7 @@ const Contact = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-[130px] sm:pt-[135px] md:pt-[140px] pb-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Indian-Themed Header */}
         <motion.div 
@@ -72,17 +121,14 @@ const Contact = () => {
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6 }}
         >
-          {/* Tricolor Icon with Lotus */}
-        
-          
           <motion.h1 
-  className="text-3xl md:text-4xl font-serif text-gray-900 mb-4"
-  initial={{ opacity: 0 }}
-  animate={{ opacity: 1 }}
-  transition={{ delay: 0.2 }}
->
-  <span className="text-orange-500">Namaste 🙏</span>, <span className="text-green-600">Let's Connect</span>
-</motion.h1>
+            className="text-3xl md:text-4xl font-serif text-gray-900 mb-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            <span className="text-orange-500">Namaste 🙏</span>, <span className="text-green-600">Let's Connect</span>
+          </motion.h1>
           <motion.p 
             className="text-lg text-gray-600 max-w-2xl mx-auto"
             initial={{ opacity: 0 }}
@@ -148,7 +194,27 @@ const Contact = () => {
               Send us a message
             </motion.h2>
 
-            <motion.form variants={container} className="space-y-6 relative z-10">
+            {error && (
+              <motion.div 
+                className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                {error}
+              </motion.div>
+            )}
+
+            {success && (
+              <motion.div 
+                className="mb-4 p-3 bg-green-100 text-green-700 rounded-lg"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                {success}
+              </motion.div>
+            )}
+
+            <motion.form variants={container} onSubmit={handleSubmit} className="space-y-6 relative z-10">
               <motion.div variants={item} className="space-y-2">
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                   Full Name
@@ -156,6 +222,9 @@ const Contact = () => {
                 <input
                   type="text"
                   id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
                   className="w-full px-4 py-3 rounded-xl bg-white/50 border border-gray-200/70 focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all placeholder-gray-400"
                   placeholder="Enter your name"
                 />
@@ -168,18 +237,24 @@ const Contact = () => {
                 <input
                   type="email"
                   id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
                   className="w-full px-4 py-3 rounded-xl bg-white/50 border border-gray-200/70 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all placeholder-gray-400"
                   placeholder="your@email.com"
                 />
               </motion.div>
 
               <motion.div variants={item} className="space-y-2">
-                <label htmlFor="subject" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="subjects" className="block text-sm font-medium text-gray-700">
                   Subject
                 </label>
                 <input
                   type="text"
-                  id="subject"
+                  id="subjects"
+                  name="subjects"
+                  value={formData.subjects}
+                  onChange={handleChange}
                   className="w-full px-4 py-3 rounded-xl bg-white/50 border border-gray-200/70 focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all placeholder-gray-400"
                   placeholder="How can we help?"
                 />
@@ -191,7 +266,10 @@ const Contact = () => {
                 </label>
                 <textarea
                   id="message"
+                  name="message"
                   rows="5"
+                  value={formData.message}
+                  onChange={handleChange}
                   className="w-full px-4 py-3 rounded-xl bg-white/50 border border-gray-200/70 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all placeholder-gray-400"
                   placeholder="Your message here..."
                 ></textarea>
@@ -303,45 +381,45 @@ const Contact = () => {
               </motion.p>
 
               <motion.div className="flex justify-center gap-4 relative z-10">
-  {[
-    { 
-      icon: <FaFacebook />, 
-      color: 'bg-orange-500 hover:bg-orange-600',
-      url: 'https://www.facebook.com/yourpage'
-    },
-    { 
-      icon: <FaTwitter />, 
-      color: 'bg-blue-400 hover:bg-blue-500',
-      url: 'https://www.facebook.com/share/16Kxqfx9wp/'
-    },
-    { 
-      icon: <FaInstagram />, 
-      color: 'bg-gradient-to-r from-orange-500 via-pink-500 to-purple-500 hover:from-orange-600 hover:via-pink-600 hover:to-purple-600',
-      url: 'https://www.instagram.com/indian_taekwondo_union_?igsh=MXgxejB3NDN6Y2Jhdw=='
-    },
-    { 
-      icon: <FaYoutube />, 
-      color: 'bg-red-500 hover:bg-red-600',
-      url: 'https://youtube.com/@indiantaekwondounion6210?si=l3n62Z7QLTqYWR6m'
-    }
-  ].map((social, index) => (
-    <motion.a
-      key={index}
-      href={social.url}
-      target="_blank"  // Opens link in new tab
-      rel="noopener noreferrer"  // Important for security with target="_blank"
-      className={`${social.color} text-white p-4 rounded-full shadow-md transition-all`}
-      whileHover={{ 
-        y: -8,
-        scale: 1.1,
-        transition: { type: "spring", stiffness: 400 }
-      }}
-      whileTap={{ scale: 0.9 }}
-    >
-      {social.icon}
-    </motion.a>
-  ))}
-</motion.div>
+                {[
+                  { 
+                    icon: <FaFacebook />, 
+                    color: 'bg-orange-500 hover:bg-orange-600',
+                    url: 'https://www.facebook.com/yourpage'
+                  },
+                  { 
+                    icon: <FaTwitter />, 
+                    color: 'bg-blue-400 hover:bg-blue-500',
+                    url: 'https://www.facebook.com/share/16Kxqfx9wp/'
+                  },
+                  { 
+                    icon: <FaInstagram />, 
+                    color: 'bg-gradient-to-r from-orange-500 via-pink-500 to-purple-500 hover:from-orange-600 hover:via-pink-600 hover:to-purple-600',
+                    url: 'https://www.instagram.com/indian_taekwondo_union_?igsh=MXgxejB3NDN6Y2Jhdw=='
+                  },
+                  { 
+                    icon: <FaYoutube />, 
+                    color: 'bg-red-500 hover:bg-red-600',
+                    url: 'https://youtube.com/@indiantaekwondounion6210?si=l3n62Z7QLTqYWR6m'
+                  }
+                ].map((social, index) => (
+                  <motion.a
+                    key={index}
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`${social.color} text-white p-4 rounded-full shadow-md transition-all`}
+                    whileHover={{ 
+                      y: -8,
+                      scale: 1.1,
+                      transition: { type: "spring", stiffness: 400 }
+                    }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    {social.icon}
+                  </motion.a>
+                ))}
+              </motion.div>
             </motion.div>
           </div>
         </div>
@@ -354,21 +432,21 @@ const Contact = () => {
           transition={{ delay: 1.6 }}
         >
           <div className="flex justify-center gap-2 mb-4">
-            {/* <motion.div 
+            <motion.div 
               className="w-8 h-1 bg-orange-500 rounded-full"
               animate={{ scaleX: [1, 1.5, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
-            /> */}
-            {/* <motion.div 
+            />
+            <motion.div 
               className="w-8 h-1 bg-white rounded-full"
               animate={{ scaleX: [1, 1.5, 1] }}
               transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
-            /> */}
-            {/* <motion.div 
+            />
+            <motion.div 
               className="w-8 h-1 bg-green-500 rounded-full"
               animate={{ scaleX: [1, 1.5, 1] }}
               transition={{ duration: 2, repeat: Infinity, delay: 1 }}
-            /> */}
+            />
           </div>
           <p>Made with ❤️ in India</p>
         </motion.div>

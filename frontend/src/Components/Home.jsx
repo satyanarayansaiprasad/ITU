@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Carousel } from "react-responsive-carousel";
-import "react-responsive-carousel/lib/styles/carousel.min.css";
+import Slider from "react-slick";
+import axios from "axios";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 const textContainerVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -18,97 +20,237 @@ const textVariants = {
 };
 
 const Home = () => {
+  const [sliderImages, setSliderImages] = useState([]);
+  const [imageLoadErrors, setImageLoadErrors] = useState({});
+
+  useEffect(() => {
+    fetchSliders();
+  }, []);
+
+  const fetchSliders = async () => {
+    try {
+      const res = await axios.get(`http://localhost:3001/api/admin/getSlider`);
+      setSliderImages(res.data || []);
+    } catch (err) {
+      console.error("Failed to fetch sliders:", err);
+    }
+  };
+
+  const getImageUrl = (filename) => {
+    if (!filename) return "/default-image.png";
+    if (/^(https?|data):/i.test(filename)) return filename;
+    return `http://localhost:3001/uploads/${filename}`;
+  };
+
+  const handleImageError = (id) => {
+    setImageLoadErrors((prev) => ({ ...prev, [id]: true }));
+  };
+
+  const sliderSettings = {
+    dots: false,
+    infinite: true,
+    speed: 800,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 3000,
+    arrows: false,
+    pauseOnHover: false,
+    cssEase: "linear", // makes smooth transition
+  };
+
   return (
-    <div className="relative w-full md:min-h-screen min-h-[500px] flex flex-col items-center justify-center overflow-hidden">
-
-
-      {/* Background Video */}
-      <video
-        autoPlay
-        loop
-        muted
+      <div className="relative w-full min-h-screen flex flex-col items-center justify-center overflow-hidden safe-area-padding pt-[50px] sm:pt-[55px] md:pt-[60px]">
+        {/* Background Video */}
+      <video 
+        autoPlay 
+        loop 
+        muted 
+        playsInline
         className="absolute top-0 left-0 w-full h-full object-cover"
       >
         <source src="/flag.webm" type="video/mp4" />
+        {/* Fallback for browsers that don't support the video */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0f2658] to-[#05183d]"></div>
       </video>
 
-      {/* Black Gradient Overlay */}
-      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-[#0f2658] to-[#05183d] opacity-90"></div>
+      {/* Enhanced Gradient Overlay */}
+      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-[#0f2658]/95 via-[#1a365d]/90 to-[#05183d]/95"></div>
 
-      {/* Content */}
-      <div className="relative z-10 flex flex-col w-full mx-auto items-center md:flex-row md:justify-between">
-        {/* Left Section - Animated Text */}
-        <motion.div
-          variants={textContainerVariants}
-          initial="hidden"
-          animate="visible"
-          className="w-full md:w-[38%] mt-10 md:mt-0 text-white text-center md:text-left px-6 md:ml-20"
-        >
-          <motion.h1
-            className="text-2xl md:text-4xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-green-500"
-            variants={textVariants}
+      {/* Main Content Container */}
+      <div className="relative z-10 container-responsive flex flex-col items-center justify-center min-h-screen py-8 sm:py-12 lg:py-16">
+        <div className="flex flex-col lg:flex-row items-center justify-between w-full gap-8 lg:gap-12">
+          
+          {/* Left Section - Enhanced Typography */}
+          <motion.div
+            variants={textContainerVariants}
+            initial="hidden"
+            animate="visible"
+            className="w-full lg:w-1/2 text-white text-center lg:text-left order-2 lg:order-1"
           >
-            Welcome to  
-          </motion.h1>
+            <motion.div
+              className="inline-block px-4 py-2 bg-white/10 backdrop-blur-md rounded-full mb-4 sm:mb-6"
+              variants={textVariants}
+            >
+              <span className="text-responsive-sm text-orange-300 font-medium">
+                🥋 Official Taekwondo Union
+              </span>
+            </motion.div>
+            
+            <motion.h1
+              className="text-responsive-2xl font-bold mb-4 sm:mb-6 leading-tight"
+              variants={textVariants}
+            >
+              <span className="block bg-gradient-to-r from-orange-400 via-yellow-300 to-green-400 bg-clip-text text-transparent">
+                Welcome to
+              </span>
+              <span className="block bg-gradient-to-r from-orange-400 via-yellow-300 to-green-400 bg-clip-text text-transparent mt-2">
+                Indian Taekwondo Union
+              </span>
+            </motion.h1>
+            
+            <motion.p
+              className="text-responsive-base text-gray-200 mb-6 sm:mb-8 leading-relaxed max-w-lg mx-auto lg:mx-0"
+              variants={textVariants}
+            >
+              Forge your spirit. Master your strength. Embrace the journey of excellence through traditional martial arts.
+            </motion.p>
+            
+            <motion.div 
+              className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
+              variants={textVariants}
+            >
+              <motion.button
+                className="btn-responsive bg-gradient-to-r from-orange-500 to-red-600 text-white font-semibold shadow-lg hover:shadow-xl focus-custom"
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <span className="flex items-center justify-center gap-2">
+                  🥋 Learn More
+                </span>
+              </motion.button>
+              
+              <motion.button
+                className="btn-responsive bg-white/10 backdrop-blur-md text-white border border-white/20 font-semibold hover:bg-white/20 focus-custom"
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <span className="flex items-center justify-center gap-2">
+                  📹 Watch Video
+                </span>
+              </motion.button>
+            </motion.div>
+            
+            {/* Stats Section */}
+            <motion.div 
+              className="grid grid-cols-3 gap-4 sm:gap-6 mt-8 sm:mt-12 pt-8 border-t border-white/20"
+              variants={textVariants}
+            >
+              <div className="text-center lg:text-left">
+                <div className="text-responsive-lg font-bold text-orange-300">50K+</div>
+                <div className="text-responsive-xs text-gray-300">Students</div>
+              </div>
+              <div className="text-center lg:text-left">
+                <div className="text-responsive-lg font-bold text-green-300">500+</div>
+                <div className="text-responsive-xs text-gray-300">Instructors</div>
+              </div>
+              <div className="text-center lg:text-left">
+                <div className="text-responsive-lg font-bold text-yellow-300">25+</div>
+                <div className="text-responsive-xs text-gray-300">States</div>
+              </div>
+            </motion.div>
+          </motion.div>
 
-          <motion.h2
-            className="text-xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-green-500"
-            variants={textVariants}
+          {/* Right - Premium Image Carousel */}
+          <motion.div
+            initial={{ opacity: 0, x: 50, scale: 0.9 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+            className="w-full lg:w-1/2 order-1 lg:order-2 max-w-lg lg:max-w-none"
           >
-            Indian Taekwondo Union
-          </motion.h2>
-
-          <motion.p
-            className="text-sm md:text-lg mt-5 md:mt-0 text-gray-300 mb-6"
-            variants={textVariants}
-          >
-            Forge your spirit. Master your strength. Embody the discipline of a true warrior. Rise with resilience, strike with precision, and embrace the journey of excellence.
-          </motion.p>
-
-          <motion.button
-  className="px-2 py-1 md:px-3 md:py-2 bg-blue-600 hover:bg-blue-800 text-white text-xs md:text-sm font-medium rounded shadow transition-transform transform hover:scale-105"
-  whileHover={{ scale: 1.03 }}
-  whileTap={{ scale: 0.95 }}
->
-  Know More
-</motion.button>
-
-        </motion.div>
-
-        {/* Right Section - Carousel */}
-        <motion.div
-  initial={{ opacity: 0, x: 50 }}
-  animate={{ opacity: 1, x: 0 }}
-  transition={{ duration: 1 }}
-  className="w-full md:w-[55%] px-2  rounded-4xl -mt-37 md:mt-0 md:mr-10 lg:mr-20"
->
-
-<Carousel
-            showThumbs={false}
-            showArrows={false}
-            showIndicators={false}
-            showStatus={false}
-            infiniteLoop={true}
-            autoPlay={true}
-            interval={3000}
-            stopOnHover={false}
-            swipeable={true}
-            className="rounded-2xl overflow-hidden "
-          >
-            {["/c1.webp", "/c2.webp", "/sldr1.webp", "/sldr2.webp"].map(
-              (src, index) => (
-                <div key={index} className="w-full">
-                  <img
-                    src={src}
-                    alt={`Taekwondo ${index + 1}`}
-                    className="w-full h-[500px] rounded-3xl object-contain"
-                  />
-                </div>
-              )
-            )}
-          </Carousel>
-        </motion.div>
+            <div className="relative">
+              {/* Multiple Decorative backgrounds for depth */}
+              <div className="absolute -inset-6 bg-gradient-to-r from-orange-500/30 to-green-500/30 rounded-3xl blur-2xl animate-pulse-soft"></div>
+              <div className="absolute -inset-3 bg-gradient-to-r from-orange-400/20 to-green-400/20 rounded-2xl blur-xl"></div>
+              
+              <div className="relative glass-effect rounded-2xl p-3 sm:p-4 border border-white/30 shadow-2xl">
+                {sliderImages.length > 0 ? (
+                  <div className="relative">
+                    <Slider {...sliderSettings}>
+                      {sliderImages.map((slider, index) => {
+                        const imageUrl = getImageUrl(slider.filename);
+                        const hasError = imageLoadErrors[slider._id];
+                        return (
+                          <div key={slider._id || index} className="relative group">
+                            <div className="aspect-video-responsive overflow-hidden rounded-xl shadow-lg">
+                              <img
+                                src={hasError ? "/default-image.png" : imageUrl}
+                                alt={`Taekwondo Training ${index + 1}`}
+                                onError={() => handleImageError(slider._id)}
+                                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                                loading="lazy"
+                              />
+                              {/* Subtle overlay for better text contrast */}
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
+                              
+                              {/* Image indicators */}
+                              <div className="absolute bottom-3 right-3 bg-black/50 backdrop-blur-sm rounded-full px-3 py-1">
+                                <span className="text-white text-xs font-medium">
+                                  {index + 1} / {sliderImages.length}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </Slider>
+                    
+                    {/* Custom slider dots */}
+                    <div className="flex justify-center mt-4 gap-2">
+                      {sliderImages.map((_, index) => (
+                        <div
+                          key={index}
+                          className="w-2 h-2 rounded-full bg-white/50 hover:bg-white/80 transition-all duration-300"
+                        ></div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="aspect-video-responsive bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl flex items-center justify-center">
+                    <div className="text-center text-gray-600">
+                      <motion.div 
+                        className="text-5xl mb-3"
+                        animate={{ rotate: [0, 10, -10, 0] }}
+                        transition={{ repeat: Infinity, duration: 2 }}
+                      >
+                        🥋
+                      </motion.div>
+                      <div className="text-sm font-medium">Loading Training Images...</div>
+                      <div className="text-xs text-gray-500 mt-1">Please wait</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        </div>
       </div>
+
+      {/* Scroll Indicator - Hidden on tablet and smaller devices */}
+      <motion.div 
+        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 hidden lg:block"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 2, duration: 0.8 }}
+      >
+        <motion.div
+          animate={{ y: [0, 10, 0] }}
+          transition={{ repeat: Infinity, duration: 2 }}
+          className="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center"
+        >
+          <div className="w-1 h-3 bg-white/70 rounded-full mt-2"></div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 };

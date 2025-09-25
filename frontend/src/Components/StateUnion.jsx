@@ -200,7 +200,7 @@ const StateUnion = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 pt-[130px] sm:pt-[135px] md:pt-[140px] pb-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
       {/* Animated background elements */}
       <motion.div 
         className="fixed inset-0 overflow-hidden pointer-events-none"
