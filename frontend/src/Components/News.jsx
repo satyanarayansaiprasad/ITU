@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { API_ENDPOINTS } from "../config/api";
 
 const News = () => {
   const [newsList, setNewsList] = useState([]);
@@ -27,7 +28,7 @@ const News = () => {
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        const response = await axios.get(`http://localhost:3001/api/admin/getallNews`);
+        const response = await axios.get(API_ENDPOINTS.GET_ALL_NEWS);
         setNewsList(response.data.news || []);
         setLoading(false);
       } catch (err) {

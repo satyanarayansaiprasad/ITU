@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+import { API_ENDPOINTS, GET_UPLOAD_URL } from '../../config/api';
 import {
   Upload,
   Image as ImageIcon,
@@ -82,7 +83,7 @@ const ModernGalleryMng = () => {
   const fetchGallery = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:3001/api/admin/getGallery');
+      const response = await axios.get('API_ENDPOINTS.GET_GALLERY');
       setGalleryImages(response.data || []);
     } catch (error) {
       console.error('Error fetching gallery:', error);
@@ -148,7 +149,7 @@ const ModernGalleryMng = () => {
 
     try {
       setUploadLoading(true);
-      await axios.post('http://localhost:3001/api/admin/uploadGallery', formData, {
+      await axios.post('API_ENDPOINTS.UPLOAD_GALLERY', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
@@ -172,7 +173,7 @@ const ModernGalleryMng = () => {
 
     try {
       setDeleteLoading(id);
-      await axios.delete(`http://localhost:3001/api/admin/deleteGallery/${id}`);
+      await axios.delete(`API_ENDPOINTS.DELETE_GALLERY(${id}`);
       await fetchGallery();
       showNotification('Image deleted successfully!');
     } catch (error) {
@@ -189,7 +190,7 @@ const ModernGalleryMng = () => {
 
     try {
       await Promise.all(
-        selectedImages.map(id => axios.delete(`http://localhost:3001/api/admin/deleteGallery/${id}`))
+        selectedImages.map(id => axios.delete(`API_ENDPOINTS.DELETE_GALLERY(${id}`))
       );
       setSelectedImages([]);
       await fetchGallery();
@@ -443,7 +444,7 @@ const ModernGalleryMng = () => {
 
                       <div className="relative aspect-square">
                         <img
-                          src={`http://localhost:3001/uploads/${image.filename}`}
+                          src={`GET_UPLOAD_URL(${image.filename}`}
                           alt={image.title || `Gallery image ${index + 1}`}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           onError={(e) => {
@@ -455,7 +456,7 @@ const ModernGalleryMng = () => {
                         <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
                             <button
-                              onClick={() => setShowPreview(`http://localhost:3001/uploads/${image.filename}`)}
+                              onClick={() => setShowPreview(`GET_UPLOAD_URL(${image.filename}`)}
                               className="p-2 bg-white bg-opacity-20 rounded-full text-white hover:bg-opacity-30 transition-all"
                             >
                               <ZoomIn size={16} />
@@ -509,7 +510,7 @@ const ModernGalleryMng = () => {
                       />
                       
                       <img
-                        src={`http://localhost:3001/uploads/${image.filename}`}
+                        src={`GET_UPLOAD_URL(${image.filename}`}
                         alt={image.title || `Gallery image ${index + 1}`}
                         className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
                         onError={(e) => {
@@ -533,7 +534,7 @@ const ModernGalleryMng = () => {
                       
                       <div className="flex items-center gap-1">
                         <button
-                          onClick={() => setShowPreview(`http://localhost:3001/${image.image}`)}
+                          onClick={() => setShowPreview(`GET_UPLOAD_URL(${image.image}`)}
                           className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                         >
                           <Eye size={16} />

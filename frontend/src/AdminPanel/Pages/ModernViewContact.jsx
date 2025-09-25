@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+import { API_ENDPOINTS } from '../../config/api';
 import {
   Mail,
   Search,
@@ -77,7 +78,7 @@ const ModernViewContact = () => {
   const fetchContacts = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:3001/api/admin/getContact');
+      const response = await axios.get(API_ENDPOINTS.GET_CONTACT);
       const contactsData = Array.isArray(response.data) ? response.data : (response.data.contacts || []);
       setContacts(contactsData.map(contact => ({ ...contact, status: 'unread', starred: false })));
     } catch (error) {

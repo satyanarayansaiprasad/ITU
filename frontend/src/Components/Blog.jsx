@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
+import { API_ENDPOINTS } from "../config/api";
 import { 
   Search, 
   Filter, 
@@ -77,10 +78,10 @@ const Blog = () => {
       });
 
       const [postsRes, featuredRes, categoriesRes, tagsRes] = await Promise.all([
-        axios.get(`http://localhost:3001/api/admin/blog/posts?${params}`),
-        axios.get(`http://localhost:3001/api/admin/blog/featured?limit=3`),
-        axios.get(`http://localhost:3001/api/admin/blog/categories`),
-        axios.get(`http://localhost:3001/api/admin/blog/tags`)
+        axios.get(`${API_ENDPOINTS.BLOG_POSTS}?${params}`),
+        axios.get(`${API_ENDPOINTS.BLOG_FEATURED}?limit=3`),
+        axios.get(API_ENDPOINTS.BLOG_CATEGORIES),
+        axios.get(API_ENDPOINTS.BLOG_TAGS)
       ]);
 
       setPosts(postsRes.data.posts || []);
@@ -99,8 +100,8 @@ const Blog = () => {
   const fetchSinglePost = async (slug) => {
     try {
       const [postRes, relatedRes] = await Promise.all([
-        axios.get(`http://localhost:3001/api/admin/blog/post/${slug}`),
-        axios.get(`http://localhost:3001/api/admin/blog/related/${slug}`)
+        axios.get(API_ENDPOINTS.BLOG_POST(slug)),
+        axios.get(API_ENDPOINTS.BLOG_RELATED(slug))
       ]);
       
       setSelectedPost(postRes.data.post);

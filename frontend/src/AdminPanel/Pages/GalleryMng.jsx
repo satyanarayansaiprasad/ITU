@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+import { API_ENDPOINTS, GET_UPLOAD_URL } from '../../config/api';
 const GalleryMng = () => {
   const [sliderImages, setSliderImages] = useState([]);
   const [newImage, setNewImage] = useState(null);
@@ -13,7 +14,7 @@ const GalleryMng = () => {
 
   const fetchSliders = async () => {
     try {
-      const response = await axios.get(`http://localhost:3001/api/admin/getGallery`);
+      const response = await axios.get(`API_ENDPOINTS.GET_GALLERY`);
       setSliderImages(response.data);
     //   console.log('Fetched sliders:', response.data); // Debugging
     } catch (error) {
@@ -34,7 +35,7 @@ const GalleryMng = () => {
     formData.append('image', newImage);
 
     try {
-      await axios.post(`http://localhost:3001/api/admin/uploadGallery`, formData, {
+      await axios.post(`API_ENDPOINTS.UPLOAD_GALLERY`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -52,7 +53,7 @@ const GalleryMng = () => {
     if (!window.confirm("Are you sure you want to delete this slider?")) return;
 
     try {
-      await axios.delete(`http://localhost:3001/api/admin/deleteGallery/${id}`);
+      await axios.delete(`API_ENDPOINTS.DELETE_GALLERY(${id}`);
       fetchSliders();
     } catch (error) {
       console.error('Delete failed:', error);
@@ -74,7 +75,7 @@ const GalleryMng = () => {
     // Choose one of these options:
     
     // Option 1: If images are served from a specific route (recommended)
-    return `http://localhost:3001/uploads/${filename}`;
+    return `GET_UPLOAD_URL(${filename}`;
     
     // Option 2: If images are in public folder
     // return `/uploads/${filename}`;

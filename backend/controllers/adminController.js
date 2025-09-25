@@ -682,7 +682,10 @@ exports.getBlogPosts = async (req, res) => {
     const updatedPosts = posts.map(post => {
       const postObj = post.toObject();
       if (postObj.image && !postObj.image.startsWith('http')) {
-        postObj.image = `http://localhost:3001/${postObj.image}`;
+        const baseUrl = process.env.NODE_ENV === 'production' 
+          ? 'https://itu-r1qa.onrender.com' 
+          : 'http://localhost:3001';
+        postObj.image = `${baseUrl}/${postObj.image}`;
       }
       return postObj;
     });
@@ -812,7 +815,10 @@ exports.getFeaturedPosts = async (req, res) => {
     const updatedPosts = posts.map(post => {
       const postObj = post.toObject();
       if (postObj.image && !postObj.image.startsWith('http')) {
-        postObj.image = `http://localhost:3001/${postObj.image}`;
+        const baseUrl = process.env.NODE_ENV === 'production' 
+          ? 'https://itu-r1qa.onrender.com' 
+          : 'http://localhost:3001';
+        postObj.image = `${baseUrl}/${postObj.image}`;
       }
       return postObj;
     });
@@ -861,7 +867,10 @@ exports.getRelatedPosts = async (req, res) => {
     const updatedPosts = relatedPosts.map(post => {
       const postObj = post.toObject();
       if (postObj.image && !postObj.image.startsWith('http')) {
-        postObj.image = `http://localhost:3001/${postObj.image}`;
+        const baseUrl = process.env.NODE_ENV === 'production' 
+          ? 'https://itu-r1qa.onrender.com' 
+          : 'http://localhost:3001';
+        postObj.image = `${baseUrl}/${postObj.image}`;
       }
       return postObj;
     });

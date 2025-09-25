@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
+import { API_ENDPOINTS } from "../config/api";
 import { MapPin, User, Mail, Phone, Landmark, CheckCircle, AlertCircle, ChevronLeft } from "lucide-react";
 
 const Form = () => {
@@ -35,7 +36,7 @@ const Form = () => {
         ? 'accelarationform' 
         : 'playerregistration';
       
-      await axios.post(`http://localhost:3001/api/user/${endpoint}`, formData);
+      await axios.post(API_ENDPOINTS.SUBMIT_FORM(endpoint), formData);
       setIsSubmitted(true);
       setFormData({
         state: "",

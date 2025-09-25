@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
+import { API_ENDPOINTS, GET_UPLOAD_URL } from '../../config/api';
 const NewsManager = () => {
   const [newsList, setNewsList] = useState([]);
   const [formData, setFormData] = useState({
@@ -25,7 +26,7 @@ const NewsManager = () => {
   const fetchNews = async () => {
     try {
       setError(null);
-      const res = await axios.get(`http://localhost:3001/api/admin/getallNews`);
+      const res = await axios.get(`API_ENDPOINTS.GET_ALL_NEWS`);
       setNewsList(res.data.news || []);
     } catch (error) {
       console.error("Error fetching news:", error);
@@ -95,13 +96,13 @@ const NewsManager = () => {
 
       if (editId) {
         response = await axios.put(
-          `http://localhost:3001/api/admin/editNews/${editId}`,
+          `API_ENDPOINTS.EDIT_NEWS(${editId}`,
           form,
           config
         );
       } else {
         response = await axios.post(
-          `http://localhost:3001/api/admin/addNews`,
+          `API_ENDPOINTS.ADD_NEWS`,
           form,
           config
         );
@@ -142,7 +143,7 @@ const NewsManager = () => {
     setError(null);
     try {
       const res = await axios.delete(
-        `http://localhost:3001/api/admin/deleteNews/${id}`,
+        `API_ENDPOINTS.DELETE_NEWS(${id}`,
         {
           headers: {
             'Content-Type': 'application/json',

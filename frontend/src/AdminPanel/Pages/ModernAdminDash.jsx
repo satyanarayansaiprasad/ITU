@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import { API_ENDPOINTS, GET_UPLOAD_URL } from '../../config/api';
 import {
   BarChart3,
   TrendingUp,
@@ -141,9 +142,9 @@ const ModernAdminDash = () => {
       });
       
       const [analyticsRes, engagementRes, contentRes] = await Promise.all([
-        axios.get(`http://localhost:3001/api/admin/analytics/dashboard?${params}`),
-        axios.get(`http://localhost:3001/api/admin/analytics/engagement?${params}`),
-        axios.get(`http://localhost:3001/api/admin/analytics/content?${params}`)
+        axios.get(`API_ENDPOINTS.DASHBOARD_ANALYTICS?${params}`),
+        axios.get(`API_ENDPOINTS.ENGAGEMENT_ANALYTICS?${params}`),
+        axios.get(`API_ENDPOINTS.CONTENT_ANALYTICS?${params}`)
       ]);
 
       const newAnalytics = analyticsRes.data.data;

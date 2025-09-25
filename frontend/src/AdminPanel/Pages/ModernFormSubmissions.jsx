@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
+import { API_ENDPOINTS, GET_UPLOAD_URL } from '../../config/api';
 import {
   FileText,
   Search,
@@ -81,7 +82,7 @@ const ModernFormSubmissions = () => {
   const fetchForms = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('http://localhost:3001/api/admin/getForm');
+      const response = await axios.get('API_ENDPOINTS.GET_FORM');
       const formsData = Array.isArray(response.data) ? response.data : (response.data.forms || []);
       setForms(formsData);
     } catch (error) {
@@ -123,7 +124,7 @@ const ModernFormSubmissions = () => {
       const password = generatePassword(state);
       setGeneratedPassword(password);
       
-      await axios.put('http://localhost:3001/api/admin/approveForm', {
+      await axios.put('API_ENDPOINTS.APPROVE_FORM', {
         formId,
         email,
         password

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { API_ENDPOINTS, GET_UPLOAD_URL } from '../../config/api';
 import { toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -15,7 +16,7 @@ const FormSubmissions = () => {
   const fetchForms = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:3001/api/admin/getForm`);
+      const response = await axios.get(`API_ENDPOINTS.GET_FORM`);
       setForms(response.data);
     } catch (error) {
       console.error("Error fetching forms:", error);
@@ -35,7 +36,7 @@ const FormSubmissions = () => {
       setApprovingId(formId);
       const password = generatePassword(state);
       
-      await axios.put(`http://localhost:3001/api/admin/approveForm`, {
+      await axios.put(`API_ENDPOINTS.APPROVE_FORM`, {
         formId,
         email,
         password

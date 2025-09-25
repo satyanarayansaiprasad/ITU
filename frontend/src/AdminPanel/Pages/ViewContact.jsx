@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
+import { API_ENDPOINTS, GET_UPLOAD_URL } from '../../config/api';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Icon component
@@ -62,7 +63,7 @@ const ViewContact = () => {
   const fetchContacts = useCallback(async (signal) => {
     try {
       const res = await axios.get(
-        `http://localhost:3001/api/admin/getContact`,
+        `API_ENDPOINTS.GET_CONTACT`,
         { withCredentials: true, signal }
       );
       setContacts(res.data);

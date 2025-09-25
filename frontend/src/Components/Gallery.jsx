@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
+import { API_ENDPOINTS, GET_UPLOAD_URL } from '../config/api';
 import { X, ZoomIn, Download, Heart } from 'lucide-react';
 
 const Gallery = () => {
@@ -17,7 +18,7 @@ const Gallery = () => {
   const fetchGalleryImages = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:3001/api/admin/getGallery`);
+      const response = await axios.get(API_ENDPOINTS.GET_GALLERY);
       setGalleryImages(response.data || []);
     } catch (error) {
       console.error('Error fetching gallery images:', error);
@@ -30,7 +31,7 @@ const Gallery = () => {
     if (!filename) return "/default-image.png";
     if (/^(https?|data):/i.test(filename)) return filename;
     if (filename.startsWith('/')) return filename;
-    return `http://localhost:3001/uploads/${filename}`;
+    return GET_UPLOAD_URL(filename);
   };
 
   const handleImageError = (id) => {
