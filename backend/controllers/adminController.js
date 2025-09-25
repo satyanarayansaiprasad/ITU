@@ -375,10 +375,10 @@ exports.deleteSlider = async (req, res) => {
 //Form
 exports.getForm = async (req, res) => {
   try {
-    const users = await User.find().sort({ createdAt: -1 });
-    res.status(200).json(users);
+    const forms = await AccelerationForm.find().sort({ createdAt: -1 });
+    res.status(200).json(forms);
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch contacts" });
+    res.status(500).json({ error: "Failed to fetch forms" });
   }
 };
 
@@ -517,7 +517,7 @@ exports.approveForm = async (req, res) => {
     const { formId, email, password } = req.body;
 
     // 1. Update the form with password
-    const updatedForm = await User.findByIdAndUpdate(
+    const updatedForm = await AccelerationForm.findByIdAndUpdate(
   formId,
   {
     password,
