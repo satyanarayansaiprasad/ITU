@@ -14,8 +14,15 @@ connectDB();
 
 // CORS Configuration
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS?.split(',') || 'http://localhost:5173',
-  credentials: true
+  origin: [
+    'https://itu-mu.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:3000',
+    ...(process.env.ALLOWED_ORIGINS?.split(',') || [])
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
 }));
 
 // Middleware
