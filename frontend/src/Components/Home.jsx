@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Slider from "react-slick";
 import axios from "axios";
+import { API_ENDPOINTS, GET_UPLOAD_URL } from "../config/api";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
@@ -29,7 +30,7 @@ const Home = () => {
 
   const fetchSliders = async () => {
     try {
-      const res = await axios.get(`http://localhost:3001/api/admin/getSlider`);
+      const res = await axios.get(API_ENDPOINTS.GET_SLIDER);
       setSliderImages(res.data || []);
     } catch (err) {
       console.error("Failed to fetch sliders:", err);
@@ -39,7 +40,7 @@ const Home = () => {
   const getImageUrl = (filename) => {
     if (!filename) return "/default-image.png";
     if (/^(https?|data):/i.test(filename)) return filename;
-    return `http://localhost:3001/uploads/${filename}`;
+    return GET_UPLOAD_URL(filename);
   };
 
   const handleImageError = (id) => {

@@ -6,6 +6,7 @@ import { GiIndiaGate, GiTigerHead, GiLotus } from 'react-icons/gi';
 import { BsFillChatSquareQuoteFill } from 'react-icons/bs';
 import { useState } from "react";
 import axios from "axios";
+import { API_ENDPOINTS } from "../config/api";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -38,7 +39,7 @@ const Contact = () => {
 
     try {
       const response = await axios.post(
-        `http://localhost:3001/api/user/contactus`,
+        API_ENDPOINTS.CONTACT_US,
         formData
       );
 
