@@ -43,24 +43,31 @@ const AdminLayout = () => {
         {mobileSidebarOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
 
-      {/* Sidebar */}
+      {/* Desktop Sidebar Toggle - Always visible when sidebar is closed */}
+      {!sidebarOpen && (
+        <button
+          className="hidden md:block fixed z-50 top-4 left-4 p-2 rounded-md bg-[#0E2A4E] text-white shadow-lg hover:bg-[#193C69] transition-colors"
+          onClick={() => setSidebarOpen(true)}
+          title="Open Sidebar"
+        >
+          <Menu size={20} />
+        </button>
+      )}
+
+      {/* Mobile Sidebar */}
       <AnimatePresence>
-        {(mobileSidebarOpen || sidebarOpen) && (
+        {mobileSidebarOpen && (
           <motion.aside
             initial={{ x: -200, opacity: 0, scale: 0.9 }}
             animate={{ x: 0, opacity: 1, scale: 1 }}
             exit={{ x: -200, opacity: 0, scale: 0.9 }}
             transition={{ type: "spring", damping: 20, stiffness: 200 }}
-            className={`fixed z-40 h-full text-white bg-gradient-to-b from-[#0E2A4E] to-[#193C69] shadow-lg transition-all
-              ${mobileSidebarOpen ? "left-0" : "md:left-0"} 
-              ${sidebarOpen ? "w-64" : "w-20"} hidden md:flex flex-col`}
+            className="fixed z-40 h-full w-64 left-0 text-white bg-gradient-to-b from-[#0E2A4E] to-[#193C69] shadow-lg md:hidden flex flex-col"
           >
             <div className="p-4 flex justify-between items-center border-b border-blue-900">
-              {sidebarOpen && <h1 className="text-xl font-bold text-white">Admin</h1>}
-              <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1 rounded hover:bg-blue-800">
-                <ChevronRight
-                  className={`transition-transform ${sidebarOpen ? "rotate-180" : ""}`}
-                />
+              <h1 className="text-xl font-bold text-white">Admin</h1>
+              <button onClick={() => setMobileSidebarOpen(false)} className="p-1 rounded hover:bg-blue-800">
+                <X size={20} />
               </button>
             </div>
 
@@ -78,7 +85,7 @@ const AdminLayout = () => {
                   onClick={() => setMobileSidebarOpen(false)}
                 >
                   {item.icon}
-                  {sidebarOpen && <span className="ml-3">{item.title}</span>}
+                  <span className="ml-3">{item.title}</span>
                 </Link>
               ))}
             </nav>
@@ -92,12 +99,74 @@ const AdminLayout = () => {
                 className="w-full flex items-center p-3 rounded-lg bg-red-600 hover:bg-red-700 text-white shadow"
               >
                 <LogOut className="w-5 h-5" />
-                {sidebarOpen && <span className="ml-3">Logout</span>}
+                <span className="ml-3">Logout</span>
               </motion.button>
             </div>
           </motion.aside>
         )}
       </AnimatePresence>
+
+      {/* Desktop Sidebar - Always visible */}
+      <aside
+        className={`hidden md:flex fixed z-40 h-full text-white bg-gradient-to-b from-[#0E2A4E] to-[#193C69] shadow-lg transition-all duration-300
+          ${sidebarOpen ? "w-64" : "w-20"} flex-col`}
+      >
+        <div className="p-4 flex justify-between items-center border-b border-blue-900">
+          {sidebarOpen && <h1 className="text-xl font-bold text-white">Admin</h1>}
+          <button 
+            onClick={() => setSidebarOpen(!sidebarOpen)} 
+            className="p-1 rounded hover:bg-blue-800 transition-colors"
+            title={sidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
+          >
+            <ChevronRight
+              className={`transition-transform ${sidebarOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+        </div>
+
+        <nav className="flex-1 p-3 overflow-y-auto">
+          {navItems.map((item, index) => (
+            <Link
+              key={index}
+              to={item.path}
+              className={`flex items-center p-3 rounded-lg mb-2 transition-all duration-200 group
+                ${
+                  location.pathname === item.path
+                    ? "bg-white/10 shadow-md text-blue-200"
+                    : "hover:bg-white/10 text-white"
+                } hover:scale-[1.03] hover:shadow-lg`}
+              title={!sidebarOpen ? item.title : ""}
+            >
+              {item.icon}
+              {sidebarOpen && <span className="ml-3">{item.title}</span>}
+              {!sidebarOpen && (
+                <div className="absolute left-20 bg-gray-800 text-white px-2 py-1 rounded text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                  {item.title}
+                </div>
+              )}
+            </Link>
+          ))}
+        </nav>
+
+        {/* Logout */}
+        <div className="p-4 border-t border-blue-900">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleLogout}
+            className="w-full flex items-center p-3 rounded-lg bg-red-600 hover:bg-red-700 text-white shadow group"
+            title={!sidebarOpen ? "Logout" : ""}
+          >
+            <LogOut className="w-5 h-5" />
+            {sidebarOpen && <span className="ml-3">Logout</span>}
+            {!sidebarOpen && (
+              <div className="absolute left-20 bg-gray-800 text-white px-2 py-1 rounded text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                Logout
+              </div>
+            )}
+          </motion.button>
+        </div>
+      </aside>
 
       {/* Main Content */}
       <main
