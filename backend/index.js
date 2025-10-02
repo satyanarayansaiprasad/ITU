@@ -18,6 +18,7 @@ app.use(cors({
     'https://itu-mu.vercel.app',
     'https://itu-r1qa.onrender.com',
     'https://taekwondounion.com',
+    'https://www.taekwondounion.com',
     'http://localhost:5173',
     'http://localhost:3000',
     ...(process.env.ALLOWED_ORIGINS?.split(',') || [])
