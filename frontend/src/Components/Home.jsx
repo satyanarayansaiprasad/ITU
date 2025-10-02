@@ -108,14 +108,31 @@ const Home = () => {
               <span className="block bg-gradient-to-r from-orange-400 via-yellow-300 to-green-400 bg-clip-text text-transparent mt-2">
                 Indian Taekwondo Union
               </span>
+              <span className="block text-lg sm:text-xl text-white/90 mt-2 font-normal">
+                Official Taekwondo Federation of India
+              </span>
             </motion.h1>
             
             <motion.p
               className="text-responsive-base text-gray-200 mb-6 sm:mb-8 leading-relaxed max-w-lg mx-auto lg:mx-0"
               variants={textVariants}
             >
-              Forge your spirit. Master your strength. Embrace the journey of excellence through traditional martial arts.
+              Join India's premier Taekwondo Federation with 50,000+ students and 500+ certified instructors across 25+ states. Learn martial arts, self-defense, and discipline through professional Taekwondo training programs.
             </motion.p>
+            
+            <motion.div
+              className="text-responsive-sm text-gray-300 mb-6 sm:mb-8 leading-relaxed max-w-lg mx-auto lg:mx-0"
+              variants={textVariants}
+            >
+              <h2 className="text-lg font-semibold text-white mb-2">Why Choose Indian Taekwondo Union?</h2>
+              <ul className="space-y-1 text-sm">
+                <li>• Official Taekwondo Federation of India since 2017</li>
+                <li>• Professional martial arts training for all ages</li>
+                <li>• Self-defense and discipline development</li>
+                <li>• National and international tournament opportunities</li>
+                <li>• Certified instructors and structured curriculum</li>
+              </ul>
+            </motion.div>
             
             <motion.div 
               className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
@@ -186,7 +203,7 @@ const Home = () => {
                             <div className="aspect-video-responsive overflow-hidden rounded-xl shadow-lg">
                               <img
                                 src={hasError ? "/default-image.png" : imageUrl}
-                                alt={`Taekwondo Training ${index + 1}`}
+                                alt={`Indian Taekwondo Union Training Session ${index + 1} - Professional Martial Arts Training in India`}
                                 onError={() => handleImageError(slider._id)}
                                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                                 loading="lazy"

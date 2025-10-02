@@ -1,0 +1,25 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://itu-mu.vercel.app/sitemap.xml
+
+# Disallow admin areas
+Disallow: /admin/
+Disallow: /admindashboard
+Disallow: /stateuniondashboard
+
+# Allow important pages
+Allow: /
+Allow: /about
+Allow: /contact
+Allow: /state-union
+Allow: /news
+Allow: /gallery
+Allow: /forms
+Allow: /self-defence
+Allow: /about/directors
+Allow: /login
+
+# Crawl delay
+Crawl-delay: 1

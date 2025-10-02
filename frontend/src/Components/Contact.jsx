@@ -128,7 +128,7 @@ const Contact = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
-            <span className="text-orange-500">Namaste 🙏</span>, <span className="text-green-600">Let's Connect</span>
+            <span className="text-orange-500">Namaste 🙏</span>, <span className="text-green-600">Contact Indian Taekwondo Union</span>
           </motion.h1>
           <motion.p 
             className="text-lg text-gray-600 max-w-2xl mx-auto"
@@ -136,7 +136,7 @@ const Contact = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
           >
-            We're here to help and answer any questions you might have.
+            Connect with India's premier Taekwondo Federation for martial arts training, self-defense classes, tournament registration, and membership inquiries. Join 50,000+ students across India.
           </motion.p>
         </motion.div>
 

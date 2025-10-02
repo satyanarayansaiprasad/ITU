@@ -314,14 +314,16 @@ const Blog = () => {
               </div>
               
               <h1 className="text-responsive-2xl font-bold text-gray-900 mb-6 leading-tight">
-                Latest News &{' '}
+                Indian Taekwondo Union{' '}
                 <span className="bg-gradient-to-r from-red-500 to-orange-600 bg-clip-text text-transparent">
-                  Insights
+                  News & Updates
                 </span>
               </h1>
               
               <p className="text-responsive-base text-gray-600 max-w-3xl mx-auto mb-8">
-                Stay updated with the latest news, training tips, and insights from the world of Taekwondo and martial arts.
+                Stay updated with the latest news, training tips, tournament results, and insights from India's premier 
+                Taekwondo Federation. Discover martial arts techniques, self-defense tips, and success stories from 
+                our 50,000+ students and 500+ instructors.
               </p>
 
               {/* Search and Filter Bar */}

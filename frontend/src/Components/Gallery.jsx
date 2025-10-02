@@ -99,15 +99,16 @@ const Gallery = () => {
           </div>
           
           <h1 className="text-responsive-2xl font-bold text-gray-900 mb-4 leading-tight">
-            Capturing Our{' '}
+            Indian Taekwondo Union{' '}
             <span className="bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">
-              Taekwondo Journey
+              Photo Gallery
             </span>
           </h1>
           
           <p className="text-responsive-base text-gray-600 max-w-2xl mx-auto">
-            Explore moments of excellence, dedication, and achievement from our training sessions, 
-            competitions, and special events at the Indian Taekwondo Union.
+            Discover our martial arts journey through exclusive photos of Taekwondo training sessions, 
+            tournaments, competitions, and achievements. See 50,000+ students and 500+ instructors 
+            in action across India's premier Taekwondo Federation.
           </p>
         </motion.div>
 
@@ -147,7 +148,7 @@ const Gallery = () => {
                   <div className="aspect-square-responsive overflow-hidden">
                     <img
                       src={hasError ? "/default-image.png" : imageUrl}
-                      alt={img.title || "Taekwondo Gallery Image"}
+                      alt={img.title || `Indian Taekwondo Union Training Session - Professional Martial Arts Training in India`}
                       onError={() => handleImageError(img._id)}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                       loading="lazy"

@@ -245,13 +245,13 @@ const About = () => {
           variants={itemVariants} 
           className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#FF9933] via-[#0B2545] to-[#138808] bg-clip-text text-transparent mb-4"
         >
-          About Indian Taekwondo Union
+          About Indian Taekwondo Union - Official Taekwondo Federation of India
         </motion.h1>
         <motion.p 
           variants={itemVariants} 
           className="text-lg md:text-xl text-gray-700 max-w-3xl mx-auto"
         >
-          Empowering individuals through martial arts since 2017. Our journey, values, and vision for the future.
+          India's premier Taekwondo Federation empowering 50,000+ students through martial arts training, self-defense education, and competitive excellence since 2017. Discover our mission to elevate Taekwondo in India.
         </motion.p>
 
         {/* Animated decorative elements */}
@@ -301,19 +301,25 @@ const About = () => {
           </motion.div>
 
           <h2 className="text-3xl font-bold text-[#0B2545] mb-6 relative z-10 text-center">
-          Our Foundation
+          Our Foundation - Indian Taekwondo Union History
   <div className="w-24 h-1 mx-auto mt-2 bg-gradient-to-r from-[#FF9933] via-white to-[#138808] rounded-full"></div>
 </h2>
           <p className="text-lg text-gray-700 mb-6 relative z-10">
             The Indian Taekwondo Union (ITU) was founded by Master Mukesh Kumar Sahoo with the vision to establish 
             a national-level organization where Taekwondo players, instructors, and referees could receive the honor 
-            and respect they deserve. Recognizing the exploitation and lack of recognition in the Taekwondo community, 
-            Master Sahoo formed ITU in 2017 with the help of dedicated Taekwondo instructors and friends.
+            and respect they deserve. As the official Taekwondo Federation of India, ITU has been at the forefront of 
+            promoting martial arts education, self-defense training, and competitive Taekwondo across the nation.
           </p>
-          <p className="text-lg text-gray-700 relative z-10">
+          <p className="text-lg text-gray-700 mb-6 relative z-10">
             Registered under the Govt. of Odisha, ITU quickly gained recognition at both national and international levels, 
             committed to fulfilling the dreams of Taekwondo practitioners across India by providing them with proper platforms 
-            to showcase their skills and dedication.
+            to showcase their skills and dedication. Today, ITU serves as India's premier martial arts organization with 
+            over 50,000 students and 500+ certified instructors.
+          </p>
+          <p className="text-lg text-gray-700 relative z-10">
+            Our mission extends beyond just training - we aim to develop world-class athletes who can represent India 
+            at international competitions, Olympic Games, and World Championships. Through structured Taekwondo programs, 
+            we instill discipline, respect, and excellence in every practitioner.
           </p>
         </motion.div>
       </motion.section>
