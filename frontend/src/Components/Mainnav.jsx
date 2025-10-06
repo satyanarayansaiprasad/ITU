@@ -87,7 +87,7 @@ export default function Mainnav() {
                 <h1 className="text-white font-bold text-base md:text-lg leading-tight">
                   Indian Taekwondo
                 </h1>
-                <p className="text-orange-300 text-sm font-semibold">Union</p>
+                <p className="text-white text-base md:text-lg font-bold">Union</p>
               </div>
             </motion.div>
 
