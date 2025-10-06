@@ -80,7 +80,7 @@ export default function Mainnav() {
                 <img
                   src="/ITU LOGO.png"
                   alt="Indian Taekwondo Union Logo"
-                  className="relative h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 rounded-full object-cover border-2 border-white/20"
+                  className="relative h-16 w-16 sm:h-18 sm:w-18 md:h-20 md:w-20 lg:h-24 lg:w-24 rounded-full object-cover border-2 border-white/20"
                 />
               </div>
               <div className="hidden sm:block">
