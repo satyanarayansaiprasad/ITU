@@ -245,7 +245,7 @@ const About = () => {
           variants={itemVariants} 
           className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#FF9933] via-[#0B2545] to-[#138808] bg-clip-text text-transparent mb-4"
         >
-          About Indian Taekwondo Union - Official Taekwondo Federation of India
+          About Indian Taekwondo Union - Official ITU
         </motion.h1>
         <motion.p 
           variants={itemVariants} 
@@ -307,7 +307,7 @@ const About = () => {
           <p className="text-lg text-gray-700 mb-6 relative z-10">
             The Indian Taekwondo Union (ITU) was founded by Master Mukesh Kumar Sahoo with the vision to establish 
             a national-level organization where Taekwondo players, instructors, and referees could receive the honor 
-            and respect they deserve. As the official Taekwondo Federation of India, ITU has been at the forefront of 
+            and respect they deserve. As the official ITU, ITU has been at the forefront of 
             promoting martial arts education, self-defense training, and competitive Taekwondo across the nation.
           </p>
           <p className="text-lg text-gray-700 mb-6 relative z-10">

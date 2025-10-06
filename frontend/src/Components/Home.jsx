@@ -109,7 +109,7 @@ const Home = () => {
                 Indian Taekwondo Union
               </span>
               <span className="block text-lg sm:text-xl text-white/90 mt-2 font-normal">
-                Official Taekwondo Federation of India
+                Official ITU
               </span>
             </motion.h1>
             
@@ -126,7 +126,7 @@ const Home = () => {
             >
               <h2 className="text-lg font-semibold text-white mb-2">Why Choose Indian Taekwondo Union?</h2>
               <ul className="space-y-1 text-sm">
-                <li>• Official Taekwondo Federation of India since 2017</li>
+                <li>• Official ITU since 2017</li>
                 <li>• Professional martial arts training for all ages</li>
                 <li>• Self-defense and discipline development</li>
                 <li>• National and international tournament opportunities</li>
