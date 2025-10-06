@@ -122,7 +122,8 @@ const UnionAbout = () => {
           </div>
         </motion.div>
 
-        {/* Technical Chairman Section */}
+        {/* Technical Chairman Section - COMMENTED OUT */}
+        {/* 
         <motion.div 
           variants={fadeIn}
           className="bg-white shadow-xl rounded-lg overflow-hidden"
@@ -159,6 +160,7 @@ const UnionAbout = () => {
             </div>
           </div>
         </motion.div>
+        */}
       </div>
     </div>
   );
