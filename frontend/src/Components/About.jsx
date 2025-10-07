@@ -251,7 +251,7 @@ const About = () => {
           variants={itemVariants} 
           className="text-lg md:text-xl text-gray-700 max-w-3xl mx-auto"
         >
-          India's premier Taekwondo Federation empowering 50,000+ students through martial arts training, self-defense education, and competitive excellence since 2017. Discover our mission to elevate Taekwondo in India.
+          India's leading Taekwondo organization empowering 50,000+ students through martial arts training, self-defense education, and competitive excellence since 2017. Discover our mission to elevate Taekwondo in India.
         </motion.p>
 
         {/* Animated decorative elements */}

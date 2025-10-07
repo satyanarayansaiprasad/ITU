@@ -117,22 +117,8 @@ const Home = () => {
               className="text-responsive-base text-gray-200 mb-6 sm:mb-8 leading-relaxed max-w-lg mx-auto lg:mx-0"
               variants={textVariants}
             >
-              Join India's premier Taekwondo Federation with 50,000+ students and 500+ certified instructors across 25+ states. Learn martial arts, self-defense, and discipline through professional Taekwondo training programs.
+              Master Taekwondo martial arts with India's leading organization. 50,000+ students, 500+ certified instructors, 25+ states nationwide.
             </motion.p>
-            
-            <motion.div
-              className="text-responsive-sm text-gray-300 mb-6 sm:mb-8 leading-relaxed max-w-lg mx-auto lg:mx-0"
-              variants={textVariants}
-            >
-              <h2 className="text-lg font-semibold text-white mb-2">Why Choose Indian Taekwondo Union?</h2>
-              <ul className="space-y-1 text-sm">
-                <li>• Official ITU since 2017</li>
-                <li>• Professional martial arts training for all ages</li>
-                <li>• Self-defense and discipline development</li>
-                <li>• National and international tournament opportunities</li>
-                <li>• Certified instructors and structured curriculum</li>
-              </ul>
-            </motion.div>
             
             <motion.div 
               className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"

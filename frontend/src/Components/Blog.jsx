@@ -321,9 +321,7 @@ const Blog = () => {
               </h1>
               
               <p className="text-responsive-base text-gray-600 max-w-3xl mx-auto mb-8">
-                Stay updated with the latest news, training tips, tournament results, and insights from India's premier 
-                Taekwondo Federation. Discover martial arts techniques, self-defense tips, and success stories from 
-                our 50,000+ students and 500+ instructors.
+                Stay updated with Taekwondo news, training tips, tournament results, and martial arts insights from India. Discover techniques, self-defense strategies, and success stories from our 50,000+ students and 500+ instructors.
               </p>
 
               {/* Search and Filter Bar */}

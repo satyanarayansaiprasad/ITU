@@ -136,7 +136,7 @@ const Contact = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
           >
-            Connect with India's premier Taekwondo Federation for martial arts training, self-defense classes, tournament registration, and membership inquiries. Join 50,000+ students across India.
+            Connect with India's leading Taekwondo organization for martial arts training, self-defense classes, tournament registration, and membership inquiries. Join 50,000+ students across India.
           </motion.p>
         </motion.div>
 

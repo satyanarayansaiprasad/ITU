@@ -106,9 +106,7 @@ const Gallery = () => {
           </h1>
           
           <p className="text-responsive-base text-gray-600 max-w-2xl mx-auto">
-            Discover our martial arts journey through exclusive photos of Taekwondo training sessions, 
-            tournaments, competitions, and achievements. See 50,000+ students and 500+ instructors 
-            in action across India's premier Taekwondo Federation.
+            Explore Taekwondo training sessions, tournaments, competitions, and achievements across India. See 50,000+ students and 500+ instructors mastering martial arts and self-defense.
           </p>
         </motion.div>
 
