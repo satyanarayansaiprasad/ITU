@@ -61,7 +61,7 @@ const Home = () => {
   };
 
   return (
-      <div className="relative w-full min-h-screen flex flex-col items-center justify-center overflow-hidden safe-area-padding pt-[50px] sm:pt-[55px] md:pt-[60px]">
+      <div className="relative w-full min-h-screen flex flex-col items-center justify-center overflow-hidden safe-area-padding pt-[30px] sm:pt-[55px] md:pt-[60px]">
         {/* Background Video */}
       <video 
         autoPlay 
