@@ -96,7 +96,7 @@ const BenefitsSection = () => {
                 },
                 {
                   icon: <Shield size={28} />,
-                  title: "Kukkiwon Black Belt",
+                  title: "KUKKIWON Black Belt",
                   description: "Certification programs to achieve internationally recognized Kukkiwon black belts.",
                   color: "from-green-500 to-green-600",
                   bgColor: "bg-green-50",
@@ -128,7 +128,7 @@ const BenefitsSection = () => {
                 },
                 {
                   icon: <Book size={28} />,
-                  title: "Referee Seminars",
+                  title: "Instructor and Referee Seminar",
                   description: "Training and certification programs for aspiring Taekwondo referees.",
                   color: "from-indigo-500 to-indigo-600",
                   bgColor: "bg-indigo-50",
