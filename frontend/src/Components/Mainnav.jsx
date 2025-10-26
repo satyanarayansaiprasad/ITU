@@ -99,7 +99,6 @@ export default function Mainnav() {
                 { icon: <Shield size={20} />, title: "STATE UNION", path: "/state-union", desc: "Regional" },
                 { icon: <Phone size={20} />, title: "CONTACT", path: "/contact", desc: "Get in Touch" },
                 { icon: <Activity size={20} />, title: "SELF DEFENCE", path: "/self-defence", desc: "Protection Skills" },
-                { icon: <MoreHorizontal size={20} />, title: "MORE", path: "#", desc: "Others", hasDropdown: true }
               ].map((item, index) => (
                 <div 
                   key={index} 
@@ -181,7 +180,6 @@ export default function Mainnav() {
                           {[
                             { icon: <Newspaper size={16} />, title: "News", path: "/news" },
                             { icon: <Image size={16} />, title: "Gallery", path: "/gallery" },
-                            { icon: <Users size={16} />, title: "Players", path: "/players" },
                             { icon: <User size={16} />, title: "Forms", path: "/forms" }
                           ].map((subItem, subIndex) => (
                             <motion.div 
@@ -435,7 +433,6 @@ export default function Mainnav() {
                   { icon: <Activity size={22} />, title: "Self Defence", path: "/self-defence", desc: "Protection & martial arts" },
                   { icon: <Newspaper size={22} />, title: "Blog", path: "/news", desc: "Latest articles & insights" },
                   { icon: <Image size={22} />, title: "Gallery", path: "/gallery", desc: "Photo gallery" },
-                  { icon: <Users size={22} />, title: "Players", path: "/players", desc: "Our athletes" },
                   { icon: <User size={22} />, title: "Forms", path: "/forms", desc: "Registration forms" },
                 ].map((item, index) => (
                   <motion.div
