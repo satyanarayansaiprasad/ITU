@@ -200,7 +200,7 @@ const StateUnion = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 pt-[130px] sm:pt-[135px] md:pt-[140px] pb-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 pt-[130px] sm:pt-[135px] md:pt-[140px] pb-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
       {/* Animated background elements */}
       <motion.div 
         className="fixed inset-0 overflow-hidden pointer-events-none"
@@ -212,7 +212,7 @@ const StateUnion = () => {
           {[...Array(20)].map((_, i) => (
             <motion.div
               key={i}
-              className="absolute rounded-full bg-white"
+              className="absolute rounded-full bg-blue-200"
               style={{
                 width: Math.random() * 200 + 50,
                 height: Math.random() * 200 + 50,
@@ -250,7 +250,7 @@ const StateUnion = () => {
           className="text-center mb-16"
         >
           <motion.h1 
-            className="text-4xl font-extrabold text-white sm:text-5xl sm:tracking-tight lg:text-6xl mb-6"
+            className="text-4xl font-extrabold text-gray-800 sm:text-5xl sm:tracking-tight lg:text-6xl mb-6"
             variants={textReveal}
           >
             <motion.span className="inline-block">
@@ -263,7 +263,7 @@ const StateUnion = () => {
             </motion.span>
           </motion.h1>
           <motion.p 
-            className="mt-5 max-w-2xl mx-auto text-xl text-gray-300 font-light"
+            className="mt-5 max-w-2xl mx-auto text-xl text-gray-700 font-light"
             variants={textReveal}
           >
             Discover the network of Taekwondo unions across India, fostering martial arts excellence nationwide
@@ -287,7 +287,7 @@ const StateUnion = () => {
               {state.active ? (
                 <motion.div
                   variants={cardHover}
-                  className="bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden cursor-pointer h-full border border-gray-700/50 hover:border-amber-400/30 transition-all duration-300 group relative"
+                  className="bg-white backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden cursor-pointer h-full border border-gray-200 hover:border-orange-400 transition-all duration-300 group relative"
                 >
                   {/* Gradient background with wave animation */}
                   <motion.div 
@@ -307,7 +307,7 @@ const StateUnion = () => {
                   <div className="p-6 relative z-10">
                     <div className="flex justify-between items-center mb-4">
                       <motion.h3 
-                        className="text-xl font-bold text-white group-hover:text-amber-300 transition-colors"
+                        className="text-xl font-bold text-gray-800 group-hover:text-orange-600 transition-colors"
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.2 }}
@@ -315,7 +315,7 @@ const StateUnion = () => {
                         {state.unionName}
                       </motion.h3>
                       <motion.span 
-                        className="text-xs bg-gray-700/50 text-gray-300 px-3 py-1 rounded-full group-hover:bg-amber-500 group-hover:text-white transition-colors"
+                        className="text-xs bg-orange-100 text-orange-700 px-3 py-1 rounded-full group-hover:bg-orange-500 group-hover:text-white transition-colors"
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.3 }}
@@ -327,8 +327,7 @@ const StateUnion = () => {
                     <div className="space-y-3 text-sm">
                       {[
                         { label: 'Secretary', value: state.secretary, icon: '👤', delay: 0.3 },
-                        { label: 'Districts', value: state.districts, icon: '🗺️', delay: 0.4 },
-                        { label: 'Champion', value: state.champion, icon: '🏆', delay: 0.5 }
+                        { label: 'Districts', value: state.districts, icon: '🗺️', delay: 0.4 }
                       ].map((item, idx) => (
                         <motion.div 
                           key={idx}
@@ -337,38 +336,18 @@ const StateUnion = () => {
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: item.delay }}
                         >
-                          <span className="text-gray-400 mr-2">{item.icon}</span>
-                          <span className="text-gray-400 flex-1">{item.label}</span>
-                          <span className="font-medium text-white text-right">{item.value}</span>
+                          <span className="text-gray-600 mr-2">{item.icon}</span>
+                          <span className="text-gray-600 flex-1">{item.label}</span>
+                          <span className="font-medium text-gray-800 text-right">{item.value}</span>
                         </motion.div>
                       ))}
                     </div>
-                    
-                    <motion.div 
-                      className="mt-4 pt-4 border-t border-gray-700/50 flex items-center"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.6 }}
-                    >
-                      <motion.svg 
-                        className="w-4 h-4 mr-2 text-gray-400" 
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24" 
-                        xmlns="http://www.w3.org/2000/svg"
-                        variants={floating}
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </motion.svg>
-                      <span className="text-xs text-gray-400">{state.headquarters}</span>
-                    </motion.div>
                   </div>
                 </motion.div>
               ) : (
                 <motion.div
                   variants={cardHover}
-                  className="bg-gray-800/30 backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden cursor-pointer h-full border-2 border-dashed border-gray-700/50 flex flex-col group"
+                  className="bg-white backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden cursor-pointer h-full border-2 border-dashed border-gray-300 flex flex-col group"
                 >
                   <motion.div 
                     className={`h-64 w-full bg-gradient-to-r ${state.color} flex items-center justify-center`}
@@ -384,7 +363,7 @@ const StateUnion = () => {
                   
                   <div className="p-6 text-center flex flex-col items-center justify-center flex-1">
                     <motion.h3 
-                      className="text-xl font-bold text-white mb-3 group-hover:text-amber-300 transition-colors"
+                      className="text-xl font-bold text-gray-800 mb-3 group-hover:text-orange-600 transition-colors"
                       whileHover={{ scale: 1.02 }}
                     >
                       {state.name} Taekwondo
@@ -411,7 +390,7 @@ const StateUnion = () => {
                     </motion.div>
                     
                     <motion.p 
-                      className="text-gray-400 text-sm max-w-xs"
+                      className="text-gray-600 text-sm max-w-xs"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.3 }}
