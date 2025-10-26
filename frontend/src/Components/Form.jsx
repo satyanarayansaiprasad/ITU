@@ -122,7 +122,7 @@ const Form = () => {
           className="bg-gradient-to-r from-orange-500 to-orange-600 text-white py-4 px-6 rounded-xl shadow-md transition flex flex-col items-center"
         >
           <Landmark className="w-10 h-10 mb-2" />
-          <span className="font-bold text-lg">Acceleration Form</span>
+          <span className="font-bold text-lg">Affiliation Form</span>
           <span className="text-sm font-medium mt-1">For general registration</span>
         </motion.button>
         
@@ -244,7 +244,7 @@ const Form = () => {
                 Processing...
               </span>
             ) : (
-              `Submit ${formType === 'player' ? 'Player Registration' : 'Acceleration Form'}`
+              `Submit ${formType === 'player' ? 'Player Registration' : 'Affiliation Form'}`
             )}
           </motion.button>
         </motion.form>
@@ -274,7 +274,7 @@ const Form = () => {
               {formType === 'player' 
                 ? "Player Registration Form" 
                 : formType === 'acceleration' 
-                  ? "Acceleration Program Form" 
+                  ? "Affiliation Form" 
                   : "Join our community"}
             </motion.p>
 
