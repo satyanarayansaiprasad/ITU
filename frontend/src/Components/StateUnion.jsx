@@ -243,7 +243,6 @@ const StateUnion = () => {
                     <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Union Name</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Secretary</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Districts</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Established</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -268,9 +267,6 @@ const StateUnion = () => {
                         <span className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
                           {state.districts}
                         </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-gray-700">{state.established}</span>
                       </td>
                     </motion.tr>
                   ))}
