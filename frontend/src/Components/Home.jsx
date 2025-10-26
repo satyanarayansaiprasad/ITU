@@ -61,7 +61,7 @@ const Home = () => {
   };
 
   return (
-      <div className="relative w-full min-h-screen flex flex-col items-center justify-center overflow-hidden safe-area-padding pt-[30px] sm:pt-[55px] md:pt-[60px]">
+      <div className="relative w-full min-h-screen flex flex-col items-center justify-center overflow-hidden safe-area-padding pt-[10px] sm:pt-[20px] md:pt-[25px]">
         {/* Background Video */}
       <video 
         autoPlay 
@@ -79,7 +79,7 @@ const Home = () => {
       <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-[#0f2658]/95 via-[#1a365d]/90 to-[#05183d]/95"></div>
 
       {/* Main Content Container */}
-      <div className="relative z-10 container-responsive flex flex-col items-center justify-center min-h-screen py-8 sm:py-12 lg:py-16">
+      <div className="relative z-10 container-responsive flex flex-col items-center justify-center min-h-screen py-4 sm:py-12 lg:py-16">
         <div className="flex flex-col lg:flex-row items-center justify-between w-full gap-8 lg:gap-12">
           
           {/* Left Section - Enhanced Typography */}
