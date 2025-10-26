@@ -117,7 +117,7 @@ const Home = () => {
               className="text-responsive-base text-gray-200 mb-6 sm:mb-8 leading-relaxed max-w-lg mx-auto lg:mx-0"
               variants={textVariants}
             >
-              Master Taekwondo martial arts with India's leading organization. 50,000+ students, 500+ certified instructors, 25+ states nationwide.
+              Learn Taekwondo martial arts with India's premier organization. Join 50,000+ students, train with 500+ certified instructors across 25+ states nationwide.
             </motion.p>
             
             <motion.div 
