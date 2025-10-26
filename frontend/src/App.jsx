@@ -15,7 +15,6 @@ import StateUnion from './Components/StateUnion';
 import Blog from './Components/Blog';
 import Gallery from './Components/Gallery';
 import UnionAbout from './Components/UnionABout';
-import Map from './Components/Map';
 import LoginPage from './Components/LoginPage';
 import ModernAdminDash from './AdminPanel/Pages/ModernAdminDash';
 import ModernViewContact from './AdminPanel/Pages/ModernViewContact';
@@ -46,7 +45,6 @@ const App = () => {
             <Marque />
             <BenefitsSection />
             <ApprovalsSection />
-            <Map />
             <Category />
           </>
         } />
