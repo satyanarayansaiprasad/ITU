@@ -79,7 +79,7 @@ const Home = () => {
       <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-[#0f2658]/95 via-[#1a365d]/90 to-[#05183d]/95"></div>
 
       {/* Main Content Container */}
-      <div className="relative z-10 container-responsive flex flex-col items-center justify-center min-h-screen py-0 sm:py-4 lg:py-12">
+      <div className="relative z-10 container-responsive flex flex-col items-center justify-center min-h-screen py-0 sm:py-4 lg:py-12 pt-0">
         <div className="flex flex-col lg:flex-row items-center justify-between w-full gap-8 lg:gap-12">
           
           {/* Left Section - Enhanced Typography */}
