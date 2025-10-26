@@ -129,9 +129,9 @@ const SelfDefence = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { name: "Women's Self Defence", duration: "4 weeks", level: "Beginner", price: "₹2,999", features: ["Basic strikes & blocks", "Escape techniques", "Situational awareness", "Confidence building"] },
-              { name: "Youth Protection", duration: "6 weeks", level: "Intermediate", price: "₹3,999", features: ["Anti-bullying strategies", "Stranger danger prevention", "Basic sparring", "Mental toughness"] },
-              { name: "Advanced Combat", duration: "8 weeks", level: "Advanced", price: "₹5,999", features: ["Advanced techniques", "Weapon defense", "Multiple attacker scenarios", "Competition preparation"] }
+              { name: "Women's Self Defence", duration: "4 weeks", level: "Beginner", features: ["Basic strikes & blocks", "Escape techniques", "Situational awareness", "Confidence building"] },
+              { name: "Youth Protection", duration: "6 weeks", level: "Intermediate", features: ["Anti-bullying strategies", "Stranger danger prevention", "Basic sparring", "Mental toughness"] },
+              { name: "Advanced Combat", duration: "8 weeks", level: "Advanced", features: ["Advanced techniques", "Weapon defense", "Multiple attacker scenarios", "Competition preparation"] }
             ].map((program, index) => (
               <motion.div
                 key={index}
@@ -147,11 +147,10 @@ const SelfDefence = () => {
                     {program.level}
                   </span>
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">{program.name}</h3>
-                  <div className="flex items-center justify-center gap-4 text-gray-600 mb-4">
+                  <div className="flex items-center justify-center gap-4 text-gray-600">
                     <Clock size={16} />
                     <span>{program.duration}</span>
                   </div>
-                  <div className="text-4xl font-black text-gray-900">{program.price}</div>
                 </div>
 
                 <ul className="space-y-3 mb-8">
