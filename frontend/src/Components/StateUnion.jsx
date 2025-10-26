@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 
 const StateUnion = () => {
@@ -8,11 +8,8 @@ const StateUnion = () => {
       name: 'Maharashtra', 
       secretary: 'Shri Rajesh Verma', 
       districts: 36, 
-      champion: 'Master Rajesh Patil', 
       unionName: 'Maharashtra Taekwondo Union',
       established: 1995,
-      headquarters: 'Mumbai',
-      color: 'from-indigo-900 via-purple-900 to-violet-900',
       active: true
     },
     { 
@@ -20,11 +17,8 @@ const StateUnion = () => {
       name: 'Delhi', 
       secretary: 'Shri Vikram Singh', 
       districts: 11, 
-      champion: 'Master Vikram Singh', 
       unionName: 'Delhi Taekwondo Union',
       established: 1992,
-      headquarters: 'New Delhi',
-      color: 'from-amber-900 via-orange-900 to-red-900',
       active: true
     },
     { 
@@ -32,11 +26,8 @@ const StateUnion = () => {
       name: 'Karnataka', 
       secretary: 'Shri Arjun Reddy', 
       districts: 30, 
-      champion: 'Master Arjun Reddy', 
       unionName: 'Karnataka Taekwondo Union',
       established: 1998,
-      headquarters: 'Bengaluru',
-      color: 'from-emerald-900 via-teal-900 to-cyan-900',
       active: true
     },
     { 
@@ -44,11 +35,8 @@ const StateUnion = () => {
       name: 'Tamil Nadu', 
       secretary: 'Shri Karthik Iyer',
       districts: 38, 
-      champion: 'Master Karthik Iyer', 
       unionName: 'Tamil Nadu Taekwondo Union',
       established: 1996,
-      headquarters: 'Chennai',
-      color: 'from-blue-900 via-indigo-900 to-purple-900',
       active: true
     },
     { 
@@ -56,11 +44,8 @@ const StateUnion = () => {
       name: 'Kerala', 
       secretary: 'Shri Ajith Nair', 
       districts: 14, 
-      champion: 'Master Ajith Nair', 
       unionName: 'Kerala Taekwondo Union',
       established: 1994,
-      headquarters: 'Kochi',
-      color: 'from-green-900 via-emerald-900 to-teal-900',
       active: true
     },
     { 
@@ -68,341 +53,259 @@ const StateUnion = () => {
       name: 'Gujarat', 
       secretary: 'Shri Jayesh Patel', 
       districts: 33, 
-      champion: 'Master Jayesh Patel', 
       unionName: 'Gujarat Taekwondo Union',
       established: 2001,
-      headquarters: 'Ahmedabad',
-      color: 'from-rose-900 via-pink-900 to-fuchsia-900',
       active: true
     },
     { 
       id: 7, 
       name: 'Rajasthan', 
       active: false,
-      color: 'from-yellow-900 via-amber-900 to-orange-900'
     },
     { 
       id: 8, 
       name: 'Punjab', 
       active: false,
-      color: 'from-sky-900 via-blue-900 to-indigo-900'
     },
     { 
       id: 9, 
       name: 'West Bengal', 
       active: false,
-      color: 'from-red-900 via-rose-900 to-pink-900'
+    },
+    {
+      id: 10,
+      name: 'Uttar Pradesh',
+      active: false,
+    },
+    {
+      id: 11,
+      name: 'Bihar',
+      active: false,
+    },
+    {
+      id: 12,
+      name: 'Madhya Pradesh',
+      active: false,
+    },
+    {
+      id: 13,
+      name: 'Odisha',
+      active: false,
+    },
+    {
+      id: 14,
+      name: 'Assam',
+      active: false,
+    },
+    {
+      id: 15,
+      name: 'Andhra Pradesh',
+      active: false,
+    },
+    {
+      id: 16,
+      name: 'Telangana',
+      active: false,
+    },
+    {
+      id: 17,
+      name: 'Chhattisgarh',
+      active: false,
+    },
+    {
+      id: 18,
+      name: 'Jharkhand',
+      active: false,
+    },
+    {
+      id: 19,
+      name: 'Haryana',
+      active: false,
+    },
+    {
+      id: 20,
+      name: 'Uttarakhand',
+      active: false,
+    },
+    {
+      id: 21,
+      name: 'Himachal Pradesh',
+      active: false,
+    },
+    {
+      id: 22,
+      name: 'Tripura',
+      active: false,
+    },
+    {
+      id: 23,
+      name: 'Manipur',
+      active: false,
+    },
+    {
+      id: 24,
+      name: 'Meghalaya',
+      active: false,
+    },
+    {
+      id: 25,
+      name: 'Mizoram',
+      active: false,
+    },
+    {
+      id: 26,
+      name: 'Nagaland',
+      active: false,
+    },
+    {
+      id: 27,
+      name: 'Arunachal Pradesh',
+      active: false,
+    },
+    {
+      id: 28,
+      name: 'Sikkim',
+      active: false,
+    },
+    {
+      id: 29,
+      name: 'Goa',
+      active: false,
+    },
+    {
+      id: 30,
+      name: 'Jammu and Kashmir',
+      active: false,
+    },
+    {
+      id: 31,
+      name: 'Ladakh',
+      active: false,
+    },
+    {
+      id: 32,
+      name: 'Puducherry',
+      active: false,
+    },
+    {
+      id: 33,
+      name: 'Andaman and Nicobar',
+      active: false,
     },
   ];
 
-  // Enhanced animations
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-        delayChildren: 0.4
-      }
-    }
-  };
-
-  const cardItem = {
-    hidden: { y: 60, opacity: 0, scale: 0.95 },
-    show: {
-      y: 0,
-      opacity: 1,
-      scale: 1,
-      transition: {
-        type: "spring",
-        damping: 15,
-        stiffness: 100,
-        duration: 0.7
-      }
-    }
-  };
-
-  const cardHover = {
-    initial: { 
-      y: 0,
-      scale: 1,
-      boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
-      rotate: 0
-    },
-    hover: { 
-      y: -12,
-      scale: 1.03,
-      boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-      transition: {
-        type: "spring",
-        damping: 10,
-        stiffness: 200
-      }
-    }
-  };
-
-  const floating = {
-    initial: { y: 0 },
-    hover: {
-      y: [0, -8, 0],
-      transition: {
-        duration: 2.5,
-        repeat: Infinity,
-        ease: "easeInOut"
-      }
-    }
-  };
-
-  const gradientWave = {
-    initial: { backgroundPosition: '0% 50%' },
-    hover: {
-      backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-      transition: {
-        duration: 6,
-        repeat: Infinity,
-        ease: "linear"
-      }
-    }
-  };
-
-  const textReveal = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: {
-        type: "spring",
-        damping: 12,
-        stiffness: 100,
-        duration: 0.8
-      }
-    }
-  };
-
-  const pulse = {
-    initial: { scale: 1 },
-    hover: {
-      scale: [1, 1.05, 1],
-      transition: {
-        duration: 2,
-        repeat: Infinity,
-        ease: "easeInOut"
-      }
-    }
-  };
-
-  const backgroundVariants = {
-    initial: { opacity: 0 },
-    animate: { 
-      opacity: 1,
-      transition: { duration: 1.5 }
-    }
-  };
+  const activeStates = states.filter(state => state.active);
+  const upcomingStates = states.filter(state => !state.active);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 pt-[130px] sm:pt-[135px] md:pt-[140px] pb-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      {/* Animated background elements */}
-      <motion.div 
-        className="fixed inset-0 overflow-hidden pointer-events-none"
-        variants={backgroundVariants}
-        initial="initial"
-        animate="animate"
-      >
-        <div className="absolute top-0 left-0 w-full h-full opacity-10">
-          {[...Array(20)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute rounded-full bg-blue-200"
-              style={{
-                width: Math.random() * 200 + 50,
-                height: Math.random() * 200 + 50,
-                top: `${Math.random() * 100}%`,
-                left: `${Math.random() * 100}%`,
-                opacity: 0.05 + Math.random() * 0.1
-              }}
-              animate={{
-                y: [0, (Math.random() > 0.5 ? 1 : -1) * 50, 0],
-                x: [0, (Math.random() > 0.5 ? 1 : -1) * 50, 0],
-                rotate: [0, 360]
-              }}
-              transition={{
-                duration: 20 + Math.random() * 20,
-                repeat: Infinity,
-                ease: "linear"
-              }}
-            />
-          ))}
-        </div>
-      </motion.div>
-
-      <div className="max-w-7xl mx-auto relative z-10">
-        {/* Animated Header */}
-        <motion.div 
-          initial="hidden"
-          animate="visible"
-          variants={{
-            hidden: { opacity: 0 },
-            visible: {
-              opacity: 1,
-              transition: { staggerChildren: 0.1 }
-            }
-          }}
-          className="text-center mb-16"
-        >
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 pt-[130px] sm:pt-[135px] md:pt-[140px] pb-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-12">
           <motion.h1 
-            className="text-4xl font-extrabold text-gray-800 sm:text-5xl sm:tracking-tight lg:text-6xl mb-6"
-            variants={textReveal}
+            className="text-4xl font-extrabold text-gray-800 sm:text-5xl mb-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
           >
-            <motion.span className="inline-block">
-              State <motion.span 
-                className="bg-gradient-to-r from-amber-400 via-orange-400 to-red-400 bg-clip-text text-transparent"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
-              >Unions</motion.span>
-            </motion.span>
+            State <span className="bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">Unions</span>
           </motion.h1>
           <motion.p 
-            className="mt-5 max-w-2xl mx-auto text-xl text-gray-700 font-light"
-            variants={textReveal}
+            className="text-xl text-gray-600"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
           >
-            Discover the network of Taekwondo unions across India, fostering martial arts excellence nationwide
+            Indian Taekwondo Union - State-wise Network
           </motion.p>
-        </motion.div>
+        </div>
 
-        {/* States Grid */}
-        <motion.div
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
-        >
-          {states.map((state) => (
+        {/* Active States Section */}
+        <div className="mb-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="bg-white rounded-xl shadow-lg overflow-hidden"
+          >
+            <div className="bg-gradient-to-r from-orange-500 to-red-600 px-6 py-4">
+              <h2 className="text-2xl font-bold text-white flex items-center">
+                <span className="mr-2">📋</span>
+                Active State Unions ({activeStates.length})
+              </h2>
+            </div>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">State</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Union Name</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Secretary</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Districts</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Established</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {activeStates.map((state, index) => (
+                    <motion.tr
+                      key={state.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="hover:bg-orange-50 transition-colors"
+                    >
+                      <td className="px-6 py-4">
+                        <span className="font-bold text-gray-800">{state.name}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-gray-700">{state.unionName}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-gray-700">{state.secretary}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                          {state.districts}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-gray-700">{state.established}</span>
+                      </td>
+                    </motion.tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Upcoming States Section */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          <div className="col-span-full bg-gradient-to-r from-gray-500 to-gray-600 px-6 py-4 rounded-lg mb-4">
+            <h2 className="text-xl font-bold text-white">
+              Upcoming State Unions ({upcomingStates.length} States)
+            </h2>
+          </div>
+          {upcomingStates.map((state, index) => (
             <motion.div
               key={state.id}
-              variants={cardItem}
-              whileHover="hover"
-              className="h-full"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: index * 0.05 }}
+              className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border-2 border-dashed border-gray-300 p-4 text-center group cursor-pointer"
             >
-              {state.active ? (
-                <motion.div
-                  variants={cardHover}
-                  className="bg-white backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden cursor-pointer h-full border border-gray-200 hover:border-orange-400 transition-all duration-300 group relative"
-                >
-                  {/* Gradient background with wave animation */}
-                  <motion.div 
-                    className={`h-64 w-full bg-gradient-to-r ${state.color} flex items-center justify-center relative overflow-hidden bg-[length:300%_300%]`}
-                    variants={gradientWave}
-                  >
-                    <motion.span 
-                      className="text-white text-4xl font-bold z-10 drop-shadow-lg"
-                      whileHover={{ scale: 1.05 }}
-                    >
-                      {state.name}
-                    </motion.span>
-                    <div className="absolute inset-0 bg-black/20" />
-                  </motion.div>
-                  
-                  {/* Content */}
-                  <div className="p-6 relative z-10">
-                    <div className="flex justify-between items-center mb-4">
-                      <motion.h3 
-                        className="text-xl font-bold text-gray-800 group-hover:text-orange-600 transition-colors"
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.2 }}
-                      >
-                        {state.unionName}
-                      </motion.h3>
-                      <motion.span 
-                        className="text-xs bg-orange-100 text-orange-700 px-3 py-1 rounded-full group-hover:bg-orange-500 group-hover:text-white transition-colors"
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.3 }}
-                      >
-                        Est. {state.established}
-                      </motion.span>
-                    </div>
-                    
-                    <div className="space-y-3 text-sm">
-                      {[
-                        { label: 'Secretary', value: state.secretary, icon: '👤', delay: 0.3 },
-                        { label: 'Districts', value: state.districts, icon: '🗺️', delay: 0.4 }
-                      ].map((item, idx) => (
-                        <motion.div 
-                          key={idx}
-                          className="flex items-center"
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: item.delay }}
-                        >
-                          <span className="text-gray-600 mr-2">{item.icon}</span>
-                          <span className="text-gray-600 flex-1">{item.label}</span>
-                          <span className="font-medium text-gray-800 text-right">{item.value}</span>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
-              ) : (
-                <motion.div
-                  variants={cardHover}
-                  className="bg-white backdrop-blur-sm rounded-2xl shadow-lg overflow-hidden cursor-pointer h-full border-2 border-dashed border-gray-300 flex flex-col group"
-                >
-                  <motion.div 
-                    className={`h-64 w-full bg-gradient-to-r ${state.color} flex items-center justify-center`}
-                    variants={pulse}
-                  >
-                    <motion.span 
-                      className="text-white text-4xl font-bold drop-shadow-lg"
-                      whileHover={{ scale: 1.05 }}
-                    >
-                      {state.name}
-                    </motion.span>
-                  </motion.div>
-                  
-                  <div className="p-6 text-center flex flex-col items-center justify-center flex-1">
-                    <motion.h3 
-                      className="text-xl font-bold text-gray-800 mb-3 group-hover:text-orange-600 transition-colors"
-                      whileHover={{ scale: 1.02 }}
-                    >
-                      {state.name} Taekwondo
-                    </motion.h3>
-                    
-                    <motion.div 
-                      className="px-4 py-1.5 bg-amber-500/20 text-amber-400 rounded-full text-sm font-semibold mb-3 inline-flex items-center"
-                      whileHover={{ scale: 1.05 }}
-                    >
-                      <motion.span 
-                        className="inline-block mr-2"
-                        animate={{
-                          rotate: [0, 360],
-                          transition: {
-                            duration: 3,
-                            repeat: Infinity,
-                            ease: "linear"
-                          }
-                        }}
-                      >
-                        ⏳
-                      </motion.span>
-                      Coming Soon
-                    </motion.div>
-                    
-                    <motion.p 
-                      className="text-gray-600 text-sm max-w-xs"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.3 }}
-                    >
-                      Union formation in progress. Stay tuned for updates!
-                    </motion.p>
-                  </div>
-                </motion.div>
-              )}
+              <div className="text-gray-600 font-medium group-hover:text-orange-600 transition-colors">
+                {state.name}
+              </div>
+              <div className="mt-2">
+                <span className="inline-block bg-amber-100 text-amber-800 px-2 py-1 rounded text-xs font-medium">
+                  Coming Soon
+                </span>
+              </div>
             </motion.div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </div>
   );
