@@ -151,7 +151,7 @@ const LoginPage = () => {
                         whileTap={{ scale: 0.98 }}
                       >
                         <UserPlus size={24} />
-                        <span className="font-medium">State Union Login</span>
+                        <span className="font-medium">Organization Login</span>
                       </motion.button>
 
                       <motion.button
@@ -174,11 +174,11 @@ const LoginPage = () => {
                         {loginType === "player" && <Users size={48} className="text-[#0B2545]" />}
                       </div>
                       <h2 className="text-3xl font-bold text-[#0B2545]">
-                        {loginType === "stateunion" ? "State Union" : loginType.charAt(0).toUpperCase() + loginType.slice(1)} Login
+                        {loginType === "stateunion" ? "Organization" : loginType.charAt(0).toUpperCase() + loginType.slice(1)} Login
                       </h2>
                       {loginType === "stateunion" && (
                         <p className="text-sm text-gray-500 mt-2">
-                          Use your registered email and state-generated password
+                          For State Unions, Districts & Academies
                         </p>
                       )}
                     </div>
@@ -204,7 +204,7 @@ const LoginPage = () => {
                         transition={{ delay: 0.1 }}
                       >
                         <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                          {loginType === "stateunion" ? "State Union Email" : "email"}
+                          {loginType === "stateunion" ? "Organization Email" : "Email"}
                         </label>
                         <input
                           type="email"
@@ -213,7 +213,7 @@ const LoginPage = () => {
                           value={formData.email}
                           onChange={handleInputChange}
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B2545] focus:border-transparent transition-all"
-                          placeholder={`Enter your ${loginType === "stateunion" ? "registered email" : "email"}`}
+                          placeholder={`Enter your ${loginType === "stateunion" ? "organization email" : "email"}`}
                           required
                         />
                       </motion.div>
@@ -235,7 +235,7 @@ const LoginPage = () => {
                             value={formData.password}
                             onChange={handleInputChange}
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B2545] focus:border-transparent transition-all pr-10"
-                            placeholder={`Enter your ${loginType === "stateunion" ? "state-generated password" : "password"}`}
+                            placeholder={`Enter your ${loginType === "stateunion" ? "organization password" : "password"}`}
                             required
                           />
                           <button
@@ -248,7 +248,7 @@ const LoginPage = () => {
                         </div>
                         {loginType === "stateunion" && (
                           <p className="text-xs text-gray-500 mt-2">
-                            Contact your administrator if you've forgotten your state-generated password
+                            Contact your administrator if you've forgotten your password
                           </p>
                         )}
                       </motion.div>
