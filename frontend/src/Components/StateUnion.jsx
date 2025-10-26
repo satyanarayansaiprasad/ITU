@@ -60,136 +60,163 @@ const StateUnion = () => {
     { 
       id: 7, 
       name: 'Rajasthan', 
+      districts: 50,
       active: false,
     },
     { 
       id: 8, 
       name: 'Punjab', 
+      districts: 23,
       active: false,
     },
     { 
       id: 9, 
       name: 'West Bengal', 
+      districts: 23,
       active: false,
     },
     {
       id: 10,
       name: 'Uttar Pradesh',
+      districts: 75,
       active: false,
     },
     {
       id: 11,
       name: 'Bihar',
+      districts: 38,
       active: false,
     },
     {
       id: 12,
       name: 'Madhya Pradesh',
+      districts: 55,
       active: false,
     },
     {
       id: 13,
       name: 'Odisha',
+      districts: 30,
       active: false,
     },
     {
       id: 14,
       name: 'Assam',
+      districts: 35,
       active: false,
     },
     {
       id: 15,
       name: 'Andhra Pradesh',
+      districts: 26,
       active: false,
     },
     {
       id: 16,
       name: 'Telangana',
+      districts: 33,
       active: false,
     },
     {
       id: 17,
       name: 'Chhattisgarh',
+      districts: 28,
       active: false,
     },
     {
       id: 18,
       name: 'Jharkhand',
+      districts: 24,
       active: false,
     },
     {
       id: 19,
       name: 'Haryana',
+      districts: 22,
       active: false,
     },
     {
       id: 20,
       name: 'Uttarakhand',
+      districts: 13,
       active: false,
     },
     {
       id: 21,
       name: 'Himachal Pradesh',
+      districts: 12,
       active: false,
     },
     {
       id: 22,
       name: 'Tripura',
+      districts: 8,
       active: false,
     },
     {
       id: 23,
       name: 'Manipur',
+      districts: 16,
       active: false,
     },
     {
       id: 24,
       name: 'Meghalaya',
+      districts: 12,
       active: false,
     },
     {
       id: 25,
       name: 'Mizoram',
+      districts: 11,
       active: false,
     },
     {
       id: 26,
       name: 'Nagaland',
+      districts: 16,
       active: false,
     },
     {
       id: 27,
       name: 'Arunachal Pradesh',
+      districts: 26,
       active: false,
     },
     {
       id: 28,
       name: 'Sikkim',
+      districts: 6,
       active: false,
     },
     {
       id: 29,
       name: 'Goa',
+      districts: 2,
       active: false,
     },
     {
       id: 30,
       name: 'Jammu and Kashmir',
+      districts: 20,
       active: false,
     },
     {
       id: 31,
       name: 'Ladakh',
+      districts: 2,
       active: false,
     },
     {
       id: 32,
       name: 'Puducherry',
+      districts: 4,
       active: false,
     },
     {
       id: 33,
       name: 'Andaman and Nicobar',
+      districts: 3,
       active: false,
     },
   ];
@@ -293,6 +320,9 @@ const StateUnion = () => {
             >
               <div className="text-gray-600 font-medium group-hover:text-orange-600 transition-colors">
                 {state.name}
+              </div>
+              <div className="mt-2 text-xs text-gray-500">
+                {state.districts} Districts
               </div>
               <div className="mt-2">
                 <span className="inline-block bg-amber-100 text-amber-800 px-2 py-1 rounded text-xs font-medium">
