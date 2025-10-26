@@ -6,15 +6,20 @@ const Districts = () => {
   const navigate = useNavigate();
   
   const districtData = {
-    'Maharashtra': { districts: ['Mumbai', 'Pune', 'Nagpur', 'Aurangabad', 'Nashik', 'Solapur'], active: true },
-    'Delhi': { districts: ['Central Delhi', 'East Delhi', 'New Delhi', 'North Delhi'], active: true },
-    'Karnataka': { districts: ['Bangalore', 'Mysore', 'Hubli', 'Mangalore'], active: true },
-    'Tamil Nadu': { districts: ['Chennai', 'Coimbatore', 'Madurai', 'Trichy'], active: true },
-    'Kerala': { districts: ['Thiruvananthapuram', 'Kollam', 'Kochi', 'Kozhikode'], active: true },
-    'Gujarat': { districts: ['Ahmedabad', 'Surat', 'Vadodara', 'Rajkot'], active: true }
+    'Maharashtra': { districts: ['Mumbai', 'Pune', 'Nagpur', 'Aurangabad', 'Nashik', 'Solapur', 'Thane', 'Kolhapur', 'Akola', 'Amravati', 'Chandrapur', 'Dhule', 'Gadchiroli', 'Gondia', 'Jalgaon', 'Jalna', 'Latur', 'Nanded', 'Osmanabad', 'Palghar', 'Parbhani', 'Raigad', 'Ratnagiri', 'Sangli', 'Satara', 'Sindhudurg', 'Wardha', 'Washim', 'Yavatmal', 'Ahmednagar', 'Beed', 'Bhandara', 'Buldhana', 'Hingoli', 'Nandurbar', 'Rayagada'], active: true },
+    'Delhi': { districts: ['Central Delhi', 'East Delhi', 'New Delhi', 'North Delhi', 'North East Delhi', 'North West Delhi', 'Shahdara', 'South Delhi', 'South East Delhi', 'South West Delhi', 'West Delhi'], active: true },
+    'Karnataka': { districts: ['Bangalore Urban', 'Mysore', 'Hubli', 'Mangalore', 'Belgaum', 'Gulbarga', 'Davangere', 'Bellary', 'Bijapur', 'Raichur', 'Tumkur', 'Shimoga', 'Kolar', 'Chitradurga', 'Hassan', 'Udupi', 'Chamarajanagar', 'Chikballapur', 'Chikmagalur', 'Dakshina Kannada', 'Davanagere', 'Dharwad', 'Gadag', 'Haveri', 'Koppal', 'Mandya', 'Mysuru', 'Uttara Kannada', 'Vijayapura', 'Bangalore Rural'], active: true },
+    'Tamil Nadu': { districts: ['Chennai', 'Coimbatore', 'Madurai', 'Trichy', 'Salem', 'Tirunelveli', 'Erode', 'Dindigul', 'Thanjavur', 'Tuticorin', 'Vellore', 'Villupuram', 'Cuddalore', 'Dharmapuri', 'Karur', 'Krishnagiri', 'Namakkal', 'Pudukkottai', 'Ramanathapuram', 'Sivaganga', 'Thoothukudi', 'Tiruvallur', 'Tiruvannamalai', 'Dindigul', 'Kanchipuram', 'Kanyakumari', 'Karur', 'Krishnagiri', 'Tirupur', 'Vellore', 'Villupuram', 'Virudhunagar', 'Ariyalur', 'Nilgiris', 'Perambalur', 'Tenkasi', 'Theni', 'Tiruppur'], active: true },
+    'Kerala': { districts: ['Thiruvananthapuram', 'Kollam', 'Alappuzha', 'Pathanamthitta', 'Kottayam', 'Idukki', 'Ernakulam', 'Thrissur', 'Palakkad', 'Malappuram', 'Kozhikode', 'Wayanad', 'Kannur', 'Kasaragod'], active: true },
+    'Gujarat': { districts: ['Ahmedabad', 'Surat', 'Vadodara', 'Rajkot', 'Bhavnagar', 'Jamnagar', 'Gandhinagar', 'Anand', 'Bharuch', 'Dahod', 'Gir Somnath', 'Kachchh', 'Kheda', 'Mahesana', 'Narmada', 'Navsari', 'Panchmahal', 'Patan', 'Porbandar', 'Sabarkantha', 'Surendranagar', 'Tapi', 'The Dangs', 'Valsad', 'Amreli', 'Aravalli', 'Banaskantha', 'Botad', 'Chhota Udaipur', 'Devbhoomi Dwarka', 'Junagadh', 'Mahisagar', 'Morbi'], active: true }
   };
 
-  const state = districtData[stateName] || { districts: ['District 1', 'District 2', 'District 3'], active: false };
+  // Default districts for states without specific data
+  const getDefaultDistricts = (count) => {
+    return Array.from({ length: count }, (_, i) => `District ${i + 1}`);
+  };
+
+  const state = districtData[stateName] || { districts: getDefaultDistricts(30), active: false };
   
   const getStatus = (i) => {
     if (!state.active) return 'coming-soon';
