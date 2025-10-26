@@ -99,6 +99,7 @@ export default function Mainnav() {
                 { icon: <Shield size={20} />, title: "STATE UNION", path: "/state-union", desc: "Regional" },
                 { icon: <Phone size={20} />, title: "CONTACT", path: "/contact", desc: "Get in Touch" },
                 { icon: <Activity size={20} />, title: "SELF DEFENCE", path: "/self-defence", desc: "Protection Skills" },
+                { icon: <MoreHorizontal size={20} />, title: "MORE", path: "#", desc: "Others", hasDropdown: true }
               ].map((item, index) => (
                 <div 
                   key={index} 
