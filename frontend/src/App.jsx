@@ -12,6 +12,7 @@ import Marque from './Components/Marque';
 import About from './Components/About';
 import Contact from './Components/Contact';
 import StateUnion from './Components/StateUnion';
+import Districts from './Components/Districts';
 import Blog from './Components/Blog';
 import Gallery from './Components/Gallery';
 import UnionAbout from './Components/UnionABout';
@@ -51,6 +52,7 @@ const App = () => {
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/state-union" element={<StateUnion />} />
+        <Route path="/state-union/:stateName" element={<Districts />} />
         <Route path="/news" element={<Blog />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/forms" element={<Form />} />
