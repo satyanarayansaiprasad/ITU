@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 const StateUnion = () => {
+  const navigate = useNavigate();
+  
   const states = [
     { 
       id: 1, 
@@ -279,7 +282,8 @@ const StateUnion = () => {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className="hover:bg-orange-50 transition-colors"
+                      className="hover:bg-orange-50 transition-colors cursor-pointer"
+                      onClick={() => navigate(`/state-union/${state.name}`)}
                     >
                       <td className="px-6 py-4">
                         <span className="font-bold text-gray-800">{state.name}</span>
@@ -317,6 +321,7 @@ const StateUnion = () => {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: index * 0.05 }}
               className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border-2 border-dashed border-gray-300 p-4 text-center group cursor-pointer"
+              onClick={() => navigate(`/state-union/${state.name}`)}
             >
               <div className="text-gray-600 font-medium group-hover:text-orange-600 transition-colors">
                 {state.name}
