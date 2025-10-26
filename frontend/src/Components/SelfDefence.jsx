@@ -10,9 +10,9 @@ const SelfDefence = () => {
 
   const sliderImages = [
     '/kick1.jpg',
-    '/kick1.jpg',
-    '/kick1.jpg',
-    '/kick1.jpg'
+    '/c1.webp',
+    '/c2.webp',
+    '/c3.webp'
   ];
 
   const sliderSettings = {
