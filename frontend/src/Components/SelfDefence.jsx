@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Zap, Target, Users, Award, Clock, Phone, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Shield, Zap, Target, Users, Award, Clock, MapPin, Phone } from 'lucide-react';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
@@ -8,7 +8,6 @@ import 'slick-carousel/slick/slick-theme.css';
 const SelfDefence = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // Slider images
   const sliderImages = [
     '/kick1.jpg',
     '/kick1.jpg',
@@ -19,15 +18,16 @@ const SelfDefence = () => {
   const sliderSettings = {
     dots: true,
     infinite: true,
-    speed: 500,
+    speed: 800,
     slidesToShow: 1,
     slidesToScroll: 1,
     autoplay: true,
-    autoplaySpeed: 3000,
+    autoplaySpeed: 4000,
     beforeChange: (oldIndex, newIndex) => setCurrentSlide(newIndex),
     arrows: true,
     fade: true,
-    cssEase: "linear",
+    cssEase: "ease-in-out",
+    pauseOnHover: false,
   };
 
   const containerVariants = {
@@ -114,74 +114,109 @@ const SelfDefence = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-red-900 to-orange-900 pt-[130px] sm:pt-[135px] md:pt-[140px] pb-12">
-      
-      {/* Hero Slider Section */}
-      <div className="relative mb-16">
-        <div className="relative h-[500px] overflow-hidden rounded-2xl shadow-2xl">
-          <Slider {...sliderSettings}>
-            {sliderImages.map((image, index) => (
-              <div key={index} className="relative h-[500px]">
-                <img 
-                  src={image} 
-                  alt={`Self Defence Training ${index + 1}`}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent">
-                  <div className="container-responsive h-full flex items-center">
-                    <motion.div
-                      initial={{ opacity: 0, x: -50 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.8, delay: 0.3 }}
-                      className="text-white max-w-2xl"
-                    >
-                      <div className="inline-flex items-center gap-2 bg-red-500/20 backdrop-blur-sm text-white px-4 py-2 rounded-full font-semibold text-sm mb-6 border border-white/30">
-                        <Shield className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                        SELF DEFENCE TRAINING
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange–50 pt-[130px] sm:pt-[135px] md:pt-[140px] pb-12">
+      <div className="container-responsive">
+        
+        {/* Hero Slider Section */}
+        <div className="relative mb-16 overflow-hidden rounded-3xl shadow-2xl">
+          <div className="relative h-[450px]">
+            <Slider {...sliderSettings}>
+              {sliderImages.map((image, index) => (
+                <div key={index} className="relative h-[450px]">
+                  <img 
+                    src={image} 
+                    alt={`Taekwondo Self Defence Training ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/20 to-transparent">
+                    <div className="h-full flex items-center">
+                      <div className="text-white max-w-2xl ml-8 sm:ml-16">
+                        <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full font-semibold text-sm mb-6 border border-white/30">
+                          <Shield className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                          SELF DEFENCE TRAINING
+                        </div>
+                        <h1 className="text-4xl sm:text-5xl font-extrabold mb-6 leading-tight">
+                          Master the Art of{' '}
+                          <span className="bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
+                            Self Defence
+                          </span>
+                        </h1>
+                        <p className="text-lg text-white/90 mb-8 leading-relaxed pr-4">
+                          Learn practical self-defense techniques rooted in traditional Taekwondo principles.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-4">
+                          <button className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-4 rounded-full font-bold shadow-lg hover:shadow-xl transition-all">
+                            <div className="flex items-center gap-3">
+                              <Shield size={20} />
+                              <span>Start Training Today</span>
+                            </div>
+                          </button>
+                          <button className="bg-white/20 backdrop-blur-sm border-2 border-white text-white px-8 py-4 rounded-full font-bold hover:bg-white/30 transition-all">
+                            <div className="flex items-center gap-3">
+                              <Phone size={20} />
+                              <span>Contact Instructor</span>
+                            </div>
+                          </button>
+                        </div>
                       </div>
-                      <h1 className="text-5xl font-extrabold mb-6 leading-tight">
-                        Master the Art of{' '}
-                        <span className="bg-gradient-to-r from-orange-400 via-red-400 to-pink-400 bg-clip-text text-transparent">
-                          Self Defence
-                        </span>
-                      </h1>
-                      <p className="text-lg text-gray-200 mb-8 leading-relaxed">
-                        Learn practical self-defense techniques rooted in traditional Taekwondo principles. 
-                        Build confidence, improve fitness, and master essential protection skills for real-world situations.
-                      </p>
-                      <div className="flex gap-4">
-                        <motion.button
-                          className="bg-gradient-to-r from-red-500 to-orange-600 text-white px-8 py-4 rounded-full font-bold shadow-lg hover:shadow-xl transition-all duration-300"
-                          whileHover={{ scale: 1.05, y: -2 }}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          <div className="flex items-center gap-3">
-                            <Shield size={20} />
-                            <span>Start Training Today</span>
-                          </div>
-                        </motion.button>
-                        
-                        <motion.button
-                          className="border-2 border-white text-white px-8 py-4 rounded-full font-bold hover:bg-white/10 backdrop-blur-sm transition-all duration-300"
-                          whileHover={{ scale: 1.05, y: -2 }}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          <div className="flex items-center gap-3">
-                            <Phone size={20} />
-                            <span>Contact Instructor</span>
-                          </div>
-                        </motion.button>
-                      </div>
-                    </motion.div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </Slider>
+              ))}
+            </Slider>
+          </div>
         </div>
-      </div>
 
-      <div className="container-responsive">
+        {/* Hero Section */}
+        <motion.div
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-red-100 to-orange-50 text-red-700 px-4 py-2 rounded-full font-semibold text-responsive-sm mb-6 border border-red-200">
+            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+            SELF DEFENCE TRAINING
+          </div>
+          
+          <h1 className="text-responsive-2xl font-bold text-gray-900 mb-6 leading-tight">
+            Master the Art of{' '}
+            <span className="bg-gradient-to-r from-red-500 to-orange-600 bg-clip-text text-transparent">
+              Self Defence
+            </span>
+          </h1>
+          
+          <p className="text-responsive-base text-gray-600 max-w-3xl mx-auto mb-8">
+            Learn practical self-defense techniques rooted in traditional Taekwondo principles. 
+            Our comprehensive programs are designed to build confidence, improve fitness, and teach 
+            essential protection skills for real-world situations.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <motion.button
+              className="btn-responsive bg-gradient-to-r from-red-500 to-orange-600 text-white font-bold shadow-lg hover:shadow-xl focus-custom"
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <div className="flex items-center justify-center gap-3">
+                <Shield size={20} />
+                <span>Start Training Today</span>
+              </div>
+            </motion.button>
+            
+            <motion.button
+              className="btn-responsive border-2 border-red-500 text-red-600 font-bold hover:bg-red-500 hover:text-white focus-custom"
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <div className="flex items-center justify-center gap-3">
+                <Phone size={20} />
+                <span>Contact Instructor</span>
+              </div>
+            </motion.button>
+          </div>
+        </motion.div>
+
         {/* Techniques Section */}
         <motion.div
           variants={containerVariants}
@@ -191,20 +226,20 @@ const SelfDefence = () => {
           className="mb-16"
         >
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-white mb-4">
+            <h2 className="text-responsive-xl font-bold text-gray-900 mb-4">
               Core Self Defence Techniques
             </h2>
-            <p className="text-lg text-gray-300 max-w-2xl mx-auto">
+            <p className="text-responsive-base text-gray-600 max-w-2xl mx-auto">
               Master these essential techniques to protect yourself and build confidence in any situation.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid-responsive-1-2-4">
             {techniques.map((technique, index) => (
               <motion.div
                 key={index}
                 variants={itemVariants}
-                className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 hover:shadow-2xl group cursor-pointer transition-all duration-300"
+                className={`card-responsive bg-white border-l-4 ${technique.borderColor} hover:shadow-xl group cursor-pointer`}
                 whileHover={{ y: -8, scale: 1.02 }}
               >
                 <div className="text-center">
@@ -214,11 +249,11 @@ const SelfDefence = () => {
                     </div>
                   </div>
                   
-                  <h3 className="2xl font-bold text-white mb-3">
+                  <h3 className="text-responsive-base font-bold text-gray-900 mb-3">
                     {technique.title}
                   </h3>
                   
-                  <p className="text-sm text-gray-300 leading-relaxed">
+                  <p className="text-responsive-sm text-gray-600 leading-relaxed">
                     {technique.description}
                   </p>
                 </div>
@@ -236,19 +271,19 @@ const SelfDefence = () => {
           viewport={{ once: true }}
         >
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-white mb-4">
+            <h2 className="text-responsive-xl font-bold text-gray-900 mb-4">
               Self Defence Programs
             </h2>
-            <p className="text-lg text-gray-300 max-w-2xl mx-auto">
+            <p className="text-responsive-base text-gray-600 max-w-2xl mx-auto">
               Choose from our specialized programs designed for different skill levels and age groups.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid-responsive-1-2-3">
             {programs.map((program, index) => (
               <motion.div
                 key={index}
-                className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 hover:shadow-2xl group transition-all duration-300"
+                className="card-responsive bg-white border border-gray-200 hover:shadow-xl group"
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.2 }}
@@ -257,32 +292,32 @@ const SelfDefence = () => {
               >
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-xl font-bold text-white">
+                    <h3 className="text-responsive-lg font-bold text-gray-900">
                       {program.name}
                     </h3>
-                    <span className="px-3 py-1 bg-red-500/30 backdrop-blur-sm text-white border border-white/30 rounded-full text-xs font-semibold">
+                    <span className="px-3 py-1 bg-red-100 text-red-600 rounded-full text-xs font-semibold">
                       {program.level}
                     </span>
                   </div>
                   
-                  <div className="flex items-center gap-4 text-sm text-gray-300 mb-3">
+                  <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
                     <div className="flex items-center gap-1">
                       <Clock size={16} />
                       <span>{program.duration}</span>
                     </div>
                   </div>
                   
-                  <p className="text-sm text-gray-300 mb-4 leading-relaxed">
+                  <p className="text-responsive-sm text-gray-600 mb-4 leading-relaxed">
                     {program.description}
                   </p>
                 </div>
 
                 <div className="space-y-2 mb-6">
-                  <h4 className="font-semibold text-white text-sm">What You'll Learn:</h4>
+                  <h4 className="font-semibold text-gray-900 text-sm">What You'll Learn:</h4>
                   <ul className="space-y-1">
                     {program.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-center gap-2 text-sm text-gray-300">
-                        <div className="w-1.5 h-1.5 bg-orange-400 rounded-full"></div>
+                      <li key={featureIndex} className="flex items-center gap-2 text-sm text-gray-600">
+                        <div className="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
                         {feature}
                       </li>
                     ))}
@@ -290,7 +325,7 @@ const SelfDefence = () => {
                 </div>
 
                 <motion.button
-                  className="w-full bg-gradient-to-r from-red-500 to-orange-600 text-white px-6 py-3 rounded-full font-semibold hover:shadow-lg transition-all duration-300"
+                  className="w-full btn-responsive bg-gradient-to-r from-red-500 to-orange-600 text-white font-semibold justify-center"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -306,17 +341,17 @@ const SelfDefence = () => {
 
         {/* Why Choose Us Section */}
         <motion.div
-          className="bg-gradient-to-r from-red-600 via-orange-600 to-pink-600 rounded-3xl p-8 sm:p-12 text-white text-center shadow-2xl"
+          className="bg-gradient-to-r from-red-500 to-orange-600 rounded-3xl p-8 sm:p-12 text-white text-center"
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
           <div className="mb-8">
-            <h2 className="text-4xl font-bold mb-4">
+            <h2 className="text-responsive-xl font-bold mb-4">
               Why Choose ITU Self Defence?
             </h2>
-            <p className="text-lg opacity-90 max-w-3xl mx-auto">
+            <p className="text-responsive-base opacity-90 max-w-3xl mx-auto">
               Our self-defense programs combine traditional Taekwondo techniques with modern protection strategies, 
               taught by certified instructors with years of experience.
             </p>
@@ -331,33 +366,33 @@ const SelfDefence = () => {
             ].map((benefit, index) => (
               <motion.div
                 key={index}
-                className="text-center bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20"
+                className="text-center"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
               >
-                <div className="text-5xl mb-3">{benefit.icon}</div>
-                <h3 className="font-bold text-xl mb-2">{benefit.title}</h3>
+                <div className="text-4xl mb-3">{benefit.icon}</div>
+                <h3 className="font-bold text-lg mb-2">{benefit.title}</h3>
                 <p className="text-sm opacity-90">{benefit.desc}</p>
               </motion.div>
             ))}
           </div>
 
           <motion.div
-            className="mt-8 pt-8 border-t border-white/30"
+            className="mt-8 pt-8 border-t border-white/20"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
           >
-            <p className="text-lg mb-6">Ready to start your self-defense journey?</p>
+            <p className="text-sm opacity-80 mb-4">Ready to start your self-defense journey?</p>
             <motion.button
-              className="bg-white text-red-600 px-8 py-4 rounded-full font-bold hover:bg-gray-100 transition-all duration-300 shadow-xl"
+              className="btn-responsive bg-white text-red-600 font-bold hover:bg-gray-100 focus-custom"
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.98 }}
             >
               <div className="flex items-center justify-center gap-3">
-                <Award size={20} />
+                <MapPin size={18} />
                 <span>Find Classes Near You</span>
               </div>
             </motion.button>
@@ -372,11 +407,11 @@ const SelfDefence = () => {
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl shadow-2xl p-8 border border-white/20">
-            <h2 className="text-3xl font-bold text-white mb-4">
+          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200">
+            <h2 className="text-responsive-lg font-bold text-gray-900 mb-4">
               Start Your Self Defence Training Today
             </h2>
-            <p className="text-lg text-gray-300 mb-8 max-w-2xl mx-auto">
+            <p className="text-responsive-base text-gray-600 mb-6 max-w-2xl mx-auto">
               Join thousands of students who have learned to protect themselves through our proven self-defense programs. 
               Contact us to schedule your first class or learn more about our training methods.
             </p>
@@ -384,7 +419,7 @@ const SelfDefence = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <motion.a
                 href="/contact"
-                className="bg-gradient-to-r from-red-500 to-orange-600 text-white px-8 py-4 rounded-full font-bold shadow-lg hover:shadow-xl transition-all duration-300"
+                className="btn-responsive bg-gradient-to-r from-red-500 to-orange-600 text-white font-bold shadow-lg hover:shadow-xl focus-custom"
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -396,7 +431,7 @@ const SelfDefence = () => {
               
               <motion.a
                 href="/about"
-                className="border-2 border-white text-white px-8 py-4 rounded-full font-bold hover:bg-white/10 backdrop-blur-sm transition-all duration-300"
+                className="btn-responsive border-2 border-red-500 text-red-600 font-bold hover:bg-red-500 hover:text-white focus-custom"
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.98 }}
               >
