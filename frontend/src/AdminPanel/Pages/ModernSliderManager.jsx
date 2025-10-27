@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
-import { API_ENDPOINTS, GET_UPLOAD_URL } from '../../config/api';
+import { API_ENDPOINTS } from '../../config/api';
 import {
   Upload,
   Image as ImageIcon,
@@ -414,11 +414,12 @@ const ModernSliderManager = () => {
                 >
                   <div className={`relative ${viewMode === 'list' ? 'w-24 h-16 flex-shrink-0' : 'aspect-video'}`}>
                     <img
-                      src={GET_UPLOAD_URL(image.filename)}
+                      src={`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/uploads/${image.filename}`}
                       alt={`Slider ${index + 1}`}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         e.target.src = '/api/placeholder/400/300';
+                        console.error('Image failed to load:', image.filename);
                       }}
                     />
                     
@@ -426,7 +427,7 @@ const ModernSliderManager = () => {
                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
                         <button
-                          onClick={() => setShowPreview(GET_UPLOAD_URL(image.filename))}
+                          onClick={() => setShowPreview(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/uploads/${image.filename}`)}
                           className="p-2 bg-white bg-opacity-20 rounded-full text-white hover:bg-opacity-30 transition-all"
                         >
                           <Eye size={16} />
@@ -463,7 +464,7 @@ const ModernSliderManager = () => {
                         </h3>
                         <div className="flex items-center gap-1">
                           <button
-                            onClick={() => setShowPreview(GET_UPLOAD_URL(image.filename))}
+                            onClick={() => setShowPreview(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/uploads/${image.filename}`)}
                             className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
                           >
                             <Eye size={14} />
