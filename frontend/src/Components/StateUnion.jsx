@@ -1,231 +1,75 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { indianStatesAndDistricts, getAllStatesAndUTs } from '../data/indianStatesDistricts';
 
 const StateUnion = () => {
   const navigate = useNavigate();
+  const [filterType, setFilterType] = useState('all'); // 'all', 'states', 'ut'
   
-  const states = [
-    { 
-      id: 1, 
-      name: 'Maharashtra', 
+  // Active states with additional info
+  const activeStatesInfo = {
+    'Maharashtra': { 
       secretary: 'Shri Rajesh Verma', 
-      districts: 36, 
       unionName: 'Maharashtra Taekwondo Union',
-      established: 1995,
-      active: true
+      established: 1995
     },
-    { 
-      id: 2, 
-      name: 'Delhi', 
+    'Delhi': { 
       secretary: 'Shri Vikram Singh', 
-      districts: 11, 
       unionName: 'Delhi Taekwondo Union',
-      established: 1992,
-      active: true
+      established: 1992
     },
-    { 
-      id: 3, 
-      name: 'Karnataka', 
+    'Karnataka': { 
       secretary: 'Shri Arjun Reddy', 
-      districts: 30, 
       unionName: 'Karnataka Taekwondo Union',
-      established: 1998,
-      active: true
+      established: 1998
     },
-    { 
-      id: 4, 
-      name: 'Tamil Nadu', 
+    'Tamil Nadu': { 
       secretary: 'Shri Karthik Iyer',
-      districts: 38, 
       unionName: 'Tamil Nadu Taekwondo Union',
-      established: 1996,
-      active: true
+      established: 1996
     },
-    { 
-      id: 5, 
-      name: 'Kerala', 
+    'Kerala': { 
       secretary: 'Shri Ajith Nair', 
-      districts: 14, 
       unionName: 'Kerala Taekwondo Union',
-      established: 1994,
-      active: true
+      established: 1994
     },
-    { 
-      id: 6, 
-      name: 'Gujarat', 
+    'Gujarat': { 
       secretary: 'Shri Jayesh Patel', 
-      districts: 33, 
       unionName: 'Gujarat Taekwondo Union',
-      established: 2001,
-      active: true
-    },
-    { 
-      id: 7, 
-      name: 'Rajasthan', 
-      districts: 50,
-      active: false,
-    },
-    { 
-      id: 8, 
-      name: 'Punjab', 
-      districts: 23,
-      active: false,
-    },
-    { 
-      id: 9, 
-      name: 'West Bengal', 
-      districts: 23,
-      active: false,
-    },
-    {
-      id: 10,
-      name: 'Uttar Pradesh',
-      districts: 75,
-      active: false,
-    },
-    {
-      id: 11,
-      name: 'Bihar',
-      districts: 38,
-      active: false,
-    },
-    {
-      id: 12,
-      name: 'Madhya Pradesh',
-      districts: 55,
-      active: false,
-    },
-    {
-      id: 13,
-      name: 'Odisha',
-      districts: 30,
-      active: false,
-    },
-    {
-      id: 14,
-      name: 'Assam',
-      districts: 35,
-      active: false,
-    },
-    {
-      id: 15,
-      name: 'Andhra Pradesh',
-      districts: 26,
-      active: false,
-    },
-    {
-      id: 16,
-      name: 'Telangana',
-      districts: 33,
-      active: false,
-    },
-    {
-      id: 17,
-      name: 'Chhattisgarh',
-      districts: 28,
-      active: false,
-    },
-    {
-      id: 18,
-      name: 'Jharkhand',
-      districts: 24,
-      active: false,
-    },
-    {
-      id: 19,
-      name: 'Haryana',
-      districts: 22,
-      active: false,
-    },
-    {
-      id: 20,
-      name: 'Uttarakhand',
-      districts: 13,
-      active: false,
-    },
-    {
-      id: 21,
-      name: 'Himachal Pradesh',
-      districts: 12,
-      active: false,
-    },
-    {
-      id: 22,
-      name: 'Tripura',
-      districts: 8,
-      active: false,
-    },
-    {
-      id: 23,
-      name: 'Manipur',
-      districts: 16,
-      active: false,
-    },
-    {
-      id: 24,
-      name: 'Meghalaya',
-      districts: 12,
-      active: false,
-    },
-    {
-      id: 25,
-      name: 'Mizoram',
-      districts: 11,
-      active: false,
-    },
-    {
-      id: 26,
-      name: 'Nagaland',
-      districts: 16,
-      active: false,
-    },
-    {
-      id: 27,
-      name: 'Arunachal Pradesh',
-      districts: 26,
-      active: false,
-    },
-    {
-      id: 28,
-      name: 'Sikkim',
-      districts: 6,
-      active: false,
-    },
-    {
-      id: 29,
-      name: 'Goa',
-      districts: 2,
-      active: false,
-    },
-    {
-      id: 30,
-      name: 'Jammu and Kashmir',
-      districts: 20,
-      active: false,
-    },
-    {
-      id: 31,
-      name: 'Ladakh',
-      districts: 2,
-      active: false,
-    },
-    {
-      id: 32,
-      name: 'Puducherry',
-      districts: 4,
-      active: false,
-    },
-    {
-      id: 33,
-      name: 'Andaman and Nicobar',
-      districts: 3,
-      active: false,
-    },
-  ];
+      established: 2001
+    }
+  };
+
+  // Build complete states list from data
+  const states = useMemo(() => {
+    return getAllStatesAndUTs().map((name, index) => {
+      const stateInfo = indianStatesAndDistricts[name];
+      const activeInfo = activeStatesInfo[name];
+      
+      return {
+        id: index + 1,
+        name: name,
+        districts: stateInfo.districts.length,
+        type: stateInfo.type,
+        active: stateInfo.active,
+        secretary: activeInfo?.secretary || null,
+        unionName: activeInfo?.unionName || `${name} Taekwondo Union`,
+        established: activeInfo?.established || null
+      };
+    });
+  }, []);
 
   const activeStates = states.filter(state => state.active);
   const upcomingStates = states.filter(state => !state.active);
+  
+  // Filter states based on type
+  const filteredUpcomingStates = useMemo(() => {
+    if (filterType === 'all') return upcomingStates;
+    if (filterType === 'states') return upcomingStates.filter(s => s.type === 'State');
+    if (filterType === 'ut') return upcomingStates.filter(s => s.type === 'Union Territory');
+    return upcomingStates;
+  }, [upcomingStates, filterType]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 pt-[130px] sm:pt-[135px] md:pt-[140px] pb-12 px-4 sm:px-6 lg:px-8">
@@ -246,7 +90,7 @@ const StateUnion = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.6 }}
           >
-            Indian Taekwondo Union - State-wise Network
+            Indian Taekwondo Union - States & Union Territories Network
           </motion.p>
         </div>
 
@@ -308,34 +152,81 @@ const StateUnion = () => {
         </div>
 
         {/* Upcoming States Section */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-          <div className="col-span-full bg-gradient-to-r from-gray-500 to-gray-600 px-6 py-4 rounded-lg mb-4">
-            <h2 className="text-xl font-bold text-white">
-              Upcoming State Unions ({upcomingStates.length} States)
-            </h2>
+        <div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="bg-white rounded-xl shadow-lg overflow-hidden mb-6"
+          >
+            <div className="bg-gradient-to-r from-gray-500 to-gray-600 px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+              <h2 className="text-xl font-bold text-white">
+                Upcoming State/UT Unions ({upcomingStates.length} Total)
+              </h2>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setFilterType('all')}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    filterType === 'all'
+                      ? 'bg-white text-gray-700'
+                      : 'bg-gray-600 text-white hover:bg-gray-500'
+                  }`}
+                >
+                  All ({upcomingStates.length})
+                </button>
+                <button
+                  onClick={() => setFilterType('states')}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    filterType === 'states'
+                      ? 'bg-white text-gray-700'
+                      : 'bg-gray-600 text-white hover:bg-gray-500'
+                  }`}
+                >
+                  States ({upcomingStates.filter(s => s.type === 'State').length})
+                </button>
+                <button
+                  onClick={() => setFilterType('ut')}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    filterType === 'ut'
+                      ? 'bg-white text-gray-700'
+                      : 'bg-gray-600 text-white hover:bg-gray-500'
+                  }`}
+                >
+                  UTs ({upcomingStates.filter(s => s.type === 'Union Territory').length})
+                </button>
+              </div>
+            </div>
+          </motion.div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            {filteredUpcomingStates.map((state, index) => (
+              <motion.div
+                key={state.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: index * 0.03 }}
+                className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border-2 border-dashed border-gray-300 p-4 text-center group cursor-pointer"
+                onClick={() => navigate(`/state-union/${state.name}`)}
+              >
+                <div className="text-gray-600 font-medium group-hover:text-orange-600 transition-colors text-sm">
+                  {state.name}
+                </div>
+                <div className="mt-2 text-xs text-gray-500">
+                  {state.districts} {state.districts === 1 ? 'District' : 'Districts'}
+                </div>
+                <div className="mt-2 flex items-center justify-center gap-1">
+                  <span className="inline-block bg-amber-100 text-amber-800 px-2 py-1 rounded text-xs font-medium">
+                    Coming Soon
+                  </span>
+                  {state.type === 'Union Territory' && (
+                    <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
+                      UT
+                    </span>
+                  )}
+                </div>
+              </motion.div>
+            ))}
           </div>
-          {upcomingStates.map((state, index) => (
-            <motion.div
-              key={state.id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.05 }}
-              className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border-2 border-dashed border-gray-300 p-4 text-center group cursor-pointer"
-              onClick={() => navigate(`/state-union/${state.name}`)}
-            >
-              <div className="text-gray-600 font-medium group-hover:text-orange-600 transition-colors">
-                {state.name}
-              </div>
-              <div className="mt-2 text-xs text-gray-500">
-                {state.districts} Districts
-              </div>
-              <div className="mt-2">
-                <span className="inline-block bg-amber-100 text-amber-800 px-2 py-1 rounded text-xs font-medium">
-                  Coming Soon
-                </span>
-              </div>
-            </motion.div>
-          ))}
         </div>
       </div>
     </div>

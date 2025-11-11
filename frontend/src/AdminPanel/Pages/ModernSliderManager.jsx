@@ -22,6 +22,8 @@ import {
   Filter
 } from 'lucide-react';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+
 const ModernSliderManager = () => {
   const [sliderImages, setSliderImages] = useState([]);
   const [newImage, setNewImage] = useState(null);
