@@ -1,13 +1,17 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { indianStatesAndDistricts, getAllStatesAndUTs } from '../data/indianStatesDistricts';
+import axios from 'axios';
+import { API_ENDPOINTS } from '../config/api';
 
 const StateUnion = () => {
   const navigate = useNavigate();
   const [filterType, setFilterType] = useState('all'); // 'all', 'states', 'ut'
+  const [states, setStates] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   
-  // Active states with additional info
+  // Active states with additional info (can be stored in Firebase later)
   const activeStatesInfo = {
     'Maharashtra': { 
       secretary: 'Shri Rajesh Verma', 
@@ -41,23 +45,41 @@ const StateUnion = () => {
     }
   };
 
-  // Build complete states list from data
-  const states = useMemo(() => {
-    return getAllStatesAndUTs().map((name, index) => {
-      const stateInfo = indianStatesAndDistricts[name];
-      const activeInfo = activeStatesInfo[name];
-      
-      return {
-        id: index + 1,
-        name: name,
-        districts: stateInfo.districts.length,
-        type: stateInfo.type,
-        active: stateInfo.active,
-        secretary: activeInfo?.secretary || null,
-        unionName: activeInfo?.unionName || `${name} Taekwondo Union`,
-        established: activeInfo?.established || null
-      };
-    });
+  // Fetch states from Firebase API
+  useEffect(() => {
+    const fetchStates = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(API_ENDPOINTS.GET_ALL_STATES);
+        
+        if (response.data.success) {
+          // Map Firebase data to component format
+          const mappedStates = response.data.data.map((state, index) => {
+            const activeInfo = activeStatesInfo[state.name];
+            return {
+              id: state.id || index + 1,
+              name: state.name,
+              districts: state.districtCount || state.districts?.length || 0,
+              type: state.type,
+              active: state.active || false,
+              secretary: state.secretary || activeInfo?.secretary || null,
+              unionName: state.unionName || activeInfo?.unionName || `${state.name} Taekwondo Union`,
+              established: state.established || activeInfo?.established || null
+            };
+          });
+          setStates(mappedStates);
+        }
+      } catch (err) {
+        console.error('Error fetching states:', err);
+        setError('Failed to load states. Please try again later.');
+        // Fallback to empty array
+        setStates([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStates();
   }, []);
 
   const activeStates = states.filter(state => state.active);
@@ -70,6 +92,37 @@ const StateUnion = () => {
     if (filterType === 'ut') return upcomingStates.filter(s => s.type === 'Union Territory');
     return upcomingStates;
   }, [upcomingStates, filterType]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 pt-[130px] sm:pt-[135px] md:pt-[140px] pb-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+            <p className="mt-4 text-gray-600">Loading states and districts...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 pt-[130px] sm:pt-[135px] md:pt-[140px] pb-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center">
+            <p className="text-red-600">{error}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="mt-4 px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 pt-[130px] sm:pt-[135px] md:pt-[140px] pb-12 px-4 sm:px-6 lg:px-8">

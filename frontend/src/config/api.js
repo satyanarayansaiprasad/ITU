@@ -41,6 +41,14 @@ export const API_ENDPOINTS = {
   
   // Uploads
   UPLOADS: `${API_BASE_URL}/uploads`,
+  
+  // States and Districts endpoints
+  GET_ALL_STATES: `${API_BASE_URL}/api/states`,
+  GET_STATES_ONLY: `${API_BASE_URL}/api/states/states-only`,
+  GET_UNION_TERRITORIES: `${API_BASE_URL}/api/states/union-territories`,
+  GET_STATE: (stateName) => `${API_BASE_URL}/api/states/${encodeURIComponent(stateName)}`,
+  GET_DISTRICTS: (stateName) => `${API_BASE_URL}/api/states/${encodeURIComponent(stateName)}/districts`,
+  UPDATE_STATE_STATUS: (stateName) => `${API_BASE_URL}/api/states/${encodeURIComponent(stateName)}/status`,
 };
 
 // Helper function for upload URLs

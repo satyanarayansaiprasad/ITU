@@ -8,6 +8,7 @@ const { initializeFirebase } = require('./config/firebase');
 const adminRoutes = require('./routes/adminRoutes');
 const userRoutes = require('./routes/userRoutes');
 const firebaseRoutes = require('./routes/firebaseRoutes');
+const statesRoutes = require('./routes/statesRoutes');
 
 const app = express();
 
@@ -53,6 +54,7 @@ app.use(session({
 app.use('/api/admin', adminRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/firebase', firebaseRoutes); // Firebase routes (optional - uncomment if needed)
+app.use('/api/states', statesRoutes); // States and Districts routes
 
 // Start Server - Restart trigger
 const PORT = process.env.PORT || 3001;

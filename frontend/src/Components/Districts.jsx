@@ -1,20 +1,53 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getStateInfo, getDistrictsForState } from '../data/indianStatesDistricts';
+import axios from 'axios';
+import { API_ENDPOINTS } from '../config/api';
 
 const Districts = () => {
   const { stateName } = useParams();
   const navigate = useNavigate();
+  const [state, setState] = useState({
+    districts: [],
+    active: false,
+    type: 'State',
+    stateName: stateName
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   
-  // Get state info and districts from data file
-  const stateInfo = getStateInfo(stateName);
-  const districts = getDistrictsForState(stateName);
-  
-  const state = {
-    districts: districts,
-    active: stateInfo?.active || false,
-    type: stateInfo?.type || 'State'
-  };
+  // Fetch districts from Firebase API
+  useEffect(() => {
+    const fetchDistricts = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(API_ENDPOINTS.GET_DISTRICTS(stateName));
+        
+        if (response.data.success) {
+          setState({
+            districts: response.data.data.districts || [],
+            active: response.data.data.active || false,
+            type: response.data.data.stateType || 'State',
+            stateName: response.data.data.stateName || stateName
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching districts:', err);
+        setError('Failed to load districts. Please try again later.');
+        setState({
+          districts: [],
+          active: false,
+          type: 'State',
+          stateName: stateName
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (stateName) {
+      fetchDistricts();
+    }
+  }, [stateName]);
   
   const getStatus = (i) => {
     if (!state.active) return 'coming-soon';
@@ -24,6 +57,37 @@ const Districts = () => {
   const activeDistricts = state.districts.filter((_, i) => getStatus(i) === 'active');
   const comingDistricts = state.districts.filter((_, i) => getStatus(i) === 'coming-soon');
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 pt-[130px] pb-12 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+            <p className="mt-4 text-gray-600">Loading districts...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 pt-[130px] pb-12 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center">
+            <p className="text-red-600">{error}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="mt-4 px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 pt-[130px] pb-12 px-4">
       <div className="max-w-7xl mx-auto">
@@ -31,7 +95,7 @@ const Districts = () => {
           <button onClick={() => navigate('/state-union')} className="mb-6 text-orange-600 hover:text-orange-700 font-medium">
             ← Back to States & Union Territories
           </button>
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">{stateName} Districts</h1>
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">{state.stateName || stateName} Districts</h1>
           <div className="flex items-center justify-center gap-3 mb-2">
             <p className="text-xl text-gray-600">Total Districts: {state.districts.length}</p>
             {state.type === 'Union Territory' && (
