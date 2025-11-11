@@ -4,13 +4,18 @@ const cors = require('cors');
 require('dotenv').config();
 const path = require('path');
 const connectDB = require('./config/db');
+const { initializeFirebase } = require('./config/firebase');
 const adminRoutes = require('./routes/adminRoutes');
 const userRoutes = require('./routes/userRoutes');
+const firebaseRoutes = require('./routes/firebaseRoutes');
 
 const app = express();
 
 // Connect MongoDB
 connectDB();
+
+// Initialize Firebase
+initializeFirebase();
 
 // CORS Configuration
 app.use(cors({
@@ -47,6 +52,7 @@ app.use(session({
 // Routes
 app.use('/api/admin', adminRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/firebase', firebaseRoutes); // Firebase routes (optional - uncomment if needed)
 
 // Start Server - Restart trigger
 const PORT = process.env.PORT || 3001;
