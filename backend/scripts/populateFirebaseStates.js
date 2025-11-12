@@ -45,12 +45,21 @@ const populateFirebase = async () => {
 
     // Test Firestore connection
     try {
-      await db.collection('_test').doc('connection').set({ test: true });
-      await db.collection('_test').doc('connection').delete();
-      console.log('✅ Firestore connection verified\n');
+      // Try to write a test document
+      const testRef = db.collection('_test').doc('connection');
+      await testRef.set({ test: true, timestamp: new Date().toISOString() });
+      console.log('✅ Firestore connection verified - can write data\n');
+      
+      // Clean up test document
+      await testRef.delete();
     } catch (testError) {
       console.error('❌ Firestore connection test failed:', testError.message);
-      console.error('💡 Please enable Firestore in Firebase Console first');
+      console.error('Error code:', testError.code);
+      console.error('\n💡 Troubleshooting:');
+      console.error('   1. Make sure Firestore is enabled in Firebase Console');
+      console.error('   2. Check that your service account has Firestore permissions');
+      console.error('   3. Verify the database location matches (asia-south1)');
+      console.error('   4. Try creating a collection manually in Firebase Console first');
       process.exit(1);
     }
 

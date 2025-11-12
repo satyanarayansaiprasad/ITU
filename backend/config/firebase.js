@@ -72,7 +72,15 @@ const getFirebaseAdmin = () => {
 const getFirestore = () => {
   const app = getFirebaseAdmin();
   if (!app) return null;
-  return admin.firestore();
+  
+  // Get Firestore instance - try with database ID if specified
+  const dbId = process.env.FIREBASE_DATABASE_ID || '(default)';
+  try {
+    return admin.firestore(app);
+  } catch (error) {
+    console.error('Error getting Firestore:', error);
+    return null;
+  }
 };
 
 // Get Realtime Database
