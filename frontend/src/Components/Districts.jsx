@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API_ENDPOINTS } from '../config/api';
+import { Building2, Phone, MapPin } from 'lucide-react';
 
 const Districts = () => {
   const { stateName } = useParams();
@@ -14,6 +15,7 @@ const Districts = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [organizationsByDistrict, setOrganizationsByDistrict] = useState({});
   
   // Fetch districts from Firebase API
   useEffect(() => {
@@ -23,12 +25,29 @@ const Districts = () => {
         const response = await axios.get(API_ENDPOINTS.GET_DISTRICTS(stateName));
         
         if (response.data.success) {
+          const districts = response.data.data.districts || [];
           setState({
-            districts: response.data.data.districts || [],
+            districts: districts,
             active: response.data.data.active || false,
             type: response.data.data.stateType || 'State',
             stateName: response.data.data.stateName || stateName
           });
+          
+          // Fetch organizations for each district
+          const orgsMap = {};
+          for (const district of districts) {
+            try {
+              const orgResponse = await axios.get(
+                API_ENDPOINTS.GET_ORGANIZATIONS_BY_DISTRICT(stateName, district)
+              );
+              if (orgResponse.data.success && orgResponse.data.data.length > 0) {
+                orgsMap[district] = orgResponse.data.data;
+              }
+            } catch (err) {
+              console.error(`Error fetching organizations for ${district}:`, err);
+            }
+          }
+          setOrganizationsByDistrict(orgsMap);
         }
       } catch (err) {
         console.error('Error fetching districts:', err);
@@ -114,11 +133,37 @@ const Districts = () => {
             <div className="bg-green-500 px-6 py-4 rounded-t-xl">
               <h2 className="text-2xl font-bold text-white">Active Districts ({activeDistricts.length})</h2>
             </div>
-            <div className="p-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {activeDistricts.map((district, i) => (
-                <div key={i} className="bg-green-50 border-2 border-green-200 rounded-lg p-4 text-center">
-                  <div className="text-green-700 font-medium text-sm">{district}</div>
-                  <span className="text-xs bg-green-500 text-white px-2 py-1 rounded mt-2 inline-block">Active</span>
+                <div key={i} className="bg-green-50 border-2 border-green-200 rounded-lg p-4">
+                  <div className="text-green-700 font-medium text-sm mb-2 text-center">{district}</div>
+                  <span className="text-xs bg-green-500 text-white px-2 py-1 rounded mb-3 inline-block">Active</span>
+                  
+                  {/* Organization Details */}
+                  {organizationsByDistrict[district] && organizationsByDistrict[district].length > 0 && (
+                    <div className="mt-3 space-y-2 border-t border-green-200 pt-3">
+                      {organizationsByDistrict[district].map((org, idx) => (
+                        <div key={idx} className="bg-white rounded p-2 text-xs">
+                          <div className="flex items-start gap-2 mb-1">
+                            <Building2 className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                            <div className="font-semibold text-gray-800">{org.name}</div>
+                          </div>
+                          {org.phone && (
+                            <div className="flex items-center gap-2 text-gray-600 mb-1">
+                              <Phone className="w-3 h-3 text-green-600 flex-shrink-0" />
+                              <span>{org.phone}</span>
+                            </div>
+                          )}
+                          {org.headOfficeAddress && (
+                            <div className="flex items-start gap-2 text-gray-600">
+                              <MapPin className="w-3 h-3 text-green-600 mt-0.5 flex-shrink-0" />
+                              <span>{org.headOfficeAddress}</span>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -130,11 +175,37 @@ const Districts = () => {
             <div className="bg-gradient-to-r from-amber-500 to-orange-600 px-6 py-4 rounded-t-xl">
               <h2 className="text-xl font-bold text-white">Coming Soon Districts ({comingDistricts.length})</h2>
             </div>
-            <div className="p-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {comingDistricts.map((district, i) => (
-                <div key={i} className="bg-white border-2 border-dashed border-amber-300 rounded-lg p-4 text-center">
-                  <div className="text-gray-600 font-medium text-sm">{district}</div>
-                  <span className="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded mt-2 inline-block">Coming Soon</span>
+                <div key={i} className="bg-white border-2 border-dashed border-amber-300 rounded-lg p-4">
+                  <div className="text-gray-600 font-medium text-sm mb-2 text-center">{district}</div>
+                  <span className="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded mb-3 inline-block">Coming Soon</span>
+                  
+                  {/* Organization Details */}
+                  {organizationsByDistrict[district] && organizationsByDistrict[district].length > 0 && (
+                    <div className="mt-3 space-y-2 border-t border-amber-200 pt-3">
+                      {organizationsByDistrict[district].map((org, idx) => (
+                        <div key={idx} className="bg-gray-50 rounded p-2 text-xs">
+                          <div className="flex items-start gap-2 mb-1">
+                            <Building2 className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                            <div className="font-semibold text-gray-800">{org.name}</div>
+                          </div>
+                          {org.phone && (
+                            <div className="flex items-center gap-2 text-gray-600 mb-1">
+                              <Phone className="w-3 h-3 text-amber-600 flex-shrink-0" />
+                              <span>{org.phone}</span>
+                            </div>
+                          )}
+                          {org.headOfficeAddress && (
+                            <div className="flex items-start gap-2 text-gray-600">
+                              <MapPin className="w-3 h-3 text-amber-600 mt-0.5 flex-shrink-0" />
+                              <span>{org.headOfficeAddress}</span>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

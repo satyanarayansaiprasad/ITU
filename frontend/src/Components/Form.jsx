@@ -11,6 +11,7 @@ const Form = () => {
     email: "",
     phone: "",
     address: "",
+    district: "",
     role: "",
     dob: "",
     beltLevel: "",
@@ -44,6 +45,7 @@ const Form = () => {
         email: "",
         phone: "",
         address: "",
+        district: "",
         role: "",
         dob: "",
         beltLevel: "",
@@ -149,6 +151,10 @@ const Form = () => {
       { name: "address", label: "Address", type: "textarea" }
     ];
 
+    const affiliationSpecificFields = [
+      { name: "district", label: "District", type: "text" }
+    ];
+
     const playerSpecificFields = [
       { name: "dob", label: "Date of Birth", type: "date" },
       { name: "beltLevel", label: "Belt Level", type: "text" },
@@ -157,7 +163,7 @@ const Form = () => {
 
     const allFields = formType === 'player' 
       ? [...commonFields, ...playerSpecificFields] 
-      : commonFields;
+      : [...commonFields, ...affiliationSpecificFields];
 
     return (
       <>

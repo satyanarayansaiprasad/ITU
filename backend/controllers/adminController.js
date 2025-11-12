@@ -532,28 +532,37 @@ exports.approveForm = async (req, res) => {
     }
 
     // 2. Send email with credentials
-    // 2. Send email with credentials
 const mailOptions = {
-  from: `"Indian Taekwondo Union" <${process.env.EMAIL_FROM}>`,
+  from: `"Indian Taekwondo Union" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
   to: email,
-  subject: "Your Permanent Account Credentials",
+  subject: "Your Affiliation Request Has Been Approved",
   html: `
-    <h2>Your Account Approval</h2>
+    <h2>Congratulations! Your Affiliation Request Has Been Approved</h2>
+    
+    <p>Dear ${updatedForm.name},</p>
+    
+    <p>We are pleased to inform you that your affiliation request has been approved by the admin.</p>
+    
+    <p><strong>Next Steps:</strong></p>
+    <p>Please update your profile by logging in using the password that was already generated and sent to you via email.</p>
     
     <p><strong>Login Email:</strong> ${email}</p>
-    <p><strong>Permanent Password:</strong> ${password}</p>
+    <p><strong>Password:</strong> ${password}</p>
     
     <h3>IMPORTANT:</h3>
     <ul>
-      <li>This password is permanent and cannot be changed</li>
-      <li>You will use this same password every time you login</li>
+      <li>This password was previously sent to you when your account was created</li>
+      <li>Please use this same password to login and update your profile</li>
       <li>Store this password securely</li>
       <li>Do not share this password with anyone</li>
     </ul>
     
-    <p>If you didn't request this account, contact admin immediately.</p>
+    <p>After logging in, please complete your profile update to ensure all information is current.</p>
+    
+    <p>If you didn't request this account or have any questions, contact admin immediately.</p>
     
     <p>Regards,<br/>
+    Indian Taekwondo Union<br/>
     System Administrator</p>
   `
 };

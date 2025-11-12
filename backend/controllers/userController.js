@@ -29,7 +29,7 @@ exports.contactUs = async (req, res) => {
 // Form submission controller
 exports.form = async (req, res) => {
   try {
-    const { state, name, email, phone, address } = req.body;
+    const { state, name, email, phone, address, district } = req.body;
 
     // Check for empty fields
     if (!state || !name || !email || !phone || !address) {
@@ -50,6 +50,7 @@ exports.form = async (req, res) => {
       email,
       phone,
       address,
+      district: district || "",
       status: "pending",
        // Add status field
     });
@@ -112,7 +113,130 @@ exports.loginStateUnion = async (req, res) => {
   }
 };
 
-// // Example password generator - replace with your actual implementation
+// Update state union profile
+exports.updateStateUnionProfile = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+    
+    const updatedProfile = await AccelerationForm.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true, runValidators: true }
+    );
+    
+    if (!updatedProfile) {
+      return res.status(404).json({ error: "State union not found" });
+    }
+    
+    res.status(200).json({ success: true, data: updatedProfile });
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Upload logo
+exports.uploadLogo = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const file = req.file;
+    
+    if (!file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+    
+    const imageUrl = `uploads/${file.filename}`;
+    const updatedProfile = await AccelerationForm.findByIdAndUpdate(
+      id,
+      { logo: imageUrl },
+      { new: true }
+    );
+    
+    if (!updatedProfile) {
+      return res.status(404).json({ error: "State union not found" });
+    }
+    
+    res.status(200).json({ 
+      success: true, 
+      logoUrl: imageUrl,
+      data: updatedProfile 
+    });
+  } catch (error) {
+    console.error("Error uploading logo:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Upload general secretary image
+exports.uploadGeneralSecretaryImage = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const file = req.file;
+    
+    if (!file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+    
+    const imageUrl = `uploads/${file.filename}`;
+    const updatedProfile = await AccelerationForm.findByIdAndUpdate(
+      id,
+      { generalSecretaryImage: imageUrl },
+      { new: true }
+    );
+    
+    if (!updatedProfile) {
+      return res.status(404).json({ error: "State union not found" });
+    }
+    
+    res.status(200).json({ 
+      success: true, 
+      generalSecretaryImageUrl: imageUrl,
+      data: updatedProfile 
+    });
+  } catch (error) {
+    console.error("Error uploading image:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Get organizations by district
+exports.getOrganizationsByDistrict = async (req, res) => {
+  try {
+    const { stateName, districtName } = req.params;
+    
+    const organizations = await AccelerationForm.find({
+      state: stateName,
+      district: districtName,
+      status: 'approved'
+    }).select('name phone headOfficeAddress district state');
+    
+    res.status(200).json({ 
+      success: true, 
+      data: organizations 
+    });
+  } catch (error) {
+    console.error("Error fetching organizations:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Get state union by ID
+exports.getStateUnionById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const stateUnion = await AccelerationForm.findById(id);
+    
+    if (!stateUnion) {
+      return res.status(404).json({ error: "State union not found" });
+    }
+    
+    res.status(200).json({ success: true, data: stateUnion });
+  } catch (error) {
+    console.error("Error fetching state union:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
 // function generatePassword(state) {
 //   // Your actual password generation logic here
 //    const cleanStateName = state.replace(/\s+/g, '').toLowerCase();

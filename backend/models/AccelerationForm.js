@@ -29,6 +29,10 @@ const accelerationFormSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    district: {
+      type: String,
+      trim: true,
+    },
     password: {
       type: String,
       trim: true,
@@ -70,6 +74,7 @@ const accelerationFormSchema = new mongoose.Schema(
     ],
   galleryImages: [String],
   logo: String,
+  generalSecretaryImage: String,
   },
   {
     timestamps: true,

@@ -52,6 +52,12 @@ export const API_ENDPOINTS = {
   UPDATE_STATE_STATUS: (stateName) => `${API_BASE_URL}/api/states/${encodeURIComponent(stateName)}/status`,
   UPDATE_DISTRICTS: (stateName) => `${API_BASE_URL}/api/states/${encodeURIComponent(stateName)}/districts`,
   DELETE_STATE: (stateName) => `${API_BASE_URL}/api/states/${encodeURIComponent(stateName)}`,
+  
+  // Organization endpoints
+  GET_ORGANIZATIONS_BY_DISTRICT: (stateName, districtName) => `${API_BASE_URL}/api/user/organizations/${encodeURIComponent(stateName)}/${encodeURIComponent(districtName)}`,
+  GET_STATE_UNION: (id) => `${API_BASE_URL}/api/user/stateunions/${id}`,
+  UPDATE_STATE_UNION: (id) => `${API_BASE_URL}/api/user/stateunions/${id}`,
+  UPLOAD_GENERAL_SECRETARY_IMAGE: (id) => `${API_BASE_URL}/api/user/stateunions/${id}/general-secretary-image`,
 };
 
 // Helper function for upload URLs

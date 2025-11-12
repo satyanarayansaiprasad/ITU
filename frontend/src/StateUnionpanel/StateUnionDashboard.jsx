@@ -14,7 +14,7 @@ const StateUnionDashboard = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axios.get(`/api/stateunions/${id}`);
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/user/stateunions/${id}`);
         setProfileData(response.data.data);
         setLoading(false);
       } catch (error) {
@@ -46,7 +46,7 @@ const StateUnionDashboard = () => {
     const values = Object.fromEntries(formData.entries());
     
     try {
-      const response = await axios.patch(`/api/stateunions/${id}`, values);
+      const response = await axios.patch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/user/stateunions/${id}`, values);
       setProfileData(response.data.data);
       alert('Profile updated successfully');
     } catch (error) {
@@ -62,7 +62,7 @@ const StateUnionDashboard = () => {
     formData.append('logo', file);
     
     try {
-      const response = await axios.post(`/api/stateunions/${id}/logo`, formData, {
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/user/stateunions/${id}/logo`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -71,6 +71,26 @@ const StateUnionDashboard = () => {
       alert('Logo uploaded successfully');
     } catch (error) {
       alert('Failed to upload logo');
+    }
+  };
+
+  const handleGeneralSecretaryImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const formData = new FormData();
+    formData.append('generalSecretaryImage', file);
+    
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/user/stateunions/${id}/general-secretary-image`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      setProfileData({ ...profileData, generalSecretaryImage: response.data.generalSecretaryImageUrl });
+      alert('General Secretary image uploaded successfully');
+    } catch (error) {
+      alert('Failed to upload General Secretary image');
     }
   };
 
@@ -227,6 +247,23 @@ const StateUnionDashboard = () => {
                     <img 
                       src={profileData.logo} 
                       alt="Union Logo" 
+                      className="mt-2 h-24" 
+                    />
+                  )}
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">General Secretary Image</label>
+                  <input 
+                    type="file" 
+                    onChange={handleGeneralSecretaryImageUpload} 
+                    accept="image/*" 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  />
+                  {profileData?.generalSecretaryImage && (
+                    <img 
+                      src={profileData.generalSecretaryImage} 
+                      alt="General Secretary" 
                       className="mt-2 h-24" 
                     />
                   )}
