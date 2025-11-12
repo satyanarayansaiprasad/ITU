@@ -11,39 +11,8 @@ const StateUnion = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  // Active states with additional info (can be stored in Firebase later)
-  const activeStatesInfo = {
-    'Maharashtra': { 
-      secretary: 'Shri Rajesh Verma', 
-      unionName: 'Maharashtra Taekwondo Union',
-      established: 1995
-    },
-    'Delhi': { 
-      secretary: 'Shri Vikram Singh', 
-      unionName: 'Delhi Taekwondo Union',
-      established: 1992
-    },
-    'Karnataka': { 
-      secretary: 'Shri Arjun Reddy', 
-      unionName: 'Karnataka Taekwondo Union',
-      established: 1998
-    },
-    'Tamil Nadu': { 
-      secretary: 'Shri Karthik Iyer',
-      unionName: 'Tamil Nadu Taekwondo Union',
-      established: 1996
-    },
-    'Kerala': { 
-      secretary: 'Shri Ajith Nair', 
-      unionName: 'Kerala Taekwondo Union',
-      established: 1994
-    },
-    'Gujarat': { 
-      secretary: 'Shri Jayesh Patel', 
-      unionName: 'Gujarat Taekwondo Union',
-      established: 2001
-    }
-  };
+  // No active states - all coming soon
+  const activeStatesInfo = {};
 
   // Fetch states from Firebase API
   useEffect(() => {
@@ -53,18 +22,17 @@ const StateUnion = () => {
         const response = await axios.get(API_ENDPOINTS.GET_ALL_STATES);
         
         if (response.data.success) {
-          // Map Firebase data to component format
+          // Map Firebase data to component format - all states are coming soon
           const mappedStates = response.data.data.map((state, index) => {
-            const activeInfo = activeStatesInfo[state.name];
             return {
               id: state.id || index + 1,
               name: state.name,
               districts: state.districtCount || state.districts?.length || 0,
               type: state.type,
-              active: state.active || false,
-              secretary: state.secretary || activeInfo?.secretary || null,
-              unionName: state.unionName || activeInfo?.unionName || `${state.name} Taekwondo Union`,
-              established: state.established || activeInfo?.established || null
+              active: false, // All states are coming soon
+              secretary: null,
+              unionName: null,
+              established: null
             };
           });
           setStates(mappedStates);
