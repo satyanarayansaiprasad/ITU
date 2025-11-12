@@ -319,15 +319,24 @@ exports.getUnionTerritories = async (req, res) => {
 /**
  * Create a new state/UT
  * Creates in Firebase if available
+ * Only accepts: name, type, and districts
  */
 exports.createState = async (req, res) => {
   try {
-    const { name, type, districts, active, secretary, unionName, established } = req.body;
+    const { name, type, districts } = req.body;
     
     if (!name || !type) {
       return res.status(400).json({
         success: false,
         error: 'State/UT name and type are required'
+      });
+    }
+    
+    // Validate districts is an array if provided
+    if (districts && !Array.isArray(districts)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Districts must be an array'
       });
     }
     
@@ -350,10 +359,7 @@ exports.createState = async (req, res) => {
           type: type,
           districts: districts || [],
           districtCount: districts?.length || 0,
-          active: active || false,
-          secretary: secretary || null,
-          unionName: unionName || null,
-          established: established || null,
+          active: false, // Default to inactive
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         };
