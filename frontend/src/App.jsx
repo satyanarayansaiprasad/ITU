@@ -13,6 +13,7 @@ import About from './Components/About';
 import Contact from './Components/Contact';
 import StateUnion from './Components/StateUnion';
 import Districts from './Components/Districts';
+import DistrictDetails from './Components/DistrictDetails';
 import Blog from './Components/Blog';
 import Gallery from './Components/Gallery';
 import UnionAbout from './Components/UnionABout';
@@ -55,6 +56,7 @@ const App = () => {
         <Route path="/contact" element={<Contact />} />
         <Route path="/state-union" element={<StateUnion />} />
         <Route path="/state-union/:stateName" element={<Districts />} />
+        <Route path="/state-union/:stateName/district/:districtName" element={<DistrictDetails />} />
         <Route path="/news" element={<Blog />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/forms" element={<Form />} />
