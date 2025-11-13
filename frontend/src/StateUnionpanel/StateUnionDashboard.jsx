@@ -76,6 +76,17 @@ const StateUnionDashboard = () => {
         delete values.establishedYear;
       }
       
+      // Auto-append "UNION" to organization name if not present
+      if (values.organizationName) {
+        const orgName = values.organizationName.trim();
+        if (orgName && !orgName.toUpperCase().endsWith('UNION')) {
+          values.name = `${orgName} UNION`;
+        } else {
+          values.name = orgName;
+        }
+        delete values.organizationName;
+      }
+      
       const response = await axios.patch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/user/stateunions/${userId}`, values);
       // Refresh profile data to ensure all fields are up to date
       const profileResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/user/stateunions/${userId}`);
@@ -203,17 +214,6 @@ const StateUnionDashboard = () => {
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Secretary Name</label>
-                    <input 
-                      type="text" 
-                      name="name" 
-                      defaultValue={profileData?.name} 
-                      required 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    />
-                  </div>
-                  
-                  <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
                     <input 
                       type="text" 
@@ -257,6 +257,19 @@ const StateUnionDashboard = () => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md"
                     />
                   </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Organization Name</label>
+                  <input 
+                    type="text" 
+                    name="organizationName" 
+                    defaultValue={profileData?.name ? profileData.name.replace(/\s+UNION$/i, '') : ''} 
+                    placeholder="e.g., GODDA DISTRICT TAEKWONDO"
+                    required 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">"UNION" will be automatically added at the end</p>
                 </div>
                 
                 <div>
@@ -323,7 +336,7 @@ const StateUnionDashboard = () => {
                   </div>
                   
                   <div className="border-b pb-4">
-                    <p className="text-sm font-medium text-gray-500 mb-1">Secretary Name</p>
+                    <p className="text-sm font-medium text-gray-500 mb-1">Organization Name</p>
                     <p className="text-lg font-semibold">{profileData?.name || 'N/A'}</p>
                   </div>
                   
