@@ -492,7 +492,7 @@ const StateUnionDashboard = () => {
       {/* Sidebar */}
       <div className={`bg-blue-800 text-white transition-all duration-300 ${collapsed ? 'w-20' : 'w-64'} flex flex-col relative`}>
         <div className={`h-16 flex items-center justify-center border-b border-blue-700 ${collapsed ? 'text-xl' : 'text-2xl'} font-bold`}>
-          {collapsed ? 'SU' : 'State Union'}
+          {collapsed ? 'UM' : 'Union member'}
         </div>
         <nav className="flex-1 overflow-y-auto">
           <ul className="space-y-1 p-2">
