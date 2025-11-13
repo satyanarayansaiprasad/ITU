@@ -63,7 +63,7 @@ const DistrictDetails = () => {
       // Store original styles to restore later
       const originalStyles = new Map();
       
-      // Convert all styles to inline RGB
+      // Convert all styles to inline RGB - including gradients and all color properties
       allElements.forEach((el) => {
         try {
           const styles = window.getComputedStyle(el);
@@ -89,28 +89,42 @@ const DistrictDetails = () => {
                 }
                 return `rgb(${r}, ${g}, ${b})`;
               } catch (e) {
-                return colorValue;
+                // Fallback to a safe color
+                return '#000000';
               }
             }
             return colorValue;
           };
           
-          // Convert and store colors
-          const bgColor = convertColor(styles.backgroundColor);
-          const textColor = convertColor(styles.color);
-          const borderColor = convertColor(styles.borderColor);
+          // Convert all color-related properties
+          const colorProperties = [
+            'backgroundColor', 'color', 'borderColor', 'borderTopColor', 
+            'borderRightColor', 'borderBottomColor', 'borderLeftColor',
+            'outlineColor', 'textDecorationColor', 'columnRuleColor'
+          ];
           
-          if (bgColor && bgColor !== styles.backgroundColor) {
-            styleMap.backgroundColor = el.style.backgroundColor;
-            el.style.backgroundColor = bgColor;
-          }
-          if (textColor && textColor !== styles.color) {
-            styleMap.color = el.style.color;
-            el.style.color = textColor;
-          }
-          if (borderColor && borderColor !== styles.borderColor) {
-            styleMap.borderColor = el.style.borderColor;
-            el.style.borderColor = borderColor;
+          colorProperties.forEach(prop => {
+            const value = styles[prop];
+            if (value && typeof value === 'string' && value.toLowerCase().includes('oklch')) {
+              const converted = convertColor(value);
+              if (converted !== value) {
+                styleMap[prop] = el.style[prop] || '';
+                el.style[prop] = converted;
+              }
+            }
+          });
+          
+          // Handle background-image gradients that might contain oklch
+          const bgImage = styles.backgroundImage;
+          if (bgImage && bgImage !== 'none' && bgImage.toLowerCase().includes('oklch')) {
+            // Replace gradient with solid color
+            const bgColor = convertColor(styles.backgroundColor);
+            styleMap.backgroundImage = el.style.backgroundImage || '';
+            el.style.backgroundImage = 'none';
+            if (bgColor) {
+              styleMap.backgroundColor = el.style.backgroundColor || '';
+              el.style.backgroundColor = bgColor;
+            }
           }
           
           if (Object.keys(styleMap).length > 0) {
