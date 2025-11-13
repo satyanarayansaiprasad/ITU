@@ -31,6 +31,11 @@ router.get('/getForm',adminController.getForm);
 
 router.put('/approveForm',adminController.approveForm)
 router.delete('/deleteUser',adminController.deleteUser)
+
+// District and State Head Management
+router.post('/set-district-head', adminController.setDistrictHead);
+router.post('/set-state-head', adminController.setStateHead);
+router.get('/organizations/:stateName', adminController.getOrganizationsByState);
 // router.put('/rejectForm',adminController.rejectForm)
 
 // ========== BLOG ROUTES ==========

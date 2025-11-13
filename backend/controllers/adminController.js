@@ -584,6 +584,133 @@ const mailOptions = {
   }
 };
 
+// Set district head
+exports.setDistrictHead = async (req, res) => {
+  try {
+    const { organizationId, district, state } = req.body;
+    
+    if (!organizationId || !district || !state) {
+      return res.status(400).json({
+        success: false,
+        error: 'Organization ID, district, and state are required'
+      });
+    }
+
+    // First, unset any existing district head for this district
+    await AccelerationForm.updateMany(
+      { 
+        district: district,
+        state: state,
+        isDistrictHead: true
+      },
+      { 
+        isDistrictHead: false 
+      }
+    );
+
+    // Set the new district head
+    const updated = await AccelerationForm.findByIdAndUpdate(
+      organizationId,
+      { isDistrictHead: true },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({
+        success: false,
+        error: 'Organization not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'District head set successfully',
+      data: updated
+    });
+
+  } catch (error) {
+    console.error('Error setting district head:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server error while setting district head',
+      details: error.message
+    });
+  }
+};
+
+// Set state head
+exports.setStateHead = async (req, res) => {
+  try {
+    const { organizationId, state } = req.body;
+    
+    if (!organizationId || !state) {
+      return res.status(400).json({
+        success: false,
+        error: 'Organization ID and state are required'
+      });
+    }
+
+    // First, unset any existing state head for this state
+    await AccelerationForm.updateMany(
+      { 
+        state: state,
+        isStateHead: true
+      },
+      { 
+        isStateHead: false 
+      }
+    );
+
+    // Set the new state head
+    const updated = await AccelerationForm.findByIdAndUpdate(
+      organizationId,
+      { isStateHead: true },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({
+        success: false,
+        error: 'Organization not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'State head set successfully',
+      data: updated
+    });
+
+  } catch (error) {
+    console.error('Error setting state head:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server error while setting state head',
+      details: error.message
+    });
+  }
+};
+
+// Get all organizations by state (for state head selection)
+exports.getOrganizationsByState = async (req, res) => {
+  try {
+    const { stateName } = req.params;
+    
+    const organizations = await AccelerationForm.find({
+      state: stateName,
+      status: 'approved'
+    }).select('name email phone district headOfficeAddress isDistrictHead isStateHead state');
+    
+    res.status(200).json({ 
+      success: true, 
+      data: organizations 
+    });
+  } catch (error) {
+    console.error('Error fetching organizations:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 // Delete user completely from all databases
 exports.deleteUser = async (req, res) => {
   try {

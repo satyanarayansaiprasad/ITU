@@ -25,6 +25,7 @@ import ModernGalleryMng from './AdminPanel/Pages/ModernGalleryMng';
 import Form from './Components/Form';
 import ModernFormSubmissions from './AdminPanel/Pages/ModernFormSubmissions';
 import ModernStatesDistrictsManager from './AdminPanel/Pages/ModernStatesDistrictsManager';
+import HeadsManagement from './AdminPanel/Pages/HeadsManagement';
 import ScrollToTop from './Components/ScrollToTop';
 import AdminLayout from './AdminPanel/Pages/AdminLayout';
 import StateUnionDashboard from './StateUnionpanel/StateUnionDashboard';
@@ -70,6 +71,7 @@ const App = () => {
   <Route path="/admin/gallery" element={<ModernGalleryMng />} />
   <Route path="/admin/form-submissions" element={<ModernFormSubmissions />} />
   <Route path="/admin/states-districts" element={<ModernStatesDistrictsManager />} />
+  <Route path="/admin/heads-management" element={<HeadsManagement />} />
 </Route>
       </Routes>
 

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API_ENDPOINTS } from '../config/api';
+import { Crown, Building2, Phone, MapPin } from 'lucide-react';
 
 const StateUnion = () => {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ const StateUnion = () => {
   const [states, setStates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [stateHeads, setStateHeads] = useState({}); // Map of stateName -> stateHead data
   
   // No active states - all coming soon
   const activeStatesInfo = {};
@@ -36,6 +38,23 @@ const StateUnion = () => {
             };
           });
           setStates(mappedStates);
+          
+          // Fetch state heads for all states
+          const headsMap = {};
+          for (const state of mappedStates) {
+            try {
+              const orgResponse = await axios.get(API_ENDPOINTS.GET_ORGANIZATIONS_BY_STATE(state.name));
+              if (orgResponse.data.success) {
+                const stateHead = orgResponse.data.data.find(org => org.isStateHead);
+                if (stateHead) {
+                  headsMap[state.name] = stateHead;
+                }
+              }
+            } catch (err) {
+              console.error(`Error fetching state head for ${state.name}:`, err);
+            }
+          }
+          setStateHeads(headsMap);
         }
       } catch (err) {
         console.error('Error fetching states:', err);
@@ -219,34 +238,56 @@ const StateUnion = () => {
             </div>
           </motion.div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-            {filteredUpcomingStates.map((state, index) => (
-              <motion.div
-                key={state.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.03 }}
-                className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border-2 border-dashed border-gray-300 p-4 text-center group cursor-pointer"
-                onClick={() => navigate(`/state-union/${state.name}`)}
-              >
-                <div className="text-gray-600 font-medium group-hover:text-orange-600 transition-colors text-sm">
-                  {state.name}
-                </div>
-                <div className="mt-2 text-xs text-gray-500">
-                  {state.districts} {state.districts === 1 ? 'District' : 'Districts'}
-                </div>
-                <div className="mt-2 flex items-center justify-center gap-1">
-                  <span className="inline-block bg-amber-100 text-amber-800 px-2 py-1 rounded text-xs font-medium">
-                    Coming Soon
-                  </span>
-                  {state.type === 'Union Territory' && (
-                    <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
-                      UT
-                    </span>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredUpcomingStates.map((state, index) => {
+              const stateHead = stateHeads[state.name];
+              return (
+                <motion.div
+                  key={state.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.03 }}
+                  className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border-2 border-dashed border-gray-300 p-4 group cursor-pointer"
+                  onClick={() => navigate(`/state-union/${state.name}`)}
+                >
+                  <div className="text-center mb-3">
+                    <div className="text-gray-600 font-medium group-hover:text-orange-600 transition-colors text-sm mb-2">
+                      {state.name}
+                    </div>
+                    <div className="text-xs text-gray-500 mb-2">
+                      {state.districts} {state.districts === 1 ? 'District' : 'Districts'}
+                    </div>
+                    <div className="flex items-center justify-center gap-1">
+                      <span className="inline-block bg-amber-100 text-amber-800 px-2 py-1 rounded text-xs font-medium">
+                        Coming Soon
+                      </span>
+                      {state.type === 'Union Territory' && (
+                        <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
+                          UT
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* State Head Display */}
+                  {stateHead && (
+                    <div className="mt-3 pt-3 border-t border-gray-200">
+                      <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-lg p-3 text-white">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Crown className="w-4 h-4" />
+                          <span className="text-xs font-semibold uppercase">State Head</span>
+                        </div>
+                        <div className="font-bold text-sm mb-1">{stateHead.name}</div>
+                        {stateHead.phone && <div className="text-xs opacity-90">{stateHead.phone}</div>}
+                        {stateHead.headOfficeAddress && (
+                          <div className="text-xs opacity-90 mt-1 line-clamp-2">{stateHead.headOfficeAddress}</div>
+                        )}
+                      </div>
+                    </div>
                   )}
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </div>

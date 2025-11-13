@@ -209,7 +209,16 @@ exports.getOrganizationsByDistrict = async (req, res) => {
       state: stateName,
       district: districtName,
       status: 'approved'
-    }).select('name phone headOfficeAddress district state');
+    }).select('name phone headOfficeAddress district state isDistrictHead isStateHead');
+    
+    // Sort: district head first, then state head, then others
+    organizations.sort((a, b) => {
+      if (a.isDistrictHead && !b.isDistrictHead) return -1;
+      if (!a.isDistrictHead && b.isDistrictHead) return 1;
+      if (a.isStateHead && !b.isStateHead) return -1;
+      if (!a.isStateHead && b.isStateHead) return 1;
+      return 0;
+    });
     
     res.status(200).json({ 
       success: true, 

@@ -18,6 +18,9 @@ export const API_ENDPOINTS = {
   GET_FORM: `${API_BASE_URL}/api/admin/getForm`,
   APPROVE_FORM: `${API_BASE_URL}/api/admin/approveForm`,
   DELETE_USER: `${API_BASE_URL}/api/admin/deleteUser`,
+  SET_DISTRICT_HEAD: `${API_BASE_URL}/api/admin/set-district-head`,
+  SET_STATE_HEAD: `${API_BASE_URL}/api/admin/set-state-head`,
+  GET_ORGANIZATIONS_BY_STATE: (stateName) => `${API_BASE_URL}/api/admin/organizations/${encodeURIComponent(stateName)}`,
   
   // User endpoints
   CONTACT_US: `${API_BASE_URL}/api/user/contactus`,

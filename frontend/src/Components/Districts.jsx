@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API_ENDPOINTS } from '../config/api';
-import { Building2, Phone, MapPin } from 'lucide-react';
+import { Building2, Phone, MapPin, Crown, Award } from 'lucide-react';
 
 const Districts = () => {
   const { stateName } = useParams();
@@ -116,7 +116,7 @@ const Districts = () => {
           </button>
           <h1 className="text-4xl font-bold text-gray-800 mb-4">{state.stateName || stateName} Districts</h1>
           <div className="flex items-center justify-center gap-3 mb-2">
-            <p className="text-xl text-gray-600">Total Districts: {state.districts.length}</p>
+          <p className="text-xl text-gray-600">Total Districts: {state.districts.length}</p>
             {state.type === 'Union Territory' && (
               <span className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
                 Union Territory
@@ -139,10 +139,33 @@ const Districts = () => {
                   <div className="text-green-700 font-medium text-sm mb-2 text-center">{district}</div>
                   <span className="text-xs bg-green-500 text-white px-2 py-1 rounded mb-3 inline-block">Active</span>
                   
-                  {/* Organization Details */}
-                  {organizationsByDistrict[district] && organizationsByDistrict[district].length > 0 && (
+                  {/* District Head - Show First */}
+                  {organizationsByDistrict[district] && organizationsByDistrict[district].find(org => org.isDistrictHead) && (
+                    <div className="mt-3 mb-3 border-t border-green-200 pt-3">
+                      <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-3 text-white">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Award className="w-4 h-4" />
+                          <span className="text-xs font-semibold uppercase">District Head</span>
+                        </div>
+                        {(() => {
+                          const head = organizationsByDistrict[district].find(org => org.isDistrictHead);
+                          return (
+                            <>
+                              <div className="font-bold text-sm mb-1">{head.name}</div>
+                              {head.phone && <div className="text-xs opacity-90">{head.phone}</div>}
+                              {head.headOfficeAddress && <div className="text-xs opacity-90 mt-1">{head.headOfficeAddress}</div>}
+                            </>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Other Organizations */}
+                  {organizationsByDistrict[district] && organizationsByDistrict[district].filter(org => !org.isDistrictHead).length > 0 && (
                     <div className="mt-3 space-y-2 border-t border-green-200 pt-3">
-                      {organizationsByDistrict[district].map((org, idx) => (
+                      <p className="text-xs font-semibold text-gray-600 mb-2">Other Organizations:</p>
+                      {organizationsByDistrict[district].filter(org => !org.isDistrictHead).map((org, idx) => (
                         <div key={idx} className="bg-white rounded p-2 text-xs">
                           <div className="flex items-start gap-2 mb-1">
                             <Building2 className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
@@ -181,10 +204,33 @@ const Districts = () => {
                   <div className="text-gray-600 font-medium text-sm mb-2 text-center">{district}</div>
                   <span className="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded mb-3 inline-block">Coming Soon</span>
                   
-                  {/* Organization Details */}
-                  {organizationsByDistrict[district] && organizationsByDistrict[district].length > 0 && (
+                  {/* District Head - Show First */}
+                  {organizationsByDistrict[district] && organizationsByDistrict[district].find(org => org.isDistrictHead) && (
+                    <div className="mt-3 mb-3 border-t border-amber-200 pt-3">
+                      <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg p-3 text-white">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Award className="w-4 h-4" />
+                          <span className="text-xs font-semibold uppercase">District Head</span>
+                        </div>
+                        {(() => {
+                          const head = organizationsByDistrict[district].find(org => org.isDistrictHead);
+                          return (
+                            <>
+                              <div className="font-bold text-sm mb-1">{head.name}</div>
+                              {head.phone && <div className="text-xs opacity-90">{head.phone}</div>}
+                              {head.headOfficeAddress && <div className="text-xs opacity-90 mt-1">{head.headOfficeAddress}</div>}
+                            </>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Other Organizations */}
+                  {organizationsByDistrict[district] && organizationsByDistrict[district].filter(org => !org.isDistrictHead).length > 0 && (
                     <div className="mt-3 space-y-2 border-t border-amber-200 pt-3">
-                      {organizationsByDistrict[district].map((org, idx) => (
+                      <p className="text-xs font-semibold text-gray-600 mb-2">Other Organizations:</p>
+                      {organizationsByDistrict[district].filter(org => !org.isDistrictHead).map((org, idx) => (
                         <div key={idx} className="bg-gray-50 rounded p-2 text-xs">
                           <div className="flex items-start gap-2 mb-1">
                             <Building2 className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />

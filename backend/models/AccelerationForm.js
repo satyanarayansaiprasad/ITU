@@ -75,6 +75,14 @@ const accelerationFormSchema = new mongoose.Schema(
   galleryImages: [String],
   logo: String,
   generalSecretaryImage: String,
+  isDistrictHead: {
+    type: Boolean,
+    default: false
+  },
+  isStateHead: {
+    type: Boolean,
+    default: false
+  },
   },
   {
     timestamps: true,

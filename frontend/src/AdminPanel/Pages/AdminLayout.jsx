@@ -12,6 +12,7 @@ import {
   ChevronRight,
   LogOut,
   MapPin,
+  Crown,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -29,6 +30,7 @@ const AdminLayout = () => {
     { title: "Gallery Management", icon: <GalleryVerticalEnd className="w-5 h-5" />, path: "/admin/gallery" },
     { title: "Form Submissions", icon: <FilePlus className="w-5 h-5" />, path: "/admin/form-submissions" },
     { title: "States & Districts", icon: <MapPin className="w-5 h-5" />, path: "/admin/states-districts" },
+    { title: "District & State Heads", icon: <Crown className="w-5 h-5" />, path: "/admin/heads-management" },
   ];
 
   const handleLogout = () => {
