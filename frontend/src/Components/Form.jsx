@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { API_ENDPOINTS } from "../config/api";
@@ -21,9 +21,58 @@ const Form = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [formType, setFormType] = useState(null); // 'acceleration' or 'player'
+  const [states, setStates] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [loadingDistricts, setLoadingDistricts] = useState(false);
+
+  // Fetch states on component mount
+  useEffect(() => {
+    const fetchStates = async () => {
+      try {
+        const response = await axios.get(API_ENDPOINTS.GET_ALL_STATES);
+        if (response.data.success) {
+          setStates(response.data.data);
+        }
+      } catch (err) {
+        console.error('Error fetching states:', err);
+      }
+    };
+    fetchStates();
+  }, []);
+
+  // Fetch districts when state changes (only for affiliation form)
+  useEffect(() => {
+    const fetchDistricts = async () => {
+      if (formType === 'acceleration' && formData.state) {
+        setLoadingDistricts(true);
+        try {
+          const response = await axios.get(API_ENDPOINTS.GET_DISTRICTS(formData.state));
+          if (response.data.success) {
+            setDistricts(response.data.data.districts || []);
+          }
+        } catch (err) {
+          console.error('Error fetching districts:', err);
+          setDistricts([]);
+        } finally {
+          setLoadingDistricts(false);
+        }
+      } else {
+        setDistricts([]);
+      }
+    };
+    fetchDistricts();
+  }, [formData.state, formType]);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData(prev => {
+      const newData = { ...prev, [name]: value };
+      // Reset district when state changes
+      if (name === 'state') {
+        newData.district = '';
+      }
+      return newData;
+    });
     setError(null);
   };
 
@@ -143,19 +192,21 @@ const Form = () => {
   );
 
   const renderFormFields = () => {
+    // Reordered fields: name, email, phone, state, district (for affiliation), address
     const commonFields = [
       { name: "name", label: "Full Name", type: "text" },
       { name: "email", label: "Email Address", type: "email" },
       { name: "phone", label: "Phone Number", type: "tel" },
-      { name: "state", label: "State", type: "text" },
-      { name: "address", label: "Address", type: "textarea" }
+      { name: "state", label: "State", type: "select", options: states.map(s => ({ value: s.name, label: s.name })) },
     ];
 
     const affiliationSpecificFields = [
-      { name: "district", label: "District", type: "text" }
+      { name: "district", label: "District", type: "select", options: districts.map(d => ({ value: d, label: d })), loading: loadingDistricts },
+      { name: "address", label: "Address", type: "textarea" }
     ];
 
     const playerSpecificFields = [
+      { name: "address", label: "Address", type: "textarea" },
       { name: "dob", label: "Date of Birth", type: "date" },
       { name: "beltLevel", label: "Belt Level", type: "text" },
       { name: "yearsOfExperience", label: "Years of Experience", type: "number" }
@@ -212,10 +263,23 @@ const Form = () => {
                 variants={inputVariants} 
                 className="relative"
               >
-                <div className="absolute top-1/2 -translate-y-1/2 left-3">
+                <div className="absolute top-1/2 -translate-y-1/2 left-3 z-10">
                   {iconMap[field.name]}
                 </div>
-                {field.type === "textarea" ? (
+                {field.type === "select" ? (
+                  <select
+                    {...commonProps}
+                    className={`${commonProps.className} appearance-none bg-white cursor-pointer`}
+                    disabled={field.loading}
+                  >
+                    <option value="">{field.loading ? `Loading ${field.label}...` : `Select ${field.label}`}</option>
+                    {field.options && field.options.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                ) : field.type === "textarea" ? (
                   <textarea
                     placeholder={field.label}
                     rows={3}

@@ -39,21 +39,29 @@ const StateUnion = () => {
           });
           setStates(mappedStates);
           
-          // Fetch state heads for all states
+          // Fetch state heads for all states in parallel for better performance
           const headsMap = {};
-          for (const state of mappedStates) {
+          const stateHeadPromises = mappedStates.map(async (state) => {
             try {
               const orgResponse = await axios.get(API_ENDPOINTS.GET_ORGANIZATIONS_BY_STATE(state.name));
               if (orgResponse.data.success) {
                 const stateHead = orgResponse.data.data.find(org => org.isStateHead);
                 if (stateHead) {
-                  headsMap[state.name] = stateHead;
+                  return { stateName: state.name, stateHead };
                 }
               }
             } catch (err) {
               console.error(`Error fetching state head for ${state.name}:`, err);
             }
-          }
+            return null;
+          });
+          
+          const results = await Promise.all(stateHeadPromises);
+          results.forEach(result => {
+            if (result && result.stateHead) {
+              headsMap[result.stateName] = result.stateHead;
+            }
+          });
           setStateHeads(headsMap);
         }
       } catch (err) {
