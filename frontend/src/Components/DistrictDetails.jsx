@@ -383,21 +383,6 @@ const DistrictDetails = () => {
                     </div>
                   )}
 
-                  {/* Address - Only show if not already shown in header */}
-                  {(selectedUnion.headOfficeAddress || selectedUnion.address) && (
-                    <div className="flex items-start gap-3 p-5 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-gray-200 shadow-sm hover:shadow-md transition-shadow md:col-span-2">
-                      <div className="bg-gray-200 rounded-lg p-2">
-                        <MapPin className="w-6 h-6 text-gray-700" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">Head Office Address</p>
-                        <p className="text-lg font-semibold text-gray-800 leading-relaxed">
-                          {selectedUnion.headOfficeAddress || selectedUnion.address}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
                   {/* Established Year */}
                   {selectedUnion.establishedDate && (
                     <div className="flex items-start gap-3 p-5 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl border-2 border-yellow-200 shadow-sm hover:shadow-md transition-shadow">
