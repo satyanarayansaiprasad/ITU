@@ -134,6 +134,55 @@ const HeadsManagement = () => {
     }
   };
 
+  const handleRemoveDistrictHead = async (organizationId, district, state) => {
+    if (!window.confirm(`Are you sure you want to remove this organization as the head of ${district} district?`)) {
+      return;
+    }
+
+    try {
+      setActionLoading(`remove-district-${organizationId}`);
+      const response = await axios.post(API_ENDPOINTS.REMOVE_DISTRICT_HEAD, {
+        organizationId,
+        district,
+        state
+      });
+
+      if (response.data.success) {
+        showNotification(`District head removed successfully for ${district}`, 'success');
+        fetchOrganizations(state);
+      }
+    } catch (error) {
+      console.error('Error removing district head:', error);
+      showNotification(error.response?.data?.error || 'Failed to remove district head', 'error');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleRemoveStateHead = async (organizationId, state) => {
+    if (!window.confirm(`Are you sure you want to remove this organization as the head of ${state} state?`)) {
+      return;
+    }
+
+    try {
+      setActionLoading(`remove-state-${organizationId}`);
+      const response = await axios.post(API_ENDPOINTS.REMOVE_STATE_HEAD, {
+        organizationId,
+        state
+      });
+
+      if (response.data.success) {
+        showNotification(`State head removed successfully for ${state}`, 'success');
+        fetchOrganizations(state);
+      }
+    } catch (error) {
+      console.error('Error removing state head:', error);
+      showNotification(error.response?.data?.error || 'Failed to remove state head', 'error');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   const filteredOrganizations = organizations.filter(org => {
     const matchesSearch = 
       org.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -329,7 +378,22 @@ const HeadsManagement = () => {
                 </div>
 
                 <div className="flex gap-2 mt-4">
-                  {!org.isDistrictHead && org.district && (
+                  {org.isDistrictHead && org.district ? (
+                    <button
+                      onClick={() => handleRemoveDistrictHead(org._id, org.district, org.state)}
+                      disabled={actionLoading === `remove-district-${org._id}`}
+                      className="flex-1 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 text-sm flex items-center justify-center gap-1"
+                    >
+                      {actionLoading === `remove-district-${org._id}` ? (
+                        <Loader className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <>
+                          <X className="w-4 h-4" />
+                          Remove District Head
+                        </>
+                      )}
+                    </button>
+                  ) : org.district ? (
                     <button
                       onClick={() => handleSetDistrictHead(org._id, org.district, org.state)}
                       disabled={actionLoading === org._id}
@@ -344,8 +408,23 @@ const HeadsManagement = () => {
                         </>
                       )}
                     </button>
-                  )}
-                  {!org.isStateHead && (
+                  ) : null}
+                  {org.isStateHead ? (
+                    <button
+                      onClick={() => handleRemoveStateHead(org._id, org.state)}
+                      disabled={actionLoading === `remove-state-${org._id}`}
+                      className="flex-1 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 text-sm flex items-center justify-center gap-1"
+                    >
+                      {actionLoading === `remove-state-${org._id}` ? (
+                        <Loader className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <>
+                          <X className="w-4 h-4" />
+                          Remove State Head
+                        </>
+                      )}
+                    </button>
+                  ) : (
                     <button
                       onClick={() => handleSetStateHead(org._id, org.state)}
                       disabled={actionLoading === `state-${org._id}`}

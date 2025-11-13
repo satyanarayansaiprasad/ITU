@@ -35,6 +35,8 @@ router.delete('/deleteUser',adminController.deleteUser)
 // District and State Head Management
 router.post('/set-district-head', adminController.setDistrictHead);
 router.post('/set-state-head', adminController.setStateHead);
+router.post('/remove-district-head', adminController.removeDistrictHead);
+router.post('/remove-state-head', adminController.removeStateHead);
 router.get('/organizations/:stateName', adminController.getOrganizationsByState);
 // router.put('/rejectForm',adminController.rejectForm)
 

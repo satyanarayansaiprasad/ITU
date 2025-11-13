@@ -231,7 +231,7 @@ exports.getOrganizationsByDistrict = async (req, res) => {
       state: stateName,
       district: districtName,
       status: 'approved'
-    }).select('name email phone address district state isDistrictHead isStateHead secretaryName presidentName generalSecretaryImage establishedDate headOfficeAddress contactEmail contactPhone officialWebsite aboutUnion logo');
+    }).select('name email phone address district state isDistrictHead isStateHead secretaryName presidentName generalSecretaryImage establishedDate headOfficeAddress contactEmail contactPhone officialWebsite aboutUnion logo').lean();
     
     // Sort: district head first, then state head, then others
     organizations.sort((a, b) => {

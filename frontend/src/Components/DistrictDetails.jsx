@@ -28,9 +28,8 @@ const DistrictDetails = () => {
           const head = organizations.find(org => org.isDistrictHead);
           setDistrictHead(head || null);
           
-          // Get other unions (excluding district head)
-          const otherUnions = organizations.filter(org => !org.isDistrictHead);
-          setUnions(otherUnions);
+          // Get all unions (including district head in the list)
+          setUnions(organizations);
         }
       } catch (error) {
         console.error('Error fetching district data:', error);
@@ -220,7 +219,15 @@ const DistrictDetails = () => {
                           </div>
                         )}
                         <div className="flex-1">
-                          <h3 className="font-bold text-lg text-gray-800 mb-1">{union.name}</h3>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-bold text-lg text-gray-800">{union.name}</h3>
+                            {union.isDistrictHead && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-500 text-white text-xs font-semibold rounded-full">
+                                <Award className="w-3 h-3" />
+                                District Head
+                              </span>
+                            )}
+                          </div>
                           {union.phone && (
                             <p className="text-sm text-gray-600 flex items-center gap-1">
                               <Phone className="w-4 h-4" />
@@ -317,13 +324,13 @@ const DistrictDetails = () => {
                       {selectedUnion.name}
                     </h3>
                     {selectedUnion.district && selectedUnion.state && (
-                      <div className="space-y-1">
+                      <div className="space-y-2">
                         <p className="text-base text-gray-600 font-medium">
                           {selectedUnion.district}, {selectedUnion.state}
                         </p>
-                        {selectedUnion.headOfficeAddress && (
-                          <p className="text-sm text-gray-500">
-                            {selectedUnion.headOfficeAddress}
+                        {(selectedUnion.headOfficeAddress || selectedUnion.address) && (
+                          <p className="text-base text-gray-700 font-semibold leading-relaxed mt-1">
+                            📍 {selectedUnion.headOfficeAddress || selectedUnion.address}
                           </p>
                         )}
                       </div>
@@ -376,15 +383,17 @@ const DistrictDetails = () => {
                     </div>
                   )}
 
-                  {/* Address */}
-                  {selectedUnion.headOfficeAddress && (
+                  {/* Address - Only show if not already shown in header */}
+                  {(selectedUnion.headOfficeAddress || selectedUnion.address) && (
                     <div className="flex items-start gap-3 p-5 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-gray-200 shadow-sm hover:shadow-md transition-shadow md:col-span-2">
                       <div className="bg-gray-200 rounded-lg p-2">
                         <MapPin className="w-6 h-6 text-gray-700" />
                       </div>
                       <div className="flex-1">
-                        <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">Address</p>
-                        <p className="text-lg font-semibold text-gray-800 leading-relaxed">{selectedUnion.headOfficeAddress}</p>
+                        <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">Head Office Address</p>
+                        <p className="text-lg font-semibold text-gray-800 leading-relaxed">
+                          {selectedUnion.headOfficeAddress || selectedUnion.address}
+                        </p>
                       </div>
                     </div>
                   )}

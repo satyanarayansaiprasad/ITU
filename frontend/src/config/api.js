@@ -20,6 +20,8 @@ export const API_ENDPOINTS = {
   DELETE_USER: `${API_BASE_URL}/api/admin/deleteUser`,
   SET_DISTRICT_HEAD: `${API_BASE_URL}/api/admin/set-district-head`,
   SET_STATE_HEAD: `${API_BASE_URL}/api/admin/set-state-head`,
+  REMOVE_DISTRICT_HEAD: `${API_BASE_URL}/api/admin/remove-district-head`,
+  REMOVE_STATE_HEAD: `${API_BASE_URL}/api/admin/remove-state-head`,
   GET_ORGANIZATIONS_BY_STATE: (stateName) => `${API_BASE_URL}/api/admin/organizations/${encodeURIComponent(stateName)}`,
   
   // User endpoints

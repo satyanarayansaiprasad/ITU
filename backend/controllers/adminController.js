@@ -691,6 +691,90 @@ exports.setStateHead = async (req, res) => {
   }
 };
 
+// Remove district head
+exports.removeDistrictHead = async (req, res) => {
+  try {
+    const { organizationId, district, state } = req.body;
+    
+    if (!organizationId || !district || !state) {
+      return res.status(400).json({
+        success: false,
+        error: 'Organization ID, district, and state are required'
+      });
+    }
+
+    // Remove district head designation
+    const updated = await AccelerationForm.findByIdAndUpdate(
+      organizationId,
+      { isDistrictHead: false },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({
+        success: false,
+        error: 'Organization not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'District head removed successfully',
+      data: updated
+    });
+
+  } catch (error) {
+    console.error('Error removing district head:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server error while removing district head',
+      details: error.message
+    });
+  }
+};
+
+// Remove state head
+exports.removeStateHead = async (req, res) => {
+  try {
+    const { organizationId, state } = req.body;
+    
+    if (!organizationId || !state) {
+      return res.status(400).json({
+        success: false,
+        error: 'Organization ID and state are required'
+      });
+    }
+
+    // Remove state head designation
+    const updated = await AccelerationForm.findByIdAndUpdate(
+      organizationId,
+      { isStateHead: false },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({
+        success: false,
+        error: 'Organization not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'State head removed successfully',
+      data: updated
+    });
+
+  } catch (error) {
+    console.error('Error removing state head:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server error while removing state head',
+      details: error.message
+    });
+  }
+};
+
 // Get all organizations by state (for state head selection)
 exports.getOrganizationsByState = async (req, res) => {
   try {
