@@ -117,7 +117,29 @@ exports.loginStateUnion = async (req, res) => {
 exports.updateStateUnionProfile = async (req, res) => {
   try {
     const { id } = req.params;
-    const updateData = req.body;
+    const updateData = { ...req.body };
+
+    // Prevent updating state and district via this endpoint
+    delete updateData.state;
+    delete updateData.district;
+
+    // Clean up any undefined or empty string values to keep DB clean
+    Object.keys(updateData).forEach(key => {
+      if (updateData[key] === '' || updateData[key] === undefined) {
+        delete updateData[key];
+      }
+    });
+
+    // Ensure establishedDate is properly formatted if provided
+    if (updateData.establishedDate) {
+      // If it's already a date string, ensure it's in correct format
+      if (typeof updateData.establishedDate === 'string' && updateData.establishedDate.includes('-')) {
+        // Already formatted, keep as is
+      } else {
+        // Convert to Date object if needed
+        updateData.establishedDate = new Date(updateData.establishedDate);
+      }
+    }
     
     const updatedProfile = await AccelerationForm.findByIdAndUpdate(
       id,
