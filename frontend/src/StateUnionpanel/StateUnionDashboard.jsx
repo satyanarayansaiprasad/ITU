@@ -280,19 +280,25 @@ const StateUnionDashboard = () => {
                     accept="image/*" 
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   />
-                  {(logoPreview || profileData?.logo) && (
-                    <div className="mt-2">
+                  <div className="mt-2">
+                    {logoPreview ? (
                       <img 
-                        src={logoPreview || getImageUrl(profileData.logo)} 
+                        src={logoPreview} 
+                        alt="Logo Preview" 
+                        className="h-32 w-auto rounded-lg object-cover border-2 border-blue-500 shadow-md" 
+                      />
+                    ) : profileData?.logo ? (
+                      <img 
+                        src={getImageUrl(profileData.logo)} 
                         alt="Union Logo" 
-                        className="h-24 w-auto rounded-lg object-cover border-2 border-gray-300" 
+                        className="h-32 w-auto rounded-lg object-cover border-2 border-gray-300" 
                         onError={(e) => {
                           console.error('Logo image error:', e.target.src);
                           e.target.style.display = 'none';
                         }}
                       />
-                    </div>
-                  )}
+                    ) : null}
+                  </div>
                 </div>
                 
                 <div>
@@ -303,19 +309,25 @@ const StateUnionDashboard = () => {
                     accept="image/*" 
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   />
-                  {(secretaryImagePreview || profileData?.generalSecretaryImage) && (
-                    <div className="mt-2">
+                  <div className="mt-2">
+                    {secretaryImagePreview ? (
                       <img 
-                        src={secretaryImagePreview || getImageUrl(profileData.generalSecretaryImage)} 
+                        src={secretaryImagePreview} 
+                        alt="Secretary Preview" 
+                        className="h-32 w-auto rounded-lg object-cover border-2 border-blue-500 shadow-md" 
+                      />
+                    ) : profileData?.generalSecretaryImage ? (
+                      <img 
+                        src={getImageUrl(profileData.generalSecretaryImage)} 
                         alt="Secretary" 
-                        className="h-24 w-auto rounded-lg object-cover border-2 border-gray-300" 
+                        className="h-32 w-auto rounded-lg object-cover border-2 border-gray-300" 
                         onError={(e) => {
                           console.error('Secretary image error:', e.target.src);
                           e.target.style.display = 'none';
                         }}
                       />
-                    </div>
-                  )}
+                    ) : null}
+                  </div>
                 </div>
                 
                 <div className="flex gap-3">
