@@ -164,20 +164,28 @@ exports.uploadLogo = async (req, res) => {
     const { id } = req.params;
     const file = req.file;
     
+    console.log('Upload Logo Request:', { id, file: file ? { filename: file.filename, size: file.size, mimetype: file.mimetype } : null });
+    
     if (!file) {
-      return res.status(400).json({ error: "No file uploaded" });
+      console.error('No file received in uploadLogo');
+      return res.status(400).json({ success: false, error: "No file uploaded" });
     }
     
     const imageUrl = `uploads/${file.filename}`;
+    console.log('Saving logo to database:', { id, imageUrl });
+    
     const updatedProfile = await AccelerationForm.findByIdAndUpdate(
       id,
       { logo: imageUrl },
-      { new: true }
+      { new: true, runValidators: true }
     );
     
     if (!updatedProfile) {
-      return res.status(404).json({ error: "State union not found" });
+      console.error('State union not found:', id);
+      return res.status(404).json({ success: false, error: "State union not found" });
     }
+    
+    console.log('Logo saved successfully:', { id, logo: updatedProfile.logo });
     
     res.status(200).json({ 
       success: true, 
@@ -186,7 +194,7 @@ exports.uploadLogo = async (req, res) => {
     });
   } catch (error) {
     console.error("Error uploading logo:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ success: false, error: "Internal server error", details: error.message });
   }
 };
 
@@ -196,20 +204,28 @@ exports.uploadGeneralSecretaryImage = async (req, res) => {
     const { id } = req.params;
     const file = req.file;
     
+    console.log('Upload General Secretary Image Request:', { id, file: file ? { filename: file.filename, size: file.size, mimetype: file.mimetype } : null });
+    
     if (!file) {
-      return res.status(400).json({ error: "No file uploaded" });
+      console.error('No file received in uploadGeneralSecretaryImage');
+      return res.status(400).json({ success: false, error: "No file uploaded" });
     }
     
     const imageUrl = `uploads/${file.filename}`;
+    console.log('Saving general secretary image to database:', { id, imageUrl });
+    
     const updatedProfile = await AccelerationForm.findByIdAndUpdate(
       id,
       { generalSecretaryImage: imageUrl },
-      { new: true }
+      { new: true, runValidators: true }
     );
     
     if (!updatedProfile) {
-      return res.status(404).json({ error: "State union not found" });
+      console.error('State union not found:', id);
+      return res.status(404).json({ success: false, error: "State union not found" });
     }
+    
+    console.log('General secretary image saved successfully:', { id, generalSecretaryImage: updatedProfile.generalSecretaryImage });
     
     res.status(200).json({ 
       success: true, 
@@ -217,8 +233,8 @@ exports.uploadGeneralSecretaryImage = async (req, res) => {
       data: updatedProfile 
     });
   } catch (error) {
-    console.error("Error uploading image:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("Error uploading general secretary image:", error);
+    res.status(500).json({ success: false, error: "Internal server error", details: error.message });
   }
 };
 

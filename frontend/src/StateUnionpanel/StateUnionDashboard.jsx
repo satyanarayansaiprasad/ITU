@@ -118,14 +118,20 @@ const StateUnionDashboard = () => {
           'Content-Type': 'multipart/form-data'
         }
       });
-      // Refresh profile data to get updated image URL
-      const profileResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/user/stateunions/${userId}`);
-      setProfileData(profileResponse.data.data);
-      setLogoPreview(null);
-      alert('Logo uploaded successfully');
+      
+      if (response.data.success) {
+        // Refresh profile data to get updated image URL
+        const profileResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/user/stateunions/${userId}`);
+        setProfileData(profileResponse.data.data);
+        setLogoPreview(null);
+        alert('Logo uploaded successfully');
+      } else {
+        throw new Error(response.data.error || 'Upload failed');
+      }
     } catch (error) {
+      console.error('Logo upload error:', error);
       setLogoPreview(null);
-      alert('Failed to upload logo');
+      alert(`Failed to upload logo: ${error.response?.data?.error || error.message || 'Unknown error'}`);
     }
   };
 
@@ -149,14 +155,20 @@ const StateUnionDashboard = () => {
           'Content-Type': 'multipart/form-data'
         }
       });
-      // Refresh profile data to get updated image URL
-      const profileResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/user/stateunions/${userId}`);
-      setProfileData(profileResponse.data.data);
-      setSecretaryImagePreview(null);
-      alert('Secretary image uploaded successfully');
+      
+      if (response.data.success) {
+        // Refresh profile data to get updated image URL
+        const profileResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/user/stateunions/${userId}`);
+        setProfileData(profileResponse.data.data);
+        setSecretaryImagePreview(null);
+        alert('Secretary image uploaded successfully');
+      } else {
+        throw new Error(response.data.error || 'Upload failed');
+      }
     } catch (error) {
+      console.error('Secretary image upload error:', error);
       setSecretaryImagePreview(null);
-      alert('Failed to upload Secretary image');
+      alert(`Failed to upload Secretary image: ${error.response?.data?.error || error.message || 'Unknown error'}`);
     }
   };
 
