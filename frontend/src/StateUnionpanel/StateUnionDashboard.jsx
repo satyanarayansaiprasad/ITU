@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { GET_UPLOAD_URL, API_BASE_URL } from '../config/api';
 
 const StateUnionDashboard = () => {
   const [collapsed, setCollapsed] = useState(false);
