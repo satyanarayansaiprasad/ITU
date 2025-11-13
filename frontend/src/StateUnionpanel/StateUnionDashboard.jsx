@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { GET_UPLOAD_URL, API_BASE_URL } from '../config/api';
 
 const StateUnionDashboard = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -9,8 +10,18 @@ const StateUnionDashboard = () => {
   const [activeMenu, setActiveMenu] = useState('profile');
   const [players, setPlayers] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
+  const [logoPreview, setLogoPreview] = useState(null);
+  const [secretaryImagePreview, setSecretaryImagePreview] = useState(null);
   const { id: paramId } = useParams();
   const navigate = useNavigate();
+  
+  // Helper function to get full image URL
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith('http')) return imagePath;
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+    return `${baseUrl}/${imagePath}`;
+  };
   
   // Get user ID from URL params or localStorage
   const userId = paramId || localStorage.getItem('stateUnionId');
@@ -67,7 +78,9 @@ const StateUnionDashboard = () => {
       }
       
       const response = await axios.patch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/user/stateunions/${userId}`, values);
-      setProfileData(response.data.data);
+      // Refresh profile data to ensure all fields are up to date
+      const profileResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/user/stateunions/${userId}`);
+      setProfileData(profileResponse.data.data);
       setIsEditing(false);
       alert('Profile updated successfully');
     } catch (error) {
@@ -79,6 +92,13 @@ const StateUnionDashboard = () => {
     const file = e.target.files[0];
     if (!file) return;
     
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setLogoPreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+    
     const formData = new FormData();
     formData.append('logo', file);
     
@@ -88,9 +108,13 @@ const StateUnionDashboard = () => {
           'Content-Type': 'multipart/form-data'
         }
       });
-      setProfileData({ ...profileData, logo: response.data.logoUrl });
+      // Refresh profile data to get updated image URL
+      const profileResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/user/stateunions/${userId}`);
+      setProfileData(profileResponse.data.data);
+      setLogoPreview(null);
       alert('Logo uploaded successfully');
     } catch (error) {
+      setLogoPreview(null);
       alert('Failed to upload logo');
     }
   };
@@ -98,6 +122,13 @@ const StateUnionDashboard = () => {
   const handleGeneralSecretaryImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setSecretaryImagePreview(reader.result);
+    };
+    reader.readAsDataURL(file);
     
     const formData = new FormData();
     formData.append('generalSecretaryImage', file);
@@ -108,9 +139,13 @@ const StateUnionDashboard = () => {
           'Content-Type': 'multipart/form-data'
         }
       });
-      setProfileData({ ...profileData, generalSecretaryImage: response.data.generalSecretaryImageUrl });
+      // Refresh profile data to get updated image URL
+      const profileResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/user/stateunions/${userId}`);
+      setProfileData(profileResponse.data.data);
+      setSecretaryImagePreview(null);
       alert('Secretary image uploaded successfully');
     } catch (error) {
+      setSecretaryImagePreview(null);
       alert('Failed to upload Secretary image');
     }
   };
@@ -233,11 +268,11 @@ const StateUnionDashboard = () => {
                     accept="image/*" 
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   />
-                  {profileData?.logo && (
+                  {(logoPreview || profileData?.logo) && (
                     <img 
-                      src={profileData.logo} 
+                      src={logoPreview || getImageUrl(profileData.logo)} 
                       alt="Union Logo" 
-                      className="mt-2 h-24" 
+                      className="mt-2 h-24 rounded-lg object-cover" 
                     />
                   )}
                 </div>
@@ -250,11 +285,11 @@ const StateUnionDashboard = () => {
                     accept="image/*" 
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   />
-                  {profileData?.generalSecretaryImage && (
+                  {(secretaryImagePreview || profileData?.generalSecretaryImage) && (
                     <img 
-                      src={profileData.generalSecretaryImage} 
+                      src={secretaryImagePreview || getImageUrl(profileData.generalSecretaryImage)} 
                       alt="Secretary" 
-                      className="mt-2 h-24" 
+                      className="mt-2 h-24 rounded-lg object-cover" 
                     />
                   )}
                 </div>
@@ -327,9 +362,12 @@ const StateUnionDashboard = () => {
                   <div>
                     <p className="text-sm font-medium text-gray-500 mb-2">Logo</p>
                     <img 
-                      src={profileData.logo} 
+                      src={getImageUrl(profileData.logo)} 
                       alt="Union Logo" 
-                      className="h-32 rounded-lg shadow-md" 
+                      className="h-32 rounded-lg shadow-md object-cover" 
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
                     />
                   </div>
                 )}
@@ -338,9 +376,12 @@ const StateUnionDashboard = () => {
                   <div>
                     <p className="text-sm font-medium text-gray-500 mb-2">Secretary Image</p>
                     <img 
-                      src={profileData.generalSecretaryImage} 
+                      src={getImageUrl(profileData.generalSecretaryImage)} 
                       alt="Secretary" 
-                      className="h-32 rounded-lg shadow-md" 
+                      className="h-32 rounded-lg shadow-md object-cover" 
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
                     />
                   </div>
                 )}
@@ -433,9 +474,9 @@ const StateUnionDashboard = () => {
                   <p className="text-lg">{profileData.presidentName || 'N/A'}</p>
                 </div>
                 <div className="border-b pb-2">
-                  <p className="text-sm font-medium text-gray-500">Established Date</p>
+                  <p className="text-sm font-medium text-gray-500">Established Year</p>
                   <p className="text-lg">
-                    {profileData.establishedDate ? new Date(profileData.establishedDate).toLocaleDateString() : 'N/A'}
+                    {profileData.establishedDate ? new Date(profileData.establishedDate).getFullYear() : 'N/A'}
                   </p>
                 </div>
               </div>
