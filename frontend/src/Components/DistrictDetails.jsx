@@ -62,6 +62,87 @@ const DistrictDetails = () => {
         logging: false,
         useCORS: true,
         allowTaint: true,
+        foreignObjectRendering: false,
+        onclone: (clonedDoc, element) => {
+          // Convert all oklch colors to rgb/hex in the cloned document
+          const allElements = clonedDoc.querySelectorAll('*');
+          
+          // Helper function to convert oklch to rgb
+          const convertToRgb = (colorValue) => {
+            if (!colorValue || colorValue === 'transparent' || colorValue === 'rgba(0, 0, 0, 0)') {
+              return colorValue;
+            }
+            // Check if it's an oklch color
+            if (typeof colorValue === 'string' && colorValue.toLowerCase().includes('oklch')) {
+              // Try to extract color hints from the original element
+              return 'rgb(0, 0, 0)'; // Default fallback
+            }
+            return colorValue;
+          };
+          
+          allElements.forEach((el) => {
+            try {
+              const styles = clonedDoc.defaultView?.getComputedStyle(el) || window.getComputedStyle(el);
+              
+              // Get all style properties and convert oklch colors
+              const bgColor = styles.backgroundColor;
+              const textColor = styles.color;
+              const borderColor = styles.borderColor;
+              
+              // Convert and apply inline styles to override oklch
+              if (bgColor && typeof bgColor === 'string' && bgColor.toLowerCase().includes('oklch')) {
+                // Use a canvas to convert the color
+                const canvas = document.createElement('canvas');
+                canvas.width = 1;
+                canvas.height = 1;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = bgColor;
+                try {
+                  ctx.fillRect(0, 0, 1, 1);
+                  const imageData = ctx.getImageData(0, 0, 1, 1);
+                  const [r, g, b] = imageData.data;
+                  el.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+                } catch (e) {
+                  el.style.backgroundColor = '#ffffff';
+                }
+              }
+              
+              if (textColor && typeof textColor === 'string' && textColor.toLowerCase().includes('oklch')) {
+                const canvas = document.createElement('canvas');
+                canvas.width = 1;
+                canvas.height = 1;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = textColor;
+                try {
+                  ctx.fillRect(0, 0, 1, 1);
+                  const imageData = ctx.getImageData(0, 0, 1, 1);
+                  const [r, g, b] = imageData.data;
+                  el.style.color = `rgb(${r}, ${g}, ${b})`;
+                } catch (e) {
+                  el.style.color = '#000000';
+                }
+              }
+              
+              if (borderColor && typeof borderColor === 'string' && borderColor.toLowerCase().includes('oklch')) {
+                const canvas = document.createElement('canvas');
+                canvas.width = 1;
+                canvas.height = 1;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = borderColor;
+                try {
+                  ctx.fillRect(0, 0, 1, 1);
+                  const imageData = ctx.getImageData(0, 0, 1, 1);
+                  const [r, g, b] = imageData.data;
+                  el.style.borderColor = `rgb(${r}, ${g}, ${b})`;
+                } catch (e) {
+                  el.style.borderColor = '#000000';
+                }
+              }
+            } catch (e) {
+              // Silently ignore errors for individual elements
+            }
+          });
+        }
       });
       
       const link = document.createElement('a');
