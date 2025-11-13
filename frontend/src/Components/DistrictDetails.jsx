@@ -280,181 +280,119 @@ const DistrictDetails = () => {
                 </button>
               </div>
               <div className="p-6">
-                {/* Secretary Photo and Organization Name */}
-                <div className="flex flex-col md:flex-row gap-6 mb-6 pb-6 border-b border-gray-200">
-                  <div className="flex flex-col items-center md:items-start flex-shrink-0">
+                {/* Header Section: Secretary Photo and Organization Name */}
+                <div className="flex flex-col md:flex-row gap-6 mb-8 pb-6 border-b-2 border-gray-200">
+                  {/* Secretary Photo - Left Side */}
+                  <div className="flex-shrink-0">
                     {selectedUnion.generalSecretaryImage ? (
                       <div className="text-center">
                         <img
                           src={getImageUrl(selectedUnion.generalSecretaryImage)}
                           alt="Secretary"
-                          className="w-40 h-40 rounded-lg object-cover border-4 border-orange-500 shadow-lg mx-auto"
+                          className="w-40 h-40 rounded-lg object-cover border-4 border-orange-500 shadow-xl mx-auto"
                           onError={(e) => {
                             e.target.style.display = 'none';
-                            e.target.nextElementSibling.style.display = 'flex';
+                            const fallback = e.target.nextElementSibling;
+                            if (fallback) fallback.style.display = 'flex';
                           }}
                         />
-                        <div className="w-40 h-40 rounded-lg bg-orange-100 flex items-center justify-center border-4 border-orange-500 shadow-lg mx-auto" style={{ display: 'none' }}>
+                        <div className="w-40 h-40 rounded-lg bg-orange-100 flex items-center justify-center border-4 border-orange-500 shadow-xl mx-auto hidden">
                           <User className="w-20 h-20 text-orange-600" />
                         </div>
-                        <p className="text-sm font-medium text-gray-700 mt-3">Secretary Photo</p>
+                        <p className="text-sm font-semibold text-gray-700 mt-3">Secretary Photo</p>
                       </div>
                     ) : (
                       <div className="text-center">
-                        <div className="w-40 h-40 rounded-lg bg-orange-100 flex items-center justify-center border-4 border-orange-500 shadow-lg mx-auto">
+                        <div className="w-40 h-40 rounded-lg bg-orange-100 flex items-center justify-center border-4 border-orange-500 shadow-xl mx-auto">
                           <User className="w-20 h-20 text-orange-600" />
                         </div>
-                        <p className="text-sm font-medium text-gray-700 mt-3">Secretary Photo</p>
+                        <p className="text-sm font-semibold text-gray-700 mt-3">Secretary Photo</p>
                       </div>
                     )}
                   </div>
-                  <div className="flex-1 text-center md:text-left">
-                    <h3 className="text-3xl font-bold text-gray-800 mb-2">{selectedUnion.name}</h3>
+                  
+                  {/* Organization Info - Right Side */}
+                  <div className="flex-1 flex flex-col justify-center">
+                    <h3 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3 leading-tight">
+                      {selectedUnion.name}
+                    </h3>
                     {selectedUnion.district && selectedUnion.state && (
-                      <p className="text-sm text-gray-500">
+                      <p className="text-base text-gray-600 font-medium">
                         {selectedUnion.district}, {selectedUnion.state}
                       </p>
                     )}
                   </div>
                 </div>
 
-                {/* All Organization Details */}
+                {/* Organization Details Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Secretary Name */}
-                  {selectedUnion.secretaryName && (
-                    <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border border-orange-200">
-                      <User className="w-5 h-5 text-orange-600 mt-1 flex-shrink-0" />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-500 mb-1">Secretary Name</p>
-                        <p className="text-lg font-semibold text-gray-800">{selectedUnion.secretaryName}</p>
-                      </div>
-                    </div>
-                  )}
-
                   {/* President Name */}
                   {selectedUnion.presidentName && (
-                    <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
-                      <User className="w-5 h-5 text-blue-600 mt-1 flex-shrink-0" />
+                    <div className="flex items-start gap-3 p-5 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border-2 border-blue-200 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="bg-blue-200 rounded-lg p-2">
+                        <User className="w-6 h-6 text-blue-700" />
+                      </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-500 mb-1">President Name</p>
-                        <p className="text-lg font-semibold text-gray-800">{selectedUnion.presidentName}</p>
+                        <p className="text-xs font-semibold text-blue-700 uppercase tracking-wide mb-1">President Name</p>
+                        <p className="text-lg font-bold text-gray-800">{selectedUnion.presidentName}</p>
                       </div>
                     </div>
                   )}
 
                   {/* Contact Phone */}
                   {selectedUnion.phone && (
-                    <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200">
-                      <Phone className="w-5 h-5 text-green-600 mt-1 flex-shrink-0" />
+                    <div className="flex items-start gap-3 p-5 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border-2 border-green-200 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="bg-green-200 rounded-lg p-2">
+                        <Phone className="w-6 h-6 text-green-700" />
+                      </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-500 mb-1">Contact Phone</p>
-                        <a href={`tel:${selectedUnion.phone}`} className="text-lg font-semibold text-gray-800 hover:text-green-600">
+                        <p className="text-xs font-semibold text-green-700 uppercase tracking-wide mb-1">Contact Phone</p>
+                        <a href={`tel:${selectedUnion.phone}`} className="text-lg font-bold text-gray-800 hover:text-green-700 transition-colors">
                           {selectedUnion.phone}
                         </a>
                       </div>
                     </div>
                   )}
 
-                  {/* Contact Phone (Alternative) */}
-                  {selectedUnion.contactPhone && selectedUnion.contactPhone !== selectedUnion.phone && (
-                    <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200">
-                      <Phone className="w-5 h-5 text-green-600 mt-1 flex-shrink-0" />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-500 mb-1">Alternate Contact</p>
-                        <a href={`tel:${selectedUnion.contactPhone}`} className="text-lg font-semibold text-gray-800 hover:text-green-600">
-                          {selectedUnion.contactPhone}
-                        </a>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Email */}
+                  {/* Email Address */}
                   {selectedUnion.email && (
-                    <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200">
-                      <Mail className="w-5 h-5 text-purple-600 mt-1 flex-shrink-0" />
+                    <div className="flex items-start gap-3 p-5 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border-2 border-purple-200 shadow-sm hover:shadow-md transition-shadow md:col-span-2">
+                      <div className="bg-purple-200 rounded-lg p-2">
+                        <Mail className="w-6 h-6 text-purple-700" />
+                      </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-500 mb-1">Email Address</p>
-                        <a href={`mailto:${selectedUnion.email}`} className="text-lg font-semibold text-gray-800 hover:text-purple-600 break-all">
+                        <p className="text-xs font-semibold text-purple-700 uppercase tracking-wide mb-1">Email Address</p>
+                        <a href={`mailto:${selectedUnion.email}`} className="text-lg font-bold text-gray-800 hover:text-purple-700 transition-colors break-all">
                           {selectedUnion.email}
                         </a>
                       </div>
                     </div>
                   )}
 
-                  {/* Contact Email (Alternative) */}
-                  {selectedUnion.contactEmail && selectedUnion.contactEmail !== selectedUnion.email && (
-                    <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200">
-                      <Mail className="w-5 h-5 text-purple-600 mt-1 flex-shrink-0" />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-500 mb-1">Contact Email</p>
-                        <a href={`mailto:${selectedUnion.contactEmail}`} className="text-lg font-semibold text-gray-800 hover:text-purple-600 break-all">
-                          {selectedUnion.contactEmail}
-                        </a>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Head Office Address */}
+                  {/* Address */}
                   {selectedUnion.headOfficeAddress && (
-                    <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-lg border border-red-200 md:col-span-2">
-                      <MapPin className="w-5 h-5 text-red-600 mt-1 flex-shrink-0" />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-500 mb-1">Head Office Address</p>
-                        <p className="text-lg text-gray-800">{selectedUnion.headOfficeAddress}</p>
+                    <div className="flex items-start gap-3 p-5 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-gray-200 shadow-sm hover:shadow-md transition-shadow md:col-span-2">
+                      <div className="bg-gray-200 rounded-lg p-2">
+                        <MapPin className="w-6 h-6 text-gray-700" />
                       </div>
-                    </div>
-                  )}
-
-                  {/* Address (if different from head office) */}
-                  {selectedUnion.address && selectedUnion.address !== selectedUnion.headOfficeAddress && (
-                    <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border border-gray-200 md:col-span-2">
-                      <MapPin className="w-5 h-5 text-gray-600 mt-1 flex-shrink-0" />
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-500 mb-1">Address</p>
-                        <p className="text-lg text-gray-800">{selectedUnion.address}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Official Website */}
-                  {selectedUnion.officialWebsite && (
-                    <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg border border-indigo-200 md:col-span-2">
-                      <Globe className="w-5 h-5 text-indigo-600 mt-1 flex-shrink-0" />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-500 mb-1">Official Website</p>
-                        <a 
-                          href={selectedUnion.officialWebsite.startsWith('http') ? selectedUnion.officialWebsite : `https://${selectedUnion.officialWebsite}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-lg font-semibold text-indigo-600 hover:text-indigo-800 break-all flex items-center gap-2"
-                        >
-                          {selectedUnion.officialWebsite}
-                          <ExternalLink className="w-4 h-4" />
-                        </a>
+                        <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">Address</p>
+                        <p className="text-lg font-semibold text-gray-800 leading-relaxed">{selectedUnion.headOfficeAddress}</p>
                       </div>
                     </div>
                   )}
 
                   {/* Established Year */}
                   {selectedUnion.establishedDate && (
-                    <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg border border-yellow-200">
-                      <Calendar className="w-5 h-5 text-yellow-600 mt-1 flex-shrink-0" />
+                    <div className="flex items-start gap-3 p-5 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl border-2 border-yellow-200 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="bg-yellow-200 rounded-lg p-2">
+                        <Calendar className="w-6 h-6 text-yellow-700" />
+                      </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-500 mb-1">Established Year</p>
-                        <p className="text-lg font-semibold text-gray-800">
+                        <p className="text-xs font-semibold text-yellow-700 uppercase tracking-wide mb-1">Established Year</p>
+                        <p className="text-lg font-bold text-gray-800">
                           {new Date(selectedUnion.establishedDate).getFullYear()}
                         </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* About Union */}
-                  {selectedUnion.aboutUnion && (
-                    <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-teal-50 to-teal-100 rounded-lg border border-teal-200 md:col-span-2">
-                      <Building2 className="w-5 h-5 text-teal-600 mt-1 flex-shrink-0" />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-500 mb-1">About Organization</p>
-                        <p className="text-lg text-gray-800 whitespace-pre-wrap">{selectedUnion.aboutUnion}</p>
                       </div>
                     </div>
                   )}
@@ -469,4 +407,5 @@ const DistrictDetails = () => {
 };
 
 export default DistrictDetails;
+
 
