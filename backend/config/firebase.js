@@ -1,5 +1,6 @@
 const admin = require('firebase-admin');
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 
 // Initialize Firebase Admin SDK
@@ -27,15 +28,29 @@ const initializeFirebase = () => {
 
     // Option 2: Using service account file path
     if (process.env.FIREBASE_SERVICE_ACCOUNT_PATH) {
-      // Resolve the path relative to the backend directory
-      const serviceAccountPath = path.resolve(__dirname, '..', process.env.FIREBASE_SERVICE_ACCOUNT_PATH.replace('./', ''));
-      const serviceAccount = require(serviceAccountPath);
-      firebaseApp = admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-        databaseURL: process.env.FIREBASE_DATABASE_URL
-      });
-      console.log('✅ Firebase initialized with service account file');
-      return firebaseApp;
+      try {
+        // Resolve the path relative to the backend directory
+        const serviceAccountPath = path.resolve(__dirname, '..', process.env.FIREBASE_SERVICE_ACCOUNT_PATH.replace('./', ''));
+        
+        // Check if file exists before requiring it
+        if (!fs.existsSync(serviceAccountPath)) {
+          console.warn(`⚠️  Firebase service account file not found at: ${serviceAccountPath}`);
+          console.warn('⚠️  Firebase features will be disabled. Using static data fallback.');
+          return null;
+        }
+        
+        const serviceAccount = require(serviceAccountPath);
+        firebaseApp = admin.initializeApp({
+          credential: admin.credential.cert(serviceAccount),
+          databaseURL: process.env.FIREBASE_DATABASE_URL
+        });
+        console.log('✅ Firebase initialized with service account file');
+        return firebaseApp;
+      } catch (fileError) {
+        console.warn(`⚠️  Error loading Firebase service account file: ${fileError.message}`);
+        console.warn('⚠️  Firebase features will be disabled. Using static data fallback.');
+        return null;
+      }
     }
 
     // Option 3: Using individual credentials from .env
@@ -53,9 +68,11 @@ const initializeFirebase = () => {
     }
 
     console.warn('⚠️  Firebase credentials not found. Firebase features will be disabled.');
+    console.warn('⚠️  The application will use static data fallback for states and districts.');
     return null;
   } catch (error) {
-    console.error('❌ Firebase initialization error:', error.message);
+    console.warn('⚠️  Firebase initialization error:', error.message);
+    console.warn('⚠️  Firebase features will be disabled. Using static data fallback.');
     return null;
   }
 };
