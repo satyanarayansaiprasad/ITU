@@ -56,93 +56,94 @@ const DistrictDetails = () => {
     if (!idCardRef.current || !selectedUnion) return;
     
     try {
-      const canvas = await html2canvas(idCardRef.current, {
+      // Pre-process: Convert all computed styles to inline styles to avoid oklch issues
+      const element = idCardRef.current;
+      const allElements = element.querySelectorAll('*');
+      
+      // Store original styles to restore later
+      const originalStyles = new Map();
+      
+      // Convert all styles to inline RGB
+      allElements.forEach((el) => {
+        try {
+          const styles = window.getComputedStyle(el);
+          const styleMap = {};
+          
+          // Helper to convert color using canvas
+          const convertColor = (colorValue) => {
+            if (!colorValue || colorValue === 'transparent' || colorValue === 'rgba(0, 0, 0, 0)') {
+              return colorValue;
+            }
+            if (typeof colorValue === 'string' && colorValue.toLowerCase().includes('oklch')) {
+              try {
+                const canvas = document.createElement('canvas');
+                canvas.width = 1;
+                canvas.height = 1;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = colorValue;
+                ctx.fillRect(0, 0, 1, 1);
+                const imageData = ctx.getImageData(0, 0, 1, 1);
+                const [r, g, b, a] = imageData.data;
+                if (a < 255) {
+                  return `rgba(${r}, ${g}, ${b}, ${(a / 255).toFixed(2)})`;
+                }
+                return `rgb(${r}, ${g}, ${b})`;
+              } catch (e) {
+                return colorValue;
+              }
+            }
+            return colorValue;
+          };
+          
+          // Convert and store colors
+          const bgColor = convertColor(styles.backgroundColor);
+          const textColor = convertColor(styles.color);
+          const borderColor = convertColor(styles.borderColor);
+          
+          if (bgColor && bgColor !== styles.backgroundColor) {
+            styleMap.backgroundColor = el.style.backgroundColor;
+            el.style.backgroundColor = bgColor;
+          }
+          if (textColor && textColor !== styles.color) {
+            styleMap.color = el.style.color;
+            el.style.color = textColor;
+          }
+          if (borderColor && borderColor !== styles.borderColor) {
+            styleMap.borderColor = el.style.borderColor;
+            el.style.borderColor = borderColor;
+          }
+          
+          if (Object.keys(styleMap).length > 0) {
+            originalStyles.set(el, styleMap);
+          }
+        } catch (e) {
+          // Ignore errors
+        }
+      });
+      
+      // Wait a bit for styles to apply
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      const canvas = await html2canvas(element, {
         backgroundColor: '#ffffff',
         scale: 2,
         logging: false,
         useCORS: true,
         allowTaint: true,
         foreignObjectRendering: false,
-        onclone: (clonedDoc, element) => {
-          // Convert all oklch colors to rgb/hex in the cloned document
-          const allElements = clonedDoc.querySelectorAll('*');
-          
-          // Helper function to convert oklch to rgb
-          const convertToRgb = (colorValue) => {
-            if (!colorValue || colorValue === 'transparent' || colorValue === 'rgba(0, 0, 0, 0)') {
-              return colorValue;
-            }
-            // Check if it's an oklch color
-            if (typeof colorValue === 'string' && colorValue.toLowerCase().includes('oklch')) {
-              // Try to extract color hints from the original element
-              return 'rgb(0, 0, 0)'; // Default fallback
-            }
-            return colorValue;
-          };
-          
-          allElements.forEach((el) => {
-            try {
-              const styles = clonedDoc.defaultView?.getComputedStyle(el) || window.getComputedStyle(el);
-              
-              // Get all style properties and convert oklch colors
-              const bgColor = styles.backgroundColor;
-              const textColor = styles.color;
-              const borderColor = styles.borderColor;
-              
-              // Convert and apply inline styles to override oklch
-              if (bgColor && typeof bgColor === 'string' && bgColor.toLowerCase().includes('oklch')) {
-                // Use a canvas to convert the color
-                const canvas = document.createElement('canvas');
-                canvas.width = 1;
-                canvas.height = 1;
-                const ctx = canvas.getContext('2d');
-                ctx.fillStyle = bgColor;
-                try {
-                  ctx.fillRect(0, 0, 1, 1);
-                  const imageData = ctx.getImageData(0, 0, 1, 1);
-                  const [r, g, b] = imageData.data;
-                  el.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
-                } catch (e) {
-                  el.style.backgroundColor = '#ffffff';
-                }
-              }
-              
-              if (textColor && typeof textColor === 'string' && textColor.toLowerCase().includes('oklch')) {
-                const canvas = document.createElement('canvas');
-                canvas.width = 1;
-                canvas.height = 1;
-                const ctx = canvas.getContext('2d');
-                ctx.fillStyle = textColor;
-                try {
-                  ctx.fillRect(0, 0, 1, 1);
-                  const imageData = ctx.getImageData(0, 0, 1, 1);
-                  const [r, g, b] = imageData.data;
-                  el.style.color = `rgb(${r}, ${g}, ${b})`;
-                } catch (e) {
-                  el.style.color = '#000000';
-                }
-              }
-              
-              if (borderColor && typeof borderColor === 'string' && borderColor.toLowerCase().includes('oklch')) {
-                const canvas = document.createElement('canvas');
-                canvas.width = 1;
-                canvas.height = 1;
-                const ctx = canvas.getContext('2d');
-                ctx.fillStyle = borderColor;
-                try {
-                  ctx.fillRect(0, 0, 1, 1);
-                  const imageData = ctx.getImageData(0, 0, 1, 1);
-                  const [r, g, b] = imageData.data;
-                  el.style.borderColor = `rgb(${r}, ${g}, ${b})`;
-                } catch (e) {
-                  el.style.borderColor = '#000000';
-                }
-              }
-            } catch (e) {
-              // Silently ignore errors for individual elements
-            }
-          });
-        }
+        imageTimeout: 15000,
+        removeContainer: true,
+      });
+      
+      // Restore original styles
+      originalStyles.forEach((styles, el) => {
+        Object.entries(styles).forEach(([prop, value]) => {
+          if (value) {
+            el.style[prop] = value;
+          } else {
+            el.style.removeProperty(prop);
+          }
+        });
       });
       
       const link = document.createElement('a');
