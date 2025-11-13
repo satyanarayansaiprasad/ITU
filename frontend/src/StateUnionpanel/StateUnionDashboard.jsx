@@ -169,7 +169,7 @@ const StateUnionDashboard = () => {
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Union Name</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Secretary Name</label>
                     <input 
                       type="text" 
                       name="name" 
@@ -212,16 +212,6 @@ const StateUnionDashboard = () => {
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Secretary Name</label>
-                    <input 
-                      type="text" 
-                      name="secretaryName" 
-                      defaultValue={profileData?.secretaryName} 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    />
-                  </div>
-                  
-                  <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Established Year</label>
                     <input 
                       type="number" 
@@ -230,16 +220,6 @@ const StateUnionDashboard = () => {
                       max={new Date().getFullYear()}
                       defaultValue={profileData?.establishedDate ? new Date(profileData.establishedDate).getFullYear() : ''} 
                       placeholder="YYYY"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Official Website</label>
-                    <input 
-                      type="text" 
-                      name="officialWebsite" 
-                      defaultValue={profileData?.officialWebsite} 
                       className="w-full px-3 py-2 border border-gray-300 rounded-md"
                     />
                   </div>
@@ -309,7 +289,7 @@ const StateUnionDashboard = () => {
                   </div>
                   
                   <div className="border-b pb-4">
-                    <p className="text-sm font-medium text-gray-500 mb-1">Union Name</p>
+                    <p className="text-sm font-medium text-gray-500 mb-1">Secretary Name</p>
                     <p className="text-lg font-semibold">{profileData?.name || 'N/A'}</p>
                   </div>
                   
@@ -329,25 +309,9 @@ const StateUnionDashboard = () => {
                   </div>
                   
                   <div className="border-b pb-4">
-                    <p className="text-sm font-medium text-gray-500 mb-1">Secretary Name</p>
-                    <p className="text-lg font-semibold">{profileData?.secretaryName || 'N/A'}</p>
-                  </div>
-                  
-                  <div className="border-b pb-4">
                     <p className="text-sm font-medium text-gray-500 mb-1">Established Year</p>
                     <p className="text-lg font-semibold">
                       {profileData?.establishedDate ? new Date(profileData.establishedDate).getFullYear() : 'N/A'}
-                    </p>
-                  </div>
-                  
-                  <div className="border-b pb-4">
-                    <p className="text-sm font-medium text-gray-500 mb-1">Official Website</p>
-                    <p className="text-lg font-semibold">
-                      {profileData?.officialWebsite ? (
-                        <a href={profileData.officialWebsite} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                          {profileData.officialWebsite}
-                        </a>
-                      ) : 'N/A'}
                     </p>
                   </div>
                   
