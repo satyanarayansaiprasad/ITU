@@ -317,9 +317,16 @@ const DistrictDetails = () => {
                       {selectedUnion.name}
                     </h3>
                     {selectedUnion.district && selectedUnion.state && (
-                      <p className="text-base text-gray-600 font-medium">
-                        {selectedUnion.district}, {selectedUnion.state}
-                      </p>
+                      <div className="space-y-1">
+                        <p className="text-base text-gray-600 font-medium">
+                          {selectedUnion.district}, {selectedUnion.state}
+                        </p>
+                        {selectedUnion.headOfficeAddress && (
+                          <p className="text-sm text-gray-500">
+                            {selectedUnion.headOfficeAddress}
+                          </p>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
