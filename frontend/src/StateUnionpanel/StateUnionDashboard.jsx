@@ -8,6 +8,7 @@ const StateUnionDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [activeMenu, setActiveMenu] = useState('profile');
   const [players, setPlayers] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
   const { id: paramId } = useParams();
   const navigate = useNavigate();
   
@@ -59,8 +60,15 @@ const StateUnionDashboard = () => {
     delete values.district;
     
     try {
+      // Convert establishedYear to establishedDate format (YYYY-01-01)
+      if (values.establishedYear) {
+        values.establishedDate = `${values.establishedYear}-01-01`;
+        delete values.establishedYear;
+      }
+      
       const response = await axios.patch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/user/stateunions/${userId}`, values);
       setProfileData(response.data.data);
+      setIsEditing(false);
       alert('Profile updated successfully');
     } catch (error) {
       alert('Failed to update profile');
@@ -101,7 +109,7 @@ const StateUnionDashboard = () => {
         }
       });
       setProfileData({ ...profileData, generalSecretaryImage: response.data.generalSecretaryImageUrl });
-      alert('General Secretary image uploaded successfully');
+      alert('Secretary image uploaded successfully');
     } catch (error) {
       alert('Failed to upload General Secretary image');
     }
@@ -118,10 +126,20 @@ const StateUnionDashboard = () => {
       case 'profile':
         return (
           <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-2xl font-bold mb-6">Update Profile</h2>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold">{isEditing ? 'Update Profile' : 'View Profile'}</h2>
+              {!isEditing && (
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                >
+                  Edit Profile
+                </button>
+              )}
+            </div>
             {loading ? (
               <p>Loading...</p>
-            ) : (
+            ) : isEditing ? (
               <form onSubmit={handleUpdateProfile} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -204,41 +222,14 @@ const StateUnionDashboard = () => {
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Director Name</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Established Year</label>
                     <input 
-                      type="text" 
-                      name="directorName" 
-                      defaultValue={profileData?.directorName} 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Established Date</label>
-                    <input 
-                      type="date" 
-                      name="establishedDate" 
-                      defaultValue={profileData?.establishedDate?.split('T')[0]} 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Head Office Address</label>
-                    <input 
-                      type="text" 
-                      name="headOfficeAddress" 
-                      defaultValue={profileData?.headOfficeAddress} 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Contact Phone</label>
-                    <input 
-                      type="text" 
-                      name="contactPhone" 
-                      defaultValue={profileData?.contactPhone} 
+                      type="number" 
+                      name="establishedYear" 
+                      min="1900"
+                      max={new Date().getFullYear()}
+                      defaultValue={profileData?.establishedDate ? new Date(profileData.establishedDate).getFullYear() : ''} 
+                      placeholder="YYYY"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md"
                     />
                   </div>
@@ -252,16 +243,6 @@ const StateUnionDashboard = () => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md"
                     />
                   </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">About Union</label>
-                  <textarea 
-                    name="aboutUnion" 
-                    rows="4"
-                    defaultValue={profileData?.aboutUnion} 
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                  />
                 </div>
                 
                 <div>
@@ -282,7 +263,7 @@ const StateUnionDashboard = () => {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">General Secretary Image</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Secretary Image</label>
                   <input 
                     type="file" 
                     onChange={handleGeneralSecretaryImageUpload} 
@@ -292,19 +273,114 @@ const StateUnionDashboard = () => {
                   {profileData?.generalSecretaryImage && (
                     <img 
                       src={profileData.generalSecretaryImage} 
-                      alt="General Secretary" 
+                      alt="Secretary" 
                       className="mt-2 h-24" 
                     />
                   )}
                 </div>
                 
-                <button 
-                  type="submit" 
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                >
-                  Update Profile
-                </button>
+                <div className="flex gap-3">
+                  <button 
+                    type="submit" 
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  >
+                    Update Profile
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => setIsEditing(false)}
+                    className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </form>
+            ) : (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="border-b pb-4">
+                    <p className="text-sm font-medium text-gray-500 mb-1">State</p>
+                    <p className="text-lg font-semibold">{profileData?.state || 'N/A'}</p>
+                  </div>
+                  
+                  <div className="border-b pb-4">
+                    <p className="text-sm font-medium text-gray-500 mb-1">District</p>
+                    <p className="text-lg font-semibold">{profileData?.district || 'N/A'}</p>
+                  </div>
+                  
+                  <div className="border-b pb-4">
+                    <p className="text-sm font-medium text-gray-500 mb-1">Union Name</p>
+                    <p className="text-lg font-semibold">{profileData?.name || 'N/A'}</p>
+                  </div>
+                  
+                  <div className="border-b pb-4">
+                    <p className="text-sm font-medium text-gray-500 mb-1">Phone</p>
+                    <p className="text-lg font-semibold">{profileData?.phone || 'N/A'}</p>
+                  </div>
+                  
+                  <div className="border-b pb-4">
+                    <p className="text-sm font-medium text-gray-500 mb-1">Address</p>
+                    <p className="text-lg font-semibold">{profileData?.address || 'N/A'}</p>
+                  </div>
+                  
+                  <div className="border-b pb-4">
+                    <p className="text-sm font-medium text-gray-500 mb-1">President Name</p>
+                    <p className="text-lg font-semibold">{profileData?.presidentName || 'N/A'}</p>
+                  </div>
+                  
+                  <div className="border-b pb-4">
+                    <p className="text-sm font-medium text-gray-500 mb-1">Secretary Name</p>
+                    <p className="text-lg font-semibold">{profileData?.secretaryName || 'N/A'}</p>
+                  </div>
+                  
+                  <div className="border-b pb-4">
+                    <p className="text-sm font-medium text-gray-500 mb-1">Established Year</p>
+                    <p className="text-lg font-semibold">
+                      {profileData?.establishedDate ? new Date(profileData.establishedDate).getFullYear() : 'N/A'}
+                    </p>
+                  </div>
+                  
+                  <div className="border-b pb-4">
+                    <p className="text-sm font-medium text-gray-500 mb-1">Official Website</p>
+                    <p className="text-lg font-semibold">
+                      {profileData?.officialWebsite ? (
+                        <a href={profileData.officialWebsite} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                          {profileData.officialWebsite}
+                        </a>
+                      ) : 'N/A'}
+                    </p>
+                  </div>
+                  
+                  <div className="border-b pb-4">
+                    <p className="text-sm font-medium text-gray-500 mb-1">Status</p>
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${profileData?.status === 'approved' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                      {profileData?.status?.toUpperCase() || 'N/A'}
+                    </span>
+                  </div>
+                </div>
+                
+                {profileData?.logo && (
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 mb-2">Logo</p>
+                    <img 
+                      src={profileData.logo} 
+                      alt="Union Logo" 
+                      className="h-32 rounded-lg shadow-md" 
+                    />
+                  </div>
+                )}
+                
+                {profileData?.generalSecretaryImage && (
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 mb-2">Secretary Image</p>
+                    <img 
+                      src={profileData.generalSecretaryImage} 
+                      alt="Secretary" 
+                      className="h-32 rounded-lg shadow-md" 
+                    />
+                  </div>
+                )}
+              </div>
             )}
           </div>
         );
