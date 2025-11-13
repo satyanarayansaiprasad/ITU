@@ -4,6 +4,8 @@ const Contact = require("../models/Contact");
 const AccelerationForm = require("../models/AccelerationForm"); // update path as needed
 
 const generatePassword = require("../utils/passwordGenerator");
+const path = require("path");
+const fs = require("fs");
 // const News =require("../models/News")
 // Handle new contact form submission
 exports.contactUs = async (req, res) => {
@@ -212,7 +214,14 @@ exports.uploadGeneralSecretaryImage = async (req, res) => {
     }
     
     const imageUrl = `uploads/${file.filename}`;
-    console.log('Saving general secretary image to database:', { id, imageUrl });
+    console.log('Saving general secretary image to database:', { id, imageUrl, filePath: file.path });
+    
+    // Verify file was actually saved
+    const filePath = path.join(__dirname, '..', 'uploads', file.filename);
+    if (!fs.existsSync(filePath)) {
+      console.error('File was not saved to disk:', filePath);
+      return res.status(500).json({ success: false, error: "File upload failed - file not saved" });
+    }
     
     const updatedProfile = await AccelerationForm.findByIdAndUpdate(
       id,
@@ -225,7 +234,14 @@ exports.uploadGeneralSecretaryImage = async (req, res) => {
       return res.status(404).json({ success: false, error: "State union not found" });
     }
     
-    console.log('General secretary image saved successfully:', { id, generalSecretaryImage: updatedProfile.generalSecretaryImage });
+    // Verify the field was actually updated
+    const verifyProfile = await AccelerationForm.findById(id);
+    console.log('General secretary image saved successfully:', { 
+      id, 
+      generalSecretaryImage: updatedProfile.generalSecretaryImage,
+      verified: verifyProfile.generalSecretaryImage,
+      fileExists: fs.existsSync(filePath)
+    });
     
     res.status(200).json({ 
       success: true, 
