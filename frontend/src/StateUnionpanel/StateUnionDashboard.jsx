@@ -111,7 +111,7 @@ const StateUnionDashboard = () => {
       setProfileData({ ...profileData, generalSecretaryImage: response.data.generalSecretaryImageUrl });
       alert('Secretary image uploaded successfully');
     } catch (error) {
-      alert('Failed to upload General Secretary image');
+      alert('Failed to upload Secretary image');
     }
   };
 
