@@ -79,6 +79,10 @@ const LoginPage = () => {
         if (res.data?.status === 'pending') {
           throw new Error('Your registration is pending approval');
         }
+        // Store user ID in localStorage for dashboard access
+        if (res.data?._id) {
+          localStorage.setItem('stateUnionId', res.data._id);
+        }
       }
 
       navigate(redirectMap[loginType]);

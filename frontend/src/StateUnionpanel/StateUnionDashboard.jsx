@@ -8,13 +8,22 @@ const StateUnionDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [activeMenu, setActiveMenu] = useState('profile');
   const [players, setPlayers] = useState([]);
-  const { id } = useParams();
+  const { id: paramId } = useParams();
   const navigate = useNavigate();
+  
+  // Get user ID from URL params or localStorage
+  const userId = paramId || localStorage.getItem('stateUnionId');
 
   useEffect(() => {
+    if (!userId) {
+      alert('User ID not found. Please login again.');
+      navigate('/login');
+      return;
+    }
+
     const fetchProfile = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/user/stateunions/${id}`);
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/user/stateunions/${userId}`);
         setProfileData(response.data.data);
         setLoading(false);
       } catch (error) {
@@ -38,15 +47,19 @@ const StateUnionDashboard = () => {
     if (activeMenu === 'players') {
       fetchPlayers();
     }
-  }, [id, activeMenu, profileData?.state]);
+  }, [userId, activeMenu, profileData?.state, navigate]);
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const values = Object.fromEntries(formData.entries());
     
+    // Don't allow updating state and district - they're read-only
+    delete values.state;
+    delete values.district;
+    
     try {
-      const response = await axios.patch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/user/stateunions/${id}`, values);
+      const response = await axios.patch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/user/stateunions/${userId}`, values);
       setProfileData(response.data.data);
       alert('Profile updated successfully');
     } catch (error) {
@@ -62,7 +75,7 @@ const StateUnionDashboard = () => {
     formData.append('logo', file);
     
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/user/stateunions/${id}/logo`, formData, {
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/user/stateunions/${userId}/logo`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -82,7 +95,7 @@ const StateUnionDashboard = () => {
     formData.append('generalSecretaryImage', file);
     
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/user/stateunions/${id}/general-secretary-image`, formData, {
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/user/stateunions/${userId}/general-secretary-image`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -96,6 +109,7 @@ const StateUnionDashboard = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('stateUnionId');
     navigate('/login');
   };
 
@@ -115,10 +129,25 @@ const StateUnionDashboard = () => {
                     <input 
                       type="text" 
                       name="state" 
-                      defaultValue={profileData?.state} 
+                      value={profileData?.state || ''} 
                       disabled
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                      readOnly
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed" 
                     />
+                    <p className="text-xs text-gray-500 mt-1">This field cannot be changed</p>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">District</label>
+                    <input 
+                      type="text" 
+                      name="district" 
+                      value={profileData?.district || ''} 
+                      disabled
+                      readOnly
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">This field cannot be changed</p>
                   </div>
                   
                   <div>
