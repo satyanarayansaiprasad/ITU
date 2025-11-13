@@ -280,34 +280,31 @@ const DistrictDetails = () => {
                 </button>
               </div>
               <div className="p-6">
-                {/* Logo and Organization Name */}
+                {/* Secretary Photo and Organization Name */}
                 <div className="flex flex-col md:flex-row gap-6 mb-6 pb-6 border-b border-gray-200">
-                  <div className="flex flex-col items-center md:items-start">
-                    {selectedUnion.logo ? (
-                      <img
-                        src={getImageUrl(selectedUnion.logo)}
-                        alt="Organization Logo"
-                        className="w-32 h-32 rounded-lg object-cover border-4 border-orange-500 shadow-lg mb-4"
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                        }}
-                      />
-                    ) : (
-                      <div className="w-32 h-32 rounded-lg bg-orange-100 flex items-center justify-center mb-4 border-4 border-orange-500">
-                        <Building2 className="w-16 h-16 text-orange-600" />
-                      </div>
-                    )}
-                    {selectedUnion.generalSecretaryImage && (
+                  <div className="flex flex-col items-center md:items-start flex-shrink-0">
+                    {selectedUnion.generalSecretaryImage ? (
                       <div className="text-center">
                         <img
                           src={getImageUrl(selectedUnion.generalSecretaryImage)}
                           alt="Secretary"
-                          className="w-24 h-24 rounded-full object-cover border-3 border-blue-500 mx-auto"
+                          className="w-40 h-40 rounded-lg object-cover border-4 border-orange-500 shadow-lg mx-auto"
                           onError={(e) => {
                             e.target.style.display = 'none';
+                            e.target.nextElementSibling.style.display = 'flex';
                           }}
                         />
-                        <p className="text-xs text-gray-500 mt-2">Secretary Photo</p>
+                        <div className="w-40 h-40 rounded-lg bg-orange-100 flex items-center justify-center border-4 border-orange-500 shadow-lg mx-auto" style={{ display: 'none' }}>
+                          <User className="w-20 h-20 text-orange-600" />
+                        </div>
+                        <p className="text-sm font-medium text-gray-700 mt-3">Secretary Photo</p>
+                      </div>
+                    ) : (
+                      <div className="text-center">
+                        <div className="w-40 h-40 rounded-lg bg-orange-100 flex items-center justify-center border-4 border-orange-500 shadow-lg mx-auto">
+                          <User className="w-20 h-20 text-orange-600" />
+                        </div>
+                        <p className="text-sm font-medium text-gray-700 mt-3">Secretary Photo</p>
                       </div>
                     )}
                   </div>

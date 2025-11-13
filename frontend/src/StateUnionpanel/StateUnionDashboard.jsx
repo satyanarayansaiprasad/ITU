@@ -281,11 +281,17 @@ const StateUnionDashboard = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   />
                   {(logoPreview || profileData?.logo) && (
-                    <img 
-                      src={logoPreview || getImageUrl(profileData.logo)} 
-                      alt="Union Logo" 
-                      className="mt-2 h-24 rounded-lg object-cover" 
-                    />
+                    <div className="mt-2">
+                      <img 
+                        src={logoPreview || getImageUrl(profileData.logo)} 
+                        alt="Union Logo" 
+                        className="h-24 w-auto rounded-lg object-cover border-2 border-gray-300" 
+                        onError={(e) => {
+                          console.error('Logo image error:', e.target.src);
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                    </div>
                   )}
                 </div>
                 
@@ -298,11 +304,17 @@ const StateUnionDashboard = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   />
                   {(secretaryImagePreview || profileData?.generalSecretaryImage) && (
-                    <img 
-                      src={secretaryImagePreview || getImageUrl(profileData.generalSecretaryImage)} 
-                      alt="Secretary" 
-                      className="mt-2 h-24 rounded-lg object-cover" 
-                    />
+                    <div className="mt-2">
+                      <img 
+                        src={secretaryImagePreview || getImageUrl(profileData.generalSecretaryImage)} 
+                        alt="Secretary" 
+                        className="h-24 w-auto rounded-lg object-cover border-2 border-gray-300" 
+                        onError={(e) => {
+                          console.error('Secretary image error:', e.target.src);
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                    </div>
                   )}
                 </div>
                 
