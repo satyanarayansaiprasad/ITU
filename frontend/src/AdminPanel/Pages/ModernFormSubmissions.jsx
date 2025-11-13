@@ -26,7 +26,8 @@ import {
   UserX,
   MoreVertical,
   Copy,
-  ExternalLink
+  ExternalLink,
+  Trash2
 } from "lucide-react";
 
 const ModernFormSubmissions = () => {
@@ -40,6 +41,7 @@ const ModernFormSubmissions = () => {
   const [notification, setNotification] = useState(null);
   const [showPasswordModal, setShowPasswordModal] = useState(null);
   const [generatedPassword, setGeneratedPassword] = useState('');
+  const [deletingId, setDeletingId] = useState(null);
 
   // Animation variants
   const containerVariants = {
@@ -138,6 +140,32 @@ const ModernFormSubmissions = () => {
       showNotification(error.response?.data?.error || "Failed to approve form", "error");
     } finally {
       setApprovingId(null);
+    }
+  };
+
+  const handleDelete = async (formId, email, name) => {
+    if (!window.confirm(`Are you sure you want to permanently delete ${name} (${email})? This action cannot be undone and will delete the user from all databases.`)) {
+      return;
+    }
+
+    try {
+      setDeletingId(formId);
+      const response = await axios.delete(API_ENDPOINTS.DELETE_USER, {
+        data: { formId, email }
+      });
+
+      if (response.data.success) {
+        showNotification(`User ${name} deleted successfully from ${response.data.deletedFrom.join(', ')}`, "success");
+        await fetchForms();
+        if (selectedForm && selectedForm._id === formId) {
+          setSelectedForm(null);
+        }
+      }
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      showNotification(error.response?.data?.error || "Failed to delete user", "error");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -438,6 +466,25 @@ const ModernFormSubmissions = () => {
                         </button>
                       )}
 
+                      {form.status === 'approved' && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(form._id, form.email, form.name);
+                          }}
+                          disabled={deletingId === form._id}
+                          className="flex items-center gap-1 px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 text-sm"
+                          title="Delete user completely from all databases"
+                        >
+                          {deletingId === form._id ? (
+                            <Loader size={14} className="animate-spin" />
+                          ) : (
+                            <Trash2 size={14} />
+                          )}
+                          Delete
+                        </button>
+                      )}
+
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -593,6 +640,28 @@ const ModernFormSubmissions = () => {
                           <X size={16} />
                           Reject
                         </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {selectedForm.status === 'approved' && (
+                    <div className="mt-6 pt-6 border-t border-gray-200">
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => handleDelete(selectedForm._id, selectedForm.email, selectedForm.name)}
+                          disabled={deletingId === selectedForm._id}
+                          className="flex items-center gap-2 px-6 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors disabled:opacity-50"
+                        >
+                          {deletingId === selectedForm._id ? (
+                            <Loader size={16} className="animate-spin" />
+                          ) : (
+                            <Trash2 size={16} />
+                          )}
+                          Delete User Completely
+                        </button>
+                        <p className="text-xs text-gray-500 ml-2">
+                          This will permanently delete the user from all databases
+                        </p>
                       </div>
                     </div>
                   )}

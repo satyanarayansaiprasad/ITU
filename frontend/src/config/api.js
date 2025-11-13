@@ -17,6 +17,7 @@ export const API_ENDPOINTS = {
   DELETE_NEWS: (id) => `${API_BASE_URL}/api/admin/deleteNews/${id}`,
   GET_FORM: `${API_BASE_URL}/api/admin/getForm`,
   APPROVE_FORM: `${API_BASE_URL}/api/admin/approveForm`,
+  DELETE_USER: `${API_BASE_URL}/api/admin/deleteUser`,
   
   // User endpoints
   CONTACT_US: `${API_BASE_URL}/api/user/contactus`,

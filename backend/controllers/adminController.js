@@ -584,6 +584,86 @@ const mailOptions = {
   }
 };
 
+// Delete user completely from all databases
+exports.deleteUser = async (req, res) => {
+  try {
+    const { formId, email } = req.body;
+    
+    if (!formId && !email) {
+      return res.status(400).json({
+        success: false,
+        error: 'Form ID or email is required'
+      });
+    }
+
+    let deletedCount = 0;
+    const deletedFrom = [];
+
+    // Build query
+    const query = formId ? { _id: formId } : { email: { $regex: new RegExp(`^${email}$`, 'i') } };
+
+    // Delete from AccelerationForm collection
+    const accelerationResult = await AccelerationForm.deleteMany(query);
+    if (accelerationResult.deletedCount > 0) {
+      deletedCount += accelerationResult.deletedCount;
+      deletedFrom.push('AccelerationForm');
+    }
+
+    // Delete from Contact collection
+    const contactResult = await Contact.deleteMany({ email: { $regex: new RegExp(`^${email}$`, 'i') } });
+    if (contactResult.deletedCount > 0) {
+      deletedCount += contactResult.deletedCount;
+      deletedFrom.push('Contact');
+    }
+
+    // Try to delete from Form collection if it exists
+    try {
+      const Form = require('../models/Form');
+      const formResult = await Form.deleteMany({ email: { $regex: new RegExp(`^${email}$`, 'i') } });
+      if (formResult.deletedCount > 0) {
+        deletedCount += formResult.deletedCount;
+        deletedFrom.push('Form');
+      }
+    } catch (e) {
+      // Form model might not exist, skip
+    }
+
+    // Try to delete from Players collection if it exists
+    try {
+      const Players = require('../models/Players');
+      const playersResult = await Players.deleteMany({ email: { $regex: new RegExp(`^${email}$`, 'i') } });
+      if (playersResult.deletedCount > 0) {
+        deletedCount += playersResult.deletedCount;
+        deletedFrom.push('Players');
+      }
+    } catch (e) {
+      // Players model might not exist, skip
+    }
+
+    if (deletedCount === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found in any collection'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `User deleted successfully from ${deletedFrom.join(', ')}`,
+      deletedCount,
+      deletedFrom
+    });
+
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server error while deleting user',
+      details: error.message
+    });
+  }
+};
+
 // // In your backend controller
 // exports.rejectForm = async (req, res) => {
 //   try {

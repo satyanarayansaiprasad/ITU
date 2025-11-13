@@ -30,6 +30,7 @@ router.delete('/deleteGallery/:id', adminController.deleteGallery);
 router.get('/getForm',adminController.getForm);
 
 router.put('/approveForm',adminController.approveForm)
+router.delete('/deleteUser',adminController.deleteUser)
 // router.put('/rejectForm',adminController.rejectForm)
 
 // ========== BLOG ROUTES ==========
