@@ -56,45 +56,51 @@ const DistrictDetails = () => {
     if (!idCardRef.current || !selectedUnion) return;
     
     try {
-      // Pre-process: Convert all computed styles to inline styles to avoid oklch issues
       const element = idCardRef.current;
-      const allElements = element.querySelectorAll('*');
       
-      // Store original styles to restore later
+      // Clone the element to avoid modifying the original
+      const clonedElement = element.cloneNode(true);
+      clonedElement.style.position = 'absolute';
+      clonedElement.style.left = '-9999px';
+      clonedElement.style.top = '0';
+      clonedElement.style.backgroundColor = '#ffffff';
+      document.body.appendChild(clonedElement);
+      
+      // Pre-process: Convert all computed styles to inline styles to avoid oklch issues
+      const allElements = clonedElement.querySelectorAll('*');
       const originalStyles = new Map();
       
-      // Convert all styles to inline RGB - including gradients and all color properties
+      // Helper to convert color using canvas
+      const convertColor = (colorValue) => {
+        if (!colorValue || colorValue === 'transparent' || colorValue === 'rgba(0, 0, 0, 0)') {
+          return '#ffffff';
+        }
+        if (typeof colorValue === 'string' && colorValue.toLowerCase().includes('oklch')) {
+          try {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1;
+            canvas.height = 1;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = colorValue;
+            ctx.fillRect(0, 0, 1, 1);
+            const imageData = ctx.getImageData(0, 0, 1, 1);
+            const [r, g, b, a] = imageData.data;
+            if (a < 255) {
+              return `rgba(${r}, ${g}, ${b}, ${(a / 255).toFixed(2)})`;
+            }
+            return `rgb(${r}, ${g}, ${b})`;
+          } catch (e) {
+            return '#ffffff';
+          }
+        }
+        return colorValue;
+      };
+      
+      // Convert all styles to inline RGB
       allElements.forEach((el) => {
         try {
           const styles = window.getComputedStyle(el);
           const styleMap = {};
-          
-          // Helper to convert color using canvas
-          const convertColor = (colorValue) => {
-            if (!colorValue || colorValue === 'transparent' || colorValue === 'rgba(0, 0, 0, 0)') {
-              return colorValue;
-            }
-            if (typeof colorValue === 'string' && colorValue.toLowerCase().includes('oklch')) {
-              try {
-                const canvas = document.createElement('canvas');
-                canvas.width = 1;
-                canvas.height = 1;
-                const ctx = canvas.getContext('2d');
-                ctx.fillStyle = colorValue;
-                ctx.fillRect(0, 0, 1, 1);
-                const imageData = ctx.getImageData(0, 0, 1, 1);
-                const [r, g, b, a] = imageData.data;
-                if (a < 255) {
-                  return `rgba(${r}, ${g}, ${b}, ${(a / 255).toFixed(2)})`;
-                }
-                return `rgb(${r}, ${g}, ${b})`;
-              } catch (e) {
-                // Fallback to a safe color
-                return '#000000';
-              }
-            }
-            return colorValue;
-          };
           
           // Convert all color-related properties
           const colorProperties = [
@@ -107,24 +113,26 @@ const DistrictDetails = () => {
             const value = styles[prop];
             if (value && typeof value === 'string' && value.toLowerCase().includes('oklch')) {
               const converted = convertColor(value);
-              if (converted !== value) {
-                styleMap[prop] = el.style[prop] || '';
-                el.style[prop] = converted;
-              }
+              styleMap[prop] = el.style[prop] || '';
+              el.style[prop] = converted;
             }
           });
           
           // Handle background-image gradients that might contain oklch
           const bgImage = styles.backgroundImage;
           if (bgImage && bgImage !== 'none' && bgImage.toLowerCase().includes('oklch')) {
-            // Replace gradient with solid color
-            const bgColor = convertColor(styles.backgroundColor);
             styleMap.backgroundImage = el.style.backgroundImage || '';
             el.style.backgroundImage = 'none';
-            if (bgColor) {
-              styleMap.backgroundColor = el.style.backgroundColor || '';
-              el.style.backgroundColor = bgColor;
-            }
+            const bgColor = convertColor(styles.backgroundColor);
+            styleMap.backgroundColor = el.style.backgroundColor || '';
+            el.style.backgroundColor = bgColor || '#ffffff';
+          }
+          
+          // Ensure white background for transparent/black backgrounds
+          const bg = styles.backgroundColor;
+          if (bg === 'rgba(0, 0, 0, 0)' || bg === 'transparent' || bg === 'rgb(0, 0, 0)' || bg === 'rgba(0, 0, 0, 1)') {
+            styleMap.backgroundColor = el.style.backgroundColor || '';
+            el.style.backgroundColor = '#ffffff';
           }
           
           if (Object.keys(styleMap).length > 0) {
@@ -135,72 +143,58 @@ const DistrictDetails = () => {
         }
       });
       
-      // Wait a bit for styles to apply
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Ensure cloned element has white background
+      clonedElement.style.backgroundColor = '#ffffff';
       
-      // Ensure element has white background
-      const originalBg = element.style.backgroundColor;
-      element.style.backgroundColor = '#ffffff';
+      // Wait for styles to apply
+      await new Promise(resolve => setTimeout(resolve, 200));
       
-      const canvas = await html2canvas(element, {
+      const canvas = await html2canvas(clonedElement, {
         backgroundColor: '#ffffff',
-        scale: 2,
+        scale: 3,
         logging: false,
         useCORS: true,
-        allowTaint: true,
-        foreignObjectRendering: false,
+        allowTaint: false,
+        foreignObjectRendering: true,
         imageTimeout: 15000,
         removeContainer: true,
-        onclone: (clonedDoc) => {
-          // Ensure all elements in cloned document have white background
+        width: clonedElement.scrollWidth,
+        height: clonedElement.scrollHeight,
+        windowWidth: clonedElement.scrollWidth,
+        windowHeight: clonedElement.scrollHeight,
+        onclone: (clonedDoc, element) => {
+          // Ensure body has white background
           const body = clonedDoc.body;
           if (body) {
             body.style.backgroundColor = '#ffffff';
-            // Find the main content div (the one with p-6 class)
-            const mainDiv = body.querySelector('.p-6') || body.querySelector('div');
-            if (mainDiv) {
-              mainDiv.style.backgroundColor = '#ffffff';
-              // Ensure all child elements with transparent/black backgrounds get white
-              const allElements = mainDiv.querySelectorAll('*');
-              allElements.forEach((el) => {
-                try {
-                  const styles = clonedDoc.defaultView.getComputedStyle(el);
-                  const bg = styles.backgroundColor;
-                  // If background is transparent or black, set to white
-                  if (bg === 'rgba(0, 0, 0, 0)' || bg === 'transparent' || bg === 'rgb(0, 0, 0)' || bg === 'rgba(0, 0, 0, 1)') {
-                    el.style.backgroundColor = '#ffffff';
-                  }
-                } catch (e) {
-                  // Ignore errors
-                }
-              });
-            }
+            body.style.margin = '0';
+            body.style.padding = '0';
           }
+          
+          // Ensure all elements have proper backgrounds
+          const allClonedElements = element.querySelectorAll('*');
+          allClonedElements.forEach((el) => {
+            try {
+              const styles = clonedDoc.defaultView.getComputedStyle(el);
+              const bg = styles.backgroundColor;
+              if (bg === 'rgba(0, 0, 0, 0)' || bg === 'transparent' || bg === 'rgb(0, 0, 0)' || bg === 'rgba(0, 0, 0, 1)') {
+                el.style.backgroundColor = '#ffffff';
+              }
+            } catch (e) {
+              // Ignore errors
+            }
+          });
         }
       });
       
-      // Restore original background
-      if (originalBg) {
-        element.style.backgroundColor = originalBg;
-      } else {
-        element.style.removeProperty('backgroundColor');
-      }
+      // Remove cloned element
+      document.body.removeChild(clonedElement);
       
-      // Restore original styles
-      originalStyles.forEach((styles, el) => {
-        Object.entries(styles).forEach(([prop, value]) => {
-          if (value) {
-            el.style[prop] = value;
-          } else {
-            el.style.removeProperty(prop);
-          }
-        });
-      });
-      
+      // Create download link
       const link = document.createElement('a');
       const fileName = `${selectedUnion.name.replace(/\s+/g, '_')}_ID_Card.png`;
       link.download = fileName;
-      link.href = canvas.toDataURL('image/png');
+      link.href = canvas.toDataURL('image/png', 1.0);
       link.click();
     } catch (error) {
       console.error('Error generating ID card:', error);
@@ -484,12 +478,12 @@ const DistrictDetails = () => {
 
         {/* Union Detail Modal */}
         {selectedUnion && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onClick={() => setSelectedUnion(null)}>
+          <div className="fixed inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setSelectedUnion(null)}>
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+              className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col"
               style={{ backgroundColor: '#ffffff' }}
             >
               <div className="bg-gradient-to-r from-orange-500 to-red-600 px-6 py-4 flex justify-between items-center">
@@ -511,10 +505,11 @@ const DistrictDetails = () => {
                   </button>
                 </div>
               </div>
-              <div className="p-6 relative bg-white" ref={idCardRef} style={{ backgroundColor: '#ffffff' }}>
+              <div className="p-6 relative bg-white overflow-y-auto flex-1" style={{ backgroundColor: '#ffffff' }}>
+                <div ref={idCardRef} className="relative bg-white" style={{ backgroundColor: '#ffffff', minHeight: '100%' }}>
                 {/* Transparent Logo Background */}
                 <div 
-                  className="absolute inset-0 opacity-5 pointer-events-none"
+                  className="absolute inset-0 opacity-5 pointer-events-none z-0"
                   style={{
                     backgroundImage: 'url(/ITU LOGO.png)',
                     backgroundRepeat: 'repeat',
@@ -649,6 +644,7 @@ const DistrictDetails = () => {
                       </div>
                     </div>
                   )}
+                </div>
                 </div>
                 </div>
               </div>
