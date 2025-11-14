@@ -484,7 +484,7 @@ const DistrictDetails = () => {
 
         {/* Union Detail Modal */}
         {selectedUnion && (
-          <div className="fixed inset-0 bg-gray-900 bg-opacity-30 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setSelectedUnion(null)}>
+          <div className="fixed inset-0 backdrop-blur-md z-50 flex items-center justify-center p-4" onClick={() => setSelectedUnion(null)}>
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
