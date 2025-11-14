@@ -130,10 +130,10 @@ const Districts = () => {
 
         {activeDistricts.length > 0 && (
           <div className="bg-white rounded-xl shadow-lg mb-12">
-            <div className="bg-green-500 px-6 py-4 rounded-t-xl">
-              <h2 className="text-2xl font-bold text-white">Active Districts ({activeDistricts.length})</h2>
+            <div className="bg-green-500 px-4 sm:px-6 py-3 sm:py-4 rounded-t-xl">
+              <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white">Active Districts ({activeDistricts.length})</h2>
             </div>
-            <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {activeDistricts.map((district, i) => (
                 <div 
                   key={i} 
@@ -152,10 +152,10 @@ const Districts = () => {
 
         {comingDistricts.length > 0 && (
           <div className="bg-white rounded-xl shadow-lg mb-12">
-            <div className="bg-gradient-to-r from-amber-500 to-orange-600 px-6 py-4 rounded-t-xl">
-              <h2 className="text-xl font-bold text-white">Coming Soon Districts ({comingDistricts.length})</h2>
+            <div className="bg-gradient-to-r from-amber-500 to-orange-600 px-4 sm:px-6 py-3 sm:py-4 rounded-t-xl">
+              <h2 className="text-lg sm:text-xl font-bold text-white">Coming Soon Districts ({comingDistricts.length})</h2>
             </div>
-            <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {comingDistricts.map((district, i) => (
                 <div 
                   key={i} 
