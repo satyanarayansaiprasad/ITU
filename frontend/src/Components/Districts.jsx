@@ -108,15 +108,15 @@ const Districts = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 pt-[130px] pb-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 pt-[100px] sm:pt-[120px] md:pt-[130px] pb-8 sm:pb-12 px-3 sm:px-4 md:px-6">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <button onClick={() => navigate('/state-union')} className="mb-6 text-orange-600 hover:text-orange-700 font-medium">
             ← Back to States & Union Territories
           </button>
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">{state.stateName || stateName} Districts</h1>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-4">{state.stateName || stateName} Districts</h1>
           <div className="flex items-center justify-center gap-3 mb-2">
-          <p className="text-xl text-gray-600">Total Districts: {state.districts.length}</p>
+          <p className="text-lg sm:text-xl text-gray-600">Total Districts: {state.districts.length}</p>
             {state.type === 'Union Territory' && (
               <span className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
                 Union Territory

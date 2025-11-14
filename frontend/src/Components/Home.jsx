@@ -57,11 +57,30 @@ const Home = () => {
     autoplaySpeed: 3000,
     arrows: false,
     pauseOnHover: false,
-    cssEase: "linear", // makes smooth transition
+    cssEase: "linear",
+    adaptiveHeight: true,
+    responsive: [
+      {
+        breakpoint: 768,
+        settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1,
+          adaptiveHeight: true,
+        }
+      },
+      {
+        breakpoint: 480,
+        settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1,
+          adaptiveHeight: true,
+        }
+      }
+    ]
   };
 
   return (
-      <div className="relative w-full min-h-screen flex flex-col items-center justify-center overflow-hidden safe-area-padding pt-[5px] sm:pt-[15px] md:pt-[18px]">
+      <div className="relative w-full min-h-screen flex flex-col items-center justify-center overflow-hidden safe-area-padding pt-[5px] sm:pt-[15px] md:pt-[18px] pb-4 sm:pb-8">
         {/* Background Video */}
       <video 
         autoPlay 
@@ -79,8 +98,8 @@ const Home = () => {
       <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-[#0f2658]/95 via-[#1a365d]/90 to-[#05183d]/95"></div>
 
       {/* Main Content Container */}
-      <div className="relative z-10 container-responsive flex flex-col items-center justify-center min-h-screen py-0 sm:py-4 lg:py-12 pt-0">
-        <div className="flex flex-col lg:flex-row items-center justify-between w-full gap-8 lg:gap-12">
+      <div className="relative z-10 container-responsive flex flex-col items-center justify-center min-h-screen py-4 sm:py-6 md:py-8 lg:py-12">
+        <div className="flex flex-col lg:flex-row items-center justify-between w-full gap-4 sm:gap-6 md:gap-8 lg:gap-12">
           
           {/* Left Section - Enhanced Typography */}
           <motion.div
@@ -170,14 +189,14 @@ const Home = () => {
             initial={{ opacity: 0, x: 50, scale: 0.9 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
             transition={{ duration: 1, ease: "easeOut" }}
-            className="w-full lg:w-1/2 order-1 lg:order-2 max-w-lg lg:max-w-none"
+            className="w-full lg:w-1/2 order-1 lg:order-2 max-w-full sm:max-w-lg lg:max-w-none px-2 sm:px-0"
           >
             <div className="relative">
               {/* Multiple Decorative backgrounds for depth */}
-              <div className="absolute -inset-6 bg-gradient-to-r from-orange-500/30 to-green-500/30 rounded-3xl blur-2xl animate-pulse-soft"></div>
-              <div className="absolute -inset-3 bg-gradient-to-r from-orange-400/20 to-green-400/20 rounded-2xl blur-xl"></div>
+              <div className="absolute -inset-2 sm:-inset-6 bg-gradient-to-r from-orange-500/30 to-green-500/30 rounded-3xl blur-2xl animate-pulse-soft"></div>
+              <div className="absolute -inset-1 sm:-inset-3 bg-gradient-to-r from-orange-400/20 to-green-400/20 rounded-2xl blur-xl"></div>
               
-              <div className="relative glass-effect rounded-2xl p-3 sm:p-4 border border-white/30 shadow-2xl">
+              <div className="relative glass-effect rounded-xl sm:rounded-2xl p-2 sm:p-3 md:p-4 border border-white/30 shadow-2xl">
                 {sliderImages.length > 0 ? (
                   <div className="relative">
                     <Slider {...sliderSettings}>
@@ -186,13 +205,14 @@ const Home = () => {
                         const hasError = imageLoadErrors[slider._id];
                         return (
                           <div key={slider._id || index} className="relative group">
-                            <div className="aspect-video-responsive overflow-hidden rounded-xl shadow-lg">
+                            <div className="aspect-video overflow-hidden rounded-lg sm:rounded-xl shadow-lg">
                               <img
                                 src={hasError ? "/default-image.png" : imageUrl}
                                 alt={`Indian Taekwondo Union Training Session ${index + 1} - Professional Martial Arts Training in India`}
                                 onError={() => handleImageError(slider._id)}
                                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                                 loading="lazy"
+                                style={{ maxHeight: '400px', objectFit: 'cover' }}
                               />
                               {/* Subtle overlay for better text contrast */}
                               <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
@@ -220,16 +240,16 @@ const Home = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="aspect-video-responsive bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl flex items-center justify-center">
-                    <div className="text-center text-gray-600">
+                  <div className="aspect-video bg-gradient-to-br from-gray-200 to-gray-300 rounded-lg sm:rounded-xl flex items-center justify-center">
+                    <div className="text-center text-gray-600 px-4">
                       <motion.div 
-                        className="text-5xl mb-3"
+                        className="text-3xl sm:text-5xl mb-3"
                         animate={{ rotate: [0, 10, -10, 0] }}
                         transition={{ repeat: Infinity, duration: 2 }}
                       >
                         🥋
                       </motion.div>
-                      <div className="text-sm font-medium">Loading Training Images...</div>
+                      <div className="text-xs sm:text-sm font-medium">Loading Training Images...</div>
                       <div className="text-xs text-gray-500 mt-1">Please wait</div>
                     </div>
                   </div>

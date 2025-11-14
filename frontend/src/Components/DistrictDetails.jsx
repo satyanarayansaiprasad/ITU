@@ -224,7 +224,7 @@ const DistrictDetails = () => {
   const hasData = districtHead || unions.length > 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 pt-[130px] pb-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 pt-[100px] sm:pt-[120px] md:pt-[130px] pb-8 sm:pb-12 px-3 sm:px-4 md:px-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <motion.div
@@ -239,8 +239,8 @@ const DistrictDetails = () => {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Districts
           </button>
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">{districtName}</h1>
-          <p className="text-xl text-gray-600">{stateName}</p>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-2">{districtName}</h1>
+          <p className="text-lg sm:text-xl text-gray-600">{stateName}</p>
         </motion.div>
 
         {!hasData ? (
@@ -248,26 +248,26 @@ const DistrictDetails = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-xl shadow-lg p-12 text-center"
+            className="bg-white rounded-xl shadow-lg p-6 sm:p-8 md:p-12 text-center"
           >
             <div className="max-w-2xl mx-auto">
               <div className="mb-6">
-                <Building2 className="w-20 h-20 text-gray-400 mx-auto mb-4" />
-                <h2 className="text-3xl font-bold text-gray-800 mb-4">
+                <Building2 className="w-16 h-16 sm:w-20 sm:h-20 text-gray-400 mx-auto mb-4" />
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-4">
                   No Organizations Available
                 </h2>
-                <p className="text-lg text-gray-600 mb-8">
+                <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8">
                   There are currently no organizations registered in this district.
                 </p>
               </div>
-              <div className="bg-gradient-to-r from-orange-500 to-red-600 rounded-lg p-8 text-white">
-                <h3 className="text-2xl font-bold mb-4">Join Our Organization</h3>
-                <p className="text-lg mb-6 opacity-90">
+              <div className="bg-gradient-to-r from-orange-500 to-red-600 rounded-lg p-6 sm:p-8 text-white">
+                <h3 className="text-xl sm:text-2xl font-bold mb-4">Join Our Organization</h3>
+                <p className="text-base sm:text-lg mb-6 opacity-90">
                   Be a part of the Indian Taekwondo Union. Register your organization today!
                 </p>
                 <button
                   onClick={() => navigate('/forms')}
-                  className="bg-white text-orange-600 px-8 py-3 rounded-lg font-bold text-lg hover:bg-gray-100 transition-colors flex items-center gap-2 mx-auto"
+                  className="bg-white text-orange-600 px-6 sm:px-8 py-2 sm:py-3 rounded-lg font-bold text-base sm:text-lg hover:bg-gray-100 transition-colors flex items-center gap-2 mx-auto"
                 >
                   <ExternalLink className="w-5 h-5" />
                   Fill Affiliation Form
@@ -301,7 +301,7 @@ const DistrictDetails = () => {
                           <img
                             src={getImageUrl(districtHead.generalSecretaryImage)}
                             alt="Secretary"
-                            className="w-40 h-40 rounded-lg object-cover border-4 border-orange-500 shadow-xl mx-auto"
+                            className="w-32 h-32 sm:w-40 sm:h-40 rounded-lg object-cover border-4 border-orange-500 shadow-xl mx-auto"
                             onError={(e) => {
                               e.target.style.display = 'none';
                             }}
@@ -311,7 +311,7 @@ const DistrictDetails = () => {
                       </div>
                     )}
                     <div className="flex-1">
-                      <h3 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3 leading-tight">
+                      <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 mb-3 leading-tight">
                         {districtHead.name}
                       </h3>
                       {districtHead.district && districtHead.state && (
@@ -402,12 +402,12 @@ const DistrictDetails = () => {
                 transition={{ delay: 0.2 }}
                 className="bg-white rounded-xl shadow-lg overflow-hidden"
               >
-                <div className="bg-gradient-to-r from-orange-500 to-red-600 px-6 py-4">
-                  <h2 className="text-2xl font-bold text-white">
+                <div className="bg-gradient-to-r from-orange-500 to-red-600 px-4 sm:px-6 py-3 sm:py-4">
+                  <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white">
                     Available Unions ({unions.length})
                   </h2>
                 </div>
-                <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   {unions.map((union, index) => (
                     <motion.div
                       key={union._id || index}
@@ -489,11 +489,11 @@ const DistrictDetails = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+              className="bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-2 sm:mx-4 max-h-[90vh] overflow-y-auto"
               style={{ backgroundColor: '#ffffff' }}
             >
-              <div className="bg-gradient-to-r from-orange-500 to-red-600 px-6 py-4 flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-white">Union Details</h2>
+              <div className="bg-gradient-to-r from-orange-500 to-red-600 px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center">
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white">Union Details</h2>
                 <div className="flex items-center gap-3">
                   <button
                     onClick={downloadIdCard}
@@ -511,7 +511,7 @@ const DistrictDetails = () => {
                   </button>
                 </div>
               </div>
-              <div className="p-6 relative bg-white" ref={idCardRef} style={{ backgroundColor: '#ffffff' }}>
+              <div className="p-4 sm:p-6 relative bg-white" ref={idCardRef} style={{ backgroundColor: '#ffffff' }}>
                 {/* Transparent Logo Background */}
                 <div 
                   className="absolute inset-0 opacity-5 pointer-events-none"
@@ -533,7 +533,7 @@ const DistrictDetails = () => {
                         <img
                           src={getImageUrl(selectedUnion.generalSecretaryImage)}
                           alt="Secretary"
-                          className="w-40 h-40 rounded-lg object-cover border-4 border-orange-500 shadow-xl mx-auto"
+                          className="w-32 h-32 sm:w-40 sm:h-40 rounded-lg object-cover border-4 border-orange-500 shadow-xl mx-auto"
                           onError={(e) => {
                             e.target.style.display = 'none';
                             const fallback = e.target.nextElementSibling;
@@ -558,7 +558,7 @@ const DistrictDetails = () => {
                   {/* Organization Info - Right Side */}
                   <div className="flex-1 flex flex-col justify-center">
                     <div className="flex items-start gap-3 mb-3">
-                      <h3 className="text-3xl md:text-4xl font-bold text-gray-800 leading-tight flex-1">
+                      <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 leading-tight flex-1">
                         {selectedUnion.name}
                       </h3>
                       {/* District/State Head Badges */}

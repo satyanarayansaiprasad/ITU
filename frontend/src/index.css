@@ -243,6 +243,37 @@
   }
 }
 
+/* Mobile slider fixes */
+@media (max-width: 640px) {
+  .slick-slider {
+    padding: 0 10px;
+  }
+  
+  .slick-slide {
+    padding: 0 5px;
+  }
+  
+  .slick-list {
+    margin: 0 -5px;
+  }
+  
+  /* Ensure images don't overflow on mobile */
+  .slick-slide img {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 300px;
+    object-fit: cover;
+  }
+}
+
+/* Mobile video fixes */
+@media (max-width: 768px) {
+  video {
+    object-fit: cover;
+    min-height: 100vh;
+  }
+}
+
 /* Print styles */
 @media print {
   .print-hidden {
