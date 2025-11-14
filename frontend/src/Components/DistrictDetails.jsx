@@ -63,8 +63,14 @@ const DistrictDetails = () => {
       clonedElement.style.position = 'absolute';
       clonedElement.style.left = '-9999px';
       clonedElement.style.top = '0';
-      clonedElement.style.backgroundColor = '#ffffff';
+      clonedElement.style.backgroundColor = 'transparent';
       document.body.appendChild(clonedElement);
+      
+      // Remove the logo background div for ID card (it's the first child with opacity-5)
+      const logoBgDiv = clonedElement.querySelector('.opacity-5');
+      if (logoBgDiv) {
+        logoBgDiv.remove();
+      }
       
       // Pre-process: Convert all computed styles to inline styles to avoid oklch issues
       const allElements = clonedElement.querySelectorAll('*');
@@ -73,7 +79,7 @@ const DistrictDetails = () => {
       // Helper to convert color using canvas
       const convertColor = (colorValue) => {
         if (!colorValue || colorValue === 'transparent' || colorValue === 'rgba(0, 0, 0, 0)') {
-          return '#ffffff';
+          return 'transparent';
         }
         if (typeof colorValue === 'string' && colorValue.toLowerCase().includes('oklch')) {
           try {
@@ -90,7 +96,7 @@ const DistrictDetails = () => {
             }
             return `rgb(${r}, ${g}, ${b})`;
           } catch (e) {
-            return '#ffffff';
+            return 'transparent';
           }
         }
         return colorValue;
@@ -125,14 +131,14 @@ const DistrictDetails = () => {
             el.style.backgroundImage = 'none';
             const bgColor = convertColor(styles.backgroundColor);
             styleMap.backgroundColor = el.style.backgroundColor || '';
-            el.style.backgroundColor = bgColor || '#ffffff';
+            el.style.backgroundColor = bgColor || 'transparent';
           }
           
-          // Ensure white background for transparent/black backgrounds
+          // Only fix black backgrounds, keep transparent as transparent
           const bg = styles.backgroundColor;
-          if (bg === 'rgba(0, 0, 0, 0)' || bg === 'transparent' || bg === 'rgb(0, 0, 0)' || bg === 'rgba(0, 0, 0, 1)') {
+          if (bg === 'rgb(0, 0, 0)' || bg === 'rgba(0, 0, 0, 1)') {
             styleMap.backgroundColor = el.style.backgroundColor || '';
-            el.style.backgroundColor = '#ffffff';
+            el.style.backgroundColor = 'transparent';
           }
           
           if (Object.keys(styleMap).length > 0) {
@@ -143,14 +149,14 @@ const DistrictDetails = () => {
         }
       });
       
-      // Ensure cloned element has white background
-      clonedElement.style.backgroundColor = '#ffffff';
+      // Ensure cloned element has transparent background
+      clonedElement.style.backgroundColor = 'transparent';
       
       // Wait for styles to apply
       await new Promise(resolve => setTimeout(resolve, 200));
       
       const canvas = await html2canvas(clonedElement, {
-        backgroundColor: '#ffffff',
+        backgroundColor: null, // Transparent background
         scale: 3,
         logging: false,
         useCORS: true,
@@ -163,22 +169,23 @@ const DistrictDetails = () => {
         windowWidth: clonedElement.scrollWidth,
         windowHeight: clonedElement.scrollHeight,
         onclone: (clonedDoc, element) => {
-          // Ensure body has white background
+          // Ensure body has transparent background
           const body = clonedDoc.body;
           if (body) {
-            body.style.backgroundColor = '#ffffff';
+            body.style.backgroundColor = 'transparent';
             body.style.margin = '0';
             body.style.padding = '0';
           }
           
-          // Ensure all elements have proper backgrounds
+          // Only fix black backgrounds, keep transparent as transparent
           const allClonedElements = element.querySelectorAll('*');
           allClonedElements.forEach((el) => {
             try {
               const styles = clonedDoc.defaultView.getComputedStyle(el);
               const bg = styles.backgroundColor;
-              if (bg === 'rgba(0, 0, 0, 0)' || bg === 'transparent' || bg === 'rgb(0, 0, 0)' || bg === 'rgba(0, 0, 0, 1)') {
-                el.style.backgroundColor = '#ffffff';
+              // Only change black backgrounds to transparent
+              if (bg === 'rgb(0, 0, 0)' || bg === 'rgba(0, 0, 0, 1)') {
+                el.style.backgroundColor = 'transparent';
               }
             } catch (e) {
               // Ignore errors
