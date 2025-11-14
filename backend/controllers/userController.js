@@ -166,15 +166,23 @@ exports.uploadLogo = async (req, res) => {
     const { id } = req.params;
     const file = req.file;
     
-    console.log('Upload Logo Request:', { id, file: file ? { filename: file.filename, size: file.size, mimetype: file.mimetype } : null });
+    console.log('Upload Logo Request:', { id, file: file ? { filename: file.filename, size: file.size, mimetype: file.mimetype, path: file.path } : null });
     
     if (!file) {
       console.error('No file received in uploadLogo');
       return res.status(400).json({ success: false, error: "No file uploaded" });
     }
     
-    const imageUrl = `uploads/${file.filename}`;
-    console.log('Saving logo to database:', { id, imageUrl });
+    // Save path with folder structure: uploads/logos/filename
+    const imageUrl = `uploads/logos/${file.filename}`;
+    console.log('Saving logo to database:', { id, imageUrl, filePath: file.path });
+    
+    // Verify file was actually saved
+    const filePath = path.join(__dirname, '..', 'uploads', 'logos', file.filename);
+    if (!fs.existsSync(filePath)) {
+      console.error('File was not saved to disk:', filePath);
+      return res.status(500).json({ success: false, error: "File upload failed - file not saved" });
+    }
     
     const updatedProfile = await AccelerationForm.findByIdAndUpdate(
       id,
@@ -187,7 +195,14 @@ exports.uploadLogo = async (req, res) => {
       return res.status(404).json({ success: false, error: "State union not found" });
     }
     
-    console.log('Logo saved successfully:', { id, logo: updatedProfile.logo });
+    // Verify the field was actually updated
+    const verifyProfile = await AccelerationForm.findById(id);
+    console.log('Logo saved successfully:', { 
+      id, 
+      logo: updatedProfile.logo,
+      verified: verifyProfile.logo,
+      fileExists: fs.existsSync(filePath)
+    });
     
     res.status(200).json({ 
       success: true, 
@@ -206,18 +221,19 @@ exports.uploadGeneralSecretaryImage = async (req, res) => {
     const { id } = req.params;
     const file = req.file;
     
-    console.log('Upload General Secretary Image Request:', { id, file: file ? { filename: file.filename, size: file.size, mimetype: file.mimetype } : null });
+    console.log('Upload General Secretary Image Request:', { id, file: file ? { filename: file.filename, size: file.size, mimetype: file.mimetype, path: file.path } : null });
     
     if (!file) {
       console.error('No file received in uploadGeneralSecretaryImage');
       return res.status(400).json({ success: false, error: "No file uploaded" });
     }
     
-    const imageUrl = `uploads/${file.filename}`;
+    // Save path with folder structure: uploads/secretary-images/filename
+    const imageUrl = `uploads/secretary-images/${file.filename}`;
     console.log('Saving general secretary image to database:', { id, imageUrl, filePath: file.path });
     
     // Verify file was actually saved
-    const filePath = path.join(__dirname, '..', 'uploads', file.filename);
+    const filePath = path.join(__dirname, '..', 'uploads', 'secretary-images', file.filename);
     if (!fs.existsSync(filePath)) {
       console.error('File was not saved to disk:', filePath);
       return res.status(500).json({ success: false, error: "File upload failed - file not saved" });

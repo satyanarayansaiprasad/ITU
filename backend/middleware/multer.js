@@ -2,16 +2,31 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
-// Ensure upload directory exists
+// Ensure upload directories exist
 const uploadDir = path.join(__dirname, "../uploads");
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+const logosDir = path.join(__dirname, "../uploads/logos");
+const secretaryImagesDir = path.join(__dirname, "../uploads/secretary-images");
+
+// Create directories if they don't exist
+[uploadDir, logosDir, secretaryImagesDir].forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+});
 
 // Multer storage config
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadDir);
+    // Determine destination folder based on field name
+    let destinationFolder = uploadDir;
+    
+    if (file.fieldname === 'logo') {
+      destinationFolder = logosDir;
+    } else if (file.fieldname === 'generalSecretaryImage') {
+      destinationFolder = secretaryImagesDir;
+    }
+    
+    cb(null, destinationFolder);
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
