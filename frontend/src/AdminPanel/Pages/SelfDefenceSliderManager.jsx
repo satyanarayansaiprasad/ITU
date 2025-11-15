@@ -6,26 +6,23 @@ import {
   Upload,
   Image as ImageIcon,
   Trash2,
-  Edit3,
   Eye,
   X,
-  Plus,
   Save,
   RotateCcw,
   AlertCircle,
   CheckCircle,
   Loader,
-  Download,
   Grid3X3,
   List,
   Search,
-  Filter
+  Shield
 } from 'lucide-react';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
                     (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-r1qa.onrender.com');
 
-const ModernSliderManager = () => {
+const SelfDefenceSliderManager = () => {
   const [sliderImages, setSliderImages] = useState([]);
   const [newImages, setNewImages] = useState([]);
   const [previews, setPreviews] = useState([]);
@@ -34,7 +31,6 @@ const ModernSliderManager = () => {
   const [deleteLoading, setDeleteLoading] = useState(null);
   const [viewMode, setViewMode] = useState('grid');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedImages, setSelectedImages] = useState([]);
   const [showPreview, setShowPreview] = useState(null);
   const [notification, setNotification] = useState(null);
   const [dragActive, setDragActive] = useState(false);
@@ -76,10 +72,10 @@ const ModernSliderManager = () => {
   const fetchSliders = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(API_ENDPOINTS.GET_SLIDER);
+      const response = await axios.get(API_ENDPOINTS.GET_SELF_DEFENCE_SLIDER);
       setSliderImages(response.data || []);
     } catch (error) {
-      console.error('Error fetching sliders:', error);
+      console.error('Error fetching self defence sliders:', error);
       showNotification('Failed to fetch slider images', 'error');
     } finally {
       setLoading(false);
@@ -160,7 +156,7 @@ const ModernSliderManager = () => {
       const uploadPromises = newImages.map(async (file) => {
         const formData = new FormData();
         formData.append('image', file);
-        return axios.post(API_ENDPOINTS.UPLOAD_SLIDER, formData, {
+        return axios.post(API_ENDPOINTS.UPLOAD_SELF_DEFENCE_SLIDER, formData, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
       });
@@ -184,7 +180,7 @@ const ModernSliderManager = () => {
 
     try {
       setDeleteLoading(id);
-      await axios.delete(API_ENDPOINTS.DELETE_SLIDER(id));
+      await axios.delete(API_ENDPOINTS.DELETE_SELF_DEFENCE_SLIDER(id));
       await fetchSliders();
       showNotification('Image deleted successfully!');
     } catch (error) {
@@ -269,8 +265,11 @@ const ModernSliderManager = () => {
         >
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Slider Management</h1>
-              <p className="text-gray-600">Manage homepage slider images with drag & drop support</p>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+                <Shield className="text-orange-500" size={32} />
+                Self Defence Slider Management
+              </h1>
+              <p className="text-gray-600">Manage self defence section slider images with drag & drop support</p>
             </div>
             
             <div className="flex items-center gap-3">
@@ -278,7 +277,7 @@ const ModernSliderManager = () => {
                 <button
                   onClick={() => setViewMode('grid')}
                   className={`p-2 rounded-md transition-colors ${
-                    viewMode === 'grid' ? 'bg-red-500 text-white' : 'text-gray-500 hover:text-gray-700'
+                    viewMode === 'grid' ? 'bg-orange-500 text-white' : 'text-gray-500 hover:text-gray-700'
                   }`}
                 >
                   <Grid3X3 size={16} />
@@ -286,7 +285,7 @@ const ModernSliderManager = () => {
                 <button
                   onClick={() => setViewMode('list')}
                   className={`p-2 rounded-md transition-colors ${
-                    viewMode === 'list' ? 'bg-red-500 text-white' : 'text-gray-500 hover:text-gray-700'
+                    viewMode === 'list' ? 'bg-orange-500 text-white' : 'text-gray-500 hover:text-gray-700'
                   }`}
                 >
                   <List size={16} />
@@ -312,7 +311,7 @@ const ModernSliderManager = () => {
               placeholder="Search slider images..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             />
           </div>
         </motion.div>
@@ -325,8 +324,8 @@ const ModernSliderManager = () => {
           transition={{ delay: 0.1 }}
         >
           <div className="flex items-center gap-2 mb-6">
-            <Upload className="text-red-500" size={24} />
-            <h2 className="text-xl font-bold text-gray-900">Upload New Slider Image</h2>
+            <Upload className="text-orange-500" size={24} />
+            <h2 className="text-xl font-bold text-gray-900">Upload New Self Defence Slider Image</h2>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -335,8 +334,8 @@ const ModernSliderManager = () => {
               <div
                 className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all ${
                   dragActive 
-                    ? 'border-red-500 bg-red-50' 
-                    : 'border-gray-300 hover:border-red-400 hover:bg-red-50'
+                    ? 'border-orange-500 bg-orange-50' 
+                    : 'border-gray-300 hover:border-orange-400 hover:bg-orange-50'
                 }`}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}
@@ -371,7 +370,7 @@ const ModernSliderManager = () => {
                   <button
                     onClick={handleUpload}
                     disabled={uploadLoading}
-                    className="flex items-center gap-2 px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50"
+                    className="flex items-center gap-2 px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
                   >
                     {uploadLoading ? (
                       <Loader size={16} className="animate-spin" />
@@ -440,19 +439,13 @@ const ModernSliderManager = () => {
         >
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-900">
-              Current Slider Images ({filteredImages.length})
+              Current Self Defence Slider Images ({filteredImages.length})
             </h2>
-            {selectedImages.length > 0 && (
-              <button className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
-                <Trash2 size={16} />
-                Delete Selected ({selectedImages.length})
-              </button>
-            )}
           </div>
 
           {loading ? (
             <div className="flex items-center justify-center py-20">
-              <Loader size={32} className="animate-spin text-red-500" />
+              <Loader size={32} className="animate-spin text-orange-500" />
               <span className="ml-3 text-gray-600">Loading images...</span>
             </div>
           ) : filteredImages.length === 0 ? (
@@ -461,7 +454,7 @@ const ModernSliderManager = () => {
                 <ImageIcon size={32} className="text-gray-400" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">No slider images found</h3>
-              <p className="text-gray-500">Upload your first slider image to get started</p>
+              <p className="text-gray-500">Upload your first self defence slider image to get started</p>
             </div>
           ) : (
             <div className={
@@ -481,7 +474,7 @@ const ModernSliderManager = () => {
                   <div className={`relative ${viewMode === 'list' ? 'w-24 h-16 flex-shrink-0' : 'aspect-video'}`}>
                     <img
                       src={getImageUrl(image.filename)}
-                      alt={`Slider ${index + 1}`}
+                      alt={`Self Defence Slider ${index + 1}`}
                       className="w-full h-full object-cover bg-gray-100"
                       onError={(e) => {
                         e.target.style.display = 'none';
@@ -596,4 +589,5 @@ const ModernSliderManager = () => {
   );
 };
 
-export default ModernSliderManager;
+export default SelfDefenceSliderManager;
+

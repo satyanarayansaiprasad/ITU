@@ -22,6 +22,7 @@ import ModernAdminDash from './AdminPanel/Pages/ModernAdminDash';
 import ModernViewContact from './AdminPanel/Pages/ModernViewContact';
 import ModernNewsManager from './AdminPanel/Pages/ModernNewsManager';
 import ModernSliderManager from './AdminPanel/Pages/ModernSliderManager';
+import SelfDefenceSliderManager from './AdminPanel/Pages/SelfDefenceSliderManager';
 import ModernGalleryMng from './AdminPanel/Pages/ModernGalleryMng';
 import Form from './Components/Form';
 import ModernFormSubmissions from './AdminPanel/Pages/ModernFormSubmissions';
@@ -70,6 +71,7 @@ const App = () => {
   <Route path="/admin/view-contacts" element={<ModernViewContact />} />
   <Route path="/admin/blogs" element={<ModernNewsManager />} />
   <Route path="/admin/slider-management" element={<ModernSliderManager />} />
+  <Route path="/admin/self-defence-slider" element={<SelfDefenceSliderManager />} />
   <Route path="/admin/gallery" element={<ModernGalleryMng />} />
   <Route path="/admin/form-submissions" element={<ModernFormSubmissions />} />
   <Route path="/admin/states-districts" element={<ModernStatesDistrictsManager />} />

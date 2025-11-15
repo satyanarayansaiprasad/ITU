@@ -24,6 +24,12 @@ router.get('/getGallery', adminController.getGallery);
  router.put('/editGallery/:id', upload.single('image'), adminController.updateGallery);
 router.delete('/deleteGallery/:id', adminController.deleteGallery);
 
+// Self Defence Slider routes
+router.post('/uploadSelfDefenceSlider', upload.single('image'), adminController.createSelfDefenceSlider);
+router.get('/getSelfDefenceSlider', adminController.getSelfDefenceSliders);
+router.put('/editSelfDefenceSlider/:id', upload.single('image'), adminController.updateSelfDefenceSlider);
+router.delete('/deleteSelfDefenceSlider/:id', adminController.deleteSelfDefenceSlider);
+
 
 
 

@@ -13,6 +13,7 @@ import {
   LogOut,
   MapPin,
   Crown,
+  Shield,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -25,6 +26,7 @@ const AdminLayout = () => {
   const navItems = [
     { title: "Dashboard", icon: <LayoutDashboard className="w-5 h-5" />, path: "/admindashboard" },
     { title: "Slider Management", icon: <Image className="w-5 h-5" />, path: "/admin/slider-management" },
+    { title: "Self Defence Slider", icon: <Shield className="w-5 h-5" />, path: "/admin/self-defence-slider" },
     { title: "Contact Submissions", icon: <Mail className="w-5 h-5" />, path: "/admin/view-contacts" },
     { title: "Blog Management", icon: <Newspaper className="w-5 h-5" />, path: "/admin/blogs" },
     { title: "Gallery Management", icon: <GalleryVerticalEnd className="w-5 h-5" />, path: "/admin/gallery" },

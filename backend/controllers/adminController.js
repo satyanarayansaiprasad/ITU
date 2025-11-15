@@ -3,6 +3,7 @@ const News =require('../models/News')
  const Contact =require('../models/Contact')
  const Slider = require('../models/Slider');
  const Gallery=require('../models/Gallery')
+ const SelfDefenceSlider = require('../models/SelfDefenceSlider');
  const path=require("path")
  const multer = require('multer');
  const fs = require('fs');
@@ -538,7 +539,131 @@ exports.deleteGallery = async (req, res) => {
   }
 };
 
+// ========== SELF DEFENCE SLIDER MANAGEMENT ==========
 
+// POST: Upload a new self defence slider image with Cloudinary
+exports.createSelfDefenceSlider = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "No image uploaded"
+      });
+    }
+
+    // Upload to Cloudinary
+    const cloudinaryResult = await uploadBufferToCloudinary(
+      req.file.buffer,
+      'itu/self-defence-sliders',
+      `self-defence-slider-${Date.now()}`
+    );
+
+    // Save Cloudinary URL to database
+    const newSlider = new SelfDefenceSlider({
+      filename: cloudinaryResult.url, // Store Cloudinary URL instead of filename
+      cloudinaryPublicId: cloudinaryResult.public_id, // Store public_id for deletion
+      uploadedAt: new Date()
+    });
+
+    await newSlider.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Self Defence slider uploaded successfully to Cloudinary",
+      slider: newSlider
+    });
+  } catch (error) {
+    console.error("Self Defence Slider upload error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to upload self defence slider",
+      error: error.message
+    });
+  }
+};
+
+// GET: Get all self defence slider images
+exports.getSelfDefenceSliders = async (req, res) => {
+  try {
+    const sliders = await SelfDefenceSlider.find().sort({ uploadedAt: -1 });
+    res.status(200).json(sliders);
+  } catch (error) {
+    console.error("Fetch error:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+// PUT: Update a self defence slider image by replacing the image
+exports.updateSelfDefenceSlider = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const slider = await SelfDefenceSlider.findById(id);
+
+    if (!slider) return res.status(404).json({ success: false, message: "Self Defence slider not found" });
+
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No image uploaded" });
+    }
+
+    // Delete old image from Cloudinary if it exists
+    if (slider.cloudinaryPublicId) {
+      try {
+        await deleteFromCloudinary(slider.cloudinaryPublicId);
+      } catch (error) {
+        console.error("Error deleting old Cloudinary image:", error);
+        // Continue even if deletion fails
+      }
+    }
+
+    // Upload new image to Cloudinary
+    const cloudinaryResult = await uploadBufferToCloudinary(
+      req.file.buffer,
+      'itu/self-defence-sliders',
+      `self-defence-slider-${Date.now()}`
+    );
+
+    // Update slider with new Cloudinary URL
+    slider.filename = cloudinaryResult.url;
+    slider.cloudinaryPublicId = cloudinaryResult.public_id;
+    slider.uploadedAt = new Date();
+    await slider.save();
+
+    res.status(200).json({ success: true, message: "Self Defence slider updated", slider });
+  } catch (error) {
+    console.error("Update error:", error);
+    res.status(500).json({ success: false, message: "Internal server error", error: error.message });
+  }
+};
+
+// DELETE: Delete a self defence slider image from Cloudinary
+exports.deleteSelfDefenceSlider = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const slider = await SelfDefenceSlider.findById(id);
+
+    if (!slider) {
+      return res.status(404).json({ success: false, message: "Self Defence slider not found" });
+    }
+
+    // Delete from Cloudinary if public_id exists
+    if (slider.cloudinaryPublicId) {
+      try {
+        await deleteFromCloudinary(slider.cloudinaryPublicId);
+      } catch (error) {
+        console.error("Error deleting from Cloudinary:", error);
+        // Continue with database deletion even if Cloudinary deletion fails
+      }
+    }
+
+    // Delete from database
+    await SelfDefenceSlider.findByIdAndDelete(id);
+
+    res.json({ success: true, message: "Self Defence slider deleted successfully from Cloudinary and database" });
+  } catch (error) {
+    console.error("Delete error:", error);
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
+  }
+};
 
 //UserApproved
 
