@@ -1,5 +1,18 @@
 // API Configuration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+// Auto-detect production vs localhost
+const getApiBaseUrl = () => {
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+  // Check if we're running on localhost
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    return 'http://localhost:3001';
+  }
+  // Default to production URL
+  return 'https://itu-r1qa.onrender.com';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 export const API_ENDPOINTS = {
   // Admin endpoints

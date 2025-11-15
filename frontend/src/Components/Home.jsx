@@ -49,15 +49,17 @@ const Home = () => {
     }
     // If filename already includes uploads/, use it directly
     if (filename.startsWith('uploads/')) {
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://itu-r1qa.onrender.com';
       return `${baseUrl}/${filename}`;
     }
     // Construct the URL - ensure we're using the correct path
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+    // Use production URL as default for deployed sites
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 
+                    (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-r1qa.onrender.com');
     // Remove any leading slashes from filename
     const cleanFilename = filename.replace(/^\/+/, '');
     const imageUrl = `${baseUrl}/uploads/${cleanFilename}`;
-    console.log("Constructed image URL:", imageUrl, "from filename:", filename);
+    console.log("Constructed image URL:", imageUrl, "from filename:", filename, "baseUrl:", baseUrl);
     return imageUrl;
   };
 
