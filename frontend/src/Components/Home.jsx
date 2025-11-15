@@ -31,6 +31,7 @@ const Home = () => {
   const fetchSliders = async () => {
     try {
       const res = await axios.get(API_ENDPOINTS.GET_SLIDER);
+      console.log("Slider data received:", res.data);
       setSliderImages(res.data || []);
     } catch (err) {
       console.error("Failed to fetch sliders:", err);
@@ -38,9 +39,26 @@ const Home = () => {
   };
 
   const getImageUrl = (filename) => {
-    if (!filename) return "/default-image.png";
-    if (/^(https?|data):/i.test(filename)) return filename;
-    return GET_UPLOAD_URL(filename);
+    if (!filename) {
+      console.warn("No filename provided for slider image");
+      return "/default-image.png";
+    }
+    // If it's already a full URL, return as is
+    if (/^(https?|data):/i.test(filename)) {
+      return filename;
+    }
+    // If filename already includes uploads/, use it directly
+    if (filename.startsWith('uploads/')) {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+      return `${baseUrl}/${filename}`;
+    }
+    // Construct the URL - ensure we're using the correct path
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+    // Remove any leading slashes from filename
+    const cleanFilename = filename.replace(/^\/+/, '');
+    const imageUrl = `${baseUrl}/uploads/${cleanFilename}`;
+    console.log("Constructed image URL:", imageUrl, "from filename:", filename);
+    return imageUrl;
   };
 
   const handleImageError = (id) => {
@@ -203,13 +221,29 @@ const Home = () => {
                       {sliderImages.map((slider, index) => {
                         const imageUrl = getImageUrl(slider.filename);
                         const hasError = imageLoadErrors[slider._id];
+                        console.log(`Slider ${index}:`, { 
+                          id: slider._id, 
+                          filename: slider.filename, 
+                          imageUrl, 
+                          hasError 
+                        });
                         return (
                           <div key={slider._id || index} className="relative group">
                             <div className="aspect-video overflow-hidden rounded-lg sm:rounded-xl shadow-lg">
                               <img
                                 src={hasError ? "/default-image.png" : imageUrl}
                                 alt={`Indian Taekwondo Union Training Session ${index + 1} - Professional Martial Arts Training in India`}
-                                onError={() => handleImageError(slider._id)}
+                                onError={(e) => {
+                                  console.error("Image load error:", { 
+                                    src: e.target.src, 
+                                    filename: slider.filename,
+                                    sliderId: slider._id 
+                                  });
+                                  handleImageError(slider._id);
+                                }}
+                                onLoad={() => {
+                                  console.log("Image loaded successfully:", imageUrl);
+                                }}
                                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
                                 loading="lazy"
                                 style={{ maxHeight: '400px', objectFit: 'cover' }}
