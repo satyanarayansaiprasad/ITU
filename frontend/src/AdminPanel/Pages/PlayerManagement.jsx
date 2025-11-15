@@ -94,6 +94,58 @@ const PlayerManagement = () => {
     }
   };
 
+  const handleApproveSingle = async (playerId) => {
+    if (!window.confirm("Are you sure you want to approve this player? They will receive a welcome email with their credentials.")) {
+      return;
+    }
+
+    try {
+      setApproving(true);
+      const response = await axios.post(API_ENDPOINTS.APPROVE_PLAYERS, {
+        playerIds: [playerId]
+      });
+
+      if (response.data.success) {
+        toast.success("Player approved successfully! Welcome email sent.");
+        setSelectedPlayers(selectedPlayers.filter(id => id !== playerId));
+        await fetchPlayers();
+      } else {
+        toast.error(response.data.error || "Failed to approve player");
+      }
+    } catch (error) {
+      console.error("Error approving player:", error);
+      toast.error(error.response?.data?.error || "Failed to approve player");
+    } finally {
+      setApproving(false);
+    }
+  };
+
+  const handleRejectSingle = async (playerId) => {
+    const reason = window.prompt("Please provide a reason for rejection (optional):");
+    if (reason === null) return; // User cancelled
+
+    if (!window.confirm("Are you sure you want to reject this player?")) {
+      return;
+    }
+
+    try {
+      const response = await axios.post(API_ENDPOINTS.REJECT_PLAYERS, {
+        playerIds: [playerId],
+        reason: reason || "Not specified"
+      });
+
+      if (response.data.success) {
+        toast.success("Player rejected successfully");
+        await fetchPlayers();
+      } else {
+        toast.error(response.data.error || "Failed to reject player");
+      }
+    } catch (error) {
+      console.error("Error rejecting player:", error);
+      toast.error(error.response?.data?.error || "Failed to reject player");
+    }
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -160,18 +212,18 @@ const PlayerManagement = () => {
               </select>
             </div>
 
-            {filter === "pending" && pendingCount > 0 && (
+            {pendingCount > 0 && (
               <div className="flex items-center gap-3">
                 <button
                   onClick={handleSelectAll}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
                 >
                   {selectedPlayers.length === pendingCount ? (
-                    <CheckSquare className="inline mr-2" size={16} />
+                    <CheckSquare size={16} />
                   ) : (
-                    <Square className="inline mr-2" size={16} />
+                    <Square size={16} />
                   )}
-                  Select All ({pendingCount})
+                  Select All Pending ({pendingCount})
                 </button>
                 <button
                   onClick={handleApproveAll}
@@ -229,7 +281,7 @@ const PlayerManagement = () => {
 
                   <div className="flex-1">
                     <div className="flex items-start justify-between mb-4">
-                      <div>
+                      <div className="flex-1">
                         <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                           {player.name}
                           {player.playerId && (
@@ -252,6 +304,32 @@ const PlayerManagement = () => {
                           </span>
                         </div>
                       </div>
+                      
+                      {/* Action Buttons */}
+                      {player.status === "pending" && (
+                        <div className="flex items-center gap-2 ml-4">
+                          <button
+                            onClick={() => handleApproveSingle(player._id)}
+                            disabled={approving}
+                            className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {approving ? (
+                              <Loader className="animate-spin" size={16} />
+                            ) : (
+                              <CheckCircle size={16} />
+                            )}
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => handleRejectSingle(player._id)}
+                            disabled={approving}
+                            className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <XCircle size={16} />
+                            Reject
+                          </button>
+                        </div>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
