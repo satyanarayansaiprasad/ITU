@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import React from "react";
 import Carousel from "react-multi-carousel";
 import "react-multi-carousel/lib/styles.css";
+import axios from "axios";
+import { API_ENDPOINTS } from "../config/api";
 import {
   GiHighKick,
   GiPunchBlast,
@@ -22,19 +24,6 @@ const categories = [
  
 ];
 
-const slides = [
-  { text: "How to master Taekwondo kicks", image: "/c1.webp" },
-  { text: "Best protective gear for training", image: "/c2.webp" },
-  { text: "Rules of international competitions", image: "/c3.webp" },
-  { text: "Belt ranking system explained", image: "/c1.webp" },
-  { text: "Advanced self-defense techniques", image: "/c4.webp" },
-  { text: "Taekwondo training drills", image: "/c3.webp" },
-  { text: "Competition strategies", image: "/c4.webp" },
-  { text: "Choosing the right sparring gear", image: "/c2.webp" },
-  { text: "Taekwondo history & origins", image: "/c3.webp" },
-  { text: "Mental discipline in martial arts", image: "/c5.webp" },
-];
-
 const responsive = {
   superLargeDesktop: { breakpoint: { max: 4000, min: 1280 }, items: 4 },
   desktop: { breakpoint: { max: 1280, min: 1024 }, items: 3 },
@@ -42,8 +31,41 @@ const responsive = {
   mobile: { breakpoint: { max: 640, min: 0 }, items: 1 },
 };
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
+                    (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-r1qa.onrender.com');
+
 export default function Category() {
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [slides, setSlides] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchCategorySliders();
+  }, []);
+
+  const fetchCategorySliders = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(API_ENDPOINTS.GET_CATEGORY_SLIDER);
+      if (response.data && Array.isArray(response.data)) {
+        setSlides(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching category sliders:', error);
+      // Fallback to empty array if API fails
+      setSlides([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getImageUrl = (image) => {
+    if (!image) return '/api/placeholder/400/300';
+    if (/^(https?|data):/i.test(image)) return image;
+    if (image.startsWith('uploads/')) return `${API_BASE_URL}/${image}`;
+    const cleanImage = image.replace(/^\/+/, '');
+    return `${API_BASE_URL}/uploads/${cleanImage}`;
+  };
 
   return (
     <div className="flex flex-col h-auto lg:flex-row lg:min-h-auto justify-between p-6 gap-8">
@@ -73,28 +95,50 @@ export default function Category() {
 
       {/* Right Carousel Section */}
       <div className="w-full lg:w-3/5 lg:py-30">
-        <Carousel
-          responsive={responsive}
-          infinite={true}
-          autoPlay={true}
-          autoPlaySpeed={3000}
-          showDots={false}
-          arrows={false}
-          containerClass="carousel-container"
-        >
-          {slides.map((slide, index) => (
-            <div key={index} className="relative p-2">
-              <img
-                src={slide.image}
-                alt={slide.text}
-                className="rounded-lg shadow-lg w-full h-[300px] sm:h-[400px] object-cover"
-              />
-              <p className="absolute bottom-4 left-4 bg-black bg-opacity-70 text-white p-2 rounded-md text-sm sm:text-base">
-                {slide.text}
-              </p>
+        {loading ? (
+          <div className="flex items-center justify-center h-[300px] sm:h-[400px]">
+            <div className="text-gray-500">Loading slider...</div>
+          </div>
+        ) : slides.length === 0 ? (
+          <div className="flex items-center justify-center h-[300px] sm:h-[400px] bg-gray-100 rounded-lg">
+            <div className="text-gray-500 text-center">
+              <p className="text-lg mb-2">No slider items available</p>
+              <p className="text-sm">Admin can add items from the admin panel</p>
             </div>
-          ))}
-        </Carousel>
+          </div>
+        ) : (
+          <Carousel
+            responsive={responsive}
+            infinite={slides.length > 1}
+            autoPlay={slides.length > 1}
+            autoPlaySpeed={3000}
+            showDots={false}
+            arrows={false}
+            containerClass="carousel-container"
+          >
+            {slides.map((slide, index) => (
+              <div key={slide._id || index} className="relative p-2">
+                <div className="relative w-full h-[300px] sm:h-[400px] rounded-lg shadow-lg overflow-hidden bg-black">
+                  <img
+                    src={getImageUrl(slide.image)}
+                    alt={slide.text || `Category slider ${index + 1}`}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      console.error('Image failed to load:', slide.image);
+                    }}
+                  />
+                  {/* Black background overlay with text */}
+                  {slide.text && (
+                    <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-80 text-white p-4">
+                      <p className="text-sm sm:text-base font-medium">{slide.text}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </Carousel>
+        )}
       </div>
     </div>
   );

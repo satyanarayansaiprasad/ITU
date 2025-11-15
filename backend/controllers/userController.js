@@ -2,6 +2,7 @@ const Contact = require("../models/Contact");
 // const Form = require("../models/Form");
 
 const AccelerationForm = require("../models/AccelerationForm"); // update path as needed
+const Player = require("../models/Players");
 
 const generatePassword = require("../utils/passwordGenerator");
 const path = require("path");
@@ -341,6 +342,286 @@ exports.getStateUnionById = async (req, res) => {
   } catch (error) {
     console.error("Error fetching state union:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// ========== PLAYER REGISTRATION ==========
+
+// Register multiple players at once
+exports.registerPlayers = async (req, res) => {
+  try {
+    const { state, district, players } = req.body;
+
+    // Validate required fields
+    if (!state || !district || !players || !Array.isArray(players) || players.length === 0) {
+      return res.status(400).json({ 
+        success: false,
+        error: "State, district, and at least one player are required" 
+      });
+    }
+
+    // Validate each player
+    const validatedPlayers = [];
+    const errors = [];
+
+    for (let i = 0; i < players.length; i++) {
+      const player = players[i];
+      
+      if (!player.name || !player.email || !player.phone || !player.address || 
+          !player.dob || !player.beltLevel || !player.yearsOfExperience) {
+        errors.push(`Player ${i + 1}: All fields are required`);
+        continue;
+      }
+
+      // Check if email already exists
+      const existingPlayer = await Player.findOne({ 
+        email: player.email.toLowerCase().trim() 
+      });
+      
+      if (existingPlayer) {
+        errors.push(`Player ${i + 1} (${player.email}): Email already exists`);
+        continue;
+      }
+
+      validatedPlayers.push({
+        name: player.name.trim(),
+        email: player.email.toLowerCase().trim(),
+        phone: player.phone.toString(),
+        state: state,
+        district: district,
+        address: player.address.trim(),
+        dob: new Date(player.dob),
+        beltLevel: player.beltLevel.trim(),
+        yearsOfExperience: parseInt(player.yearsOfExperience) || 0,
+        status: 'pending'
+      });
+    }
+
+    if (validatedPlayers.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: "No valid players to register",
+        errors: errors
+      });
+    }
+
+    // Insert all valid players
+    const savedPlayers = await Player.insertMany(validatedPlayers);
+
+    res.status(201).json({
+      success: true,
+      message: `${savedPlayers.length} player(s) registered successfully`,
+      data: savedPlayers,
+      errors: errors.length > 0 ? errors : undefined
+    });
+  } catch (error) {
+    console.error("Error registering players:", error);
+    
+    if (error.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        error: "One or more players with this email already exist"
+      });
+    }
+    
+    res.status(500).json({
+      success: false,
+      error: "Internal server error",
+      details: error.message
+    });
+  }
+};
+
+// Player login
+exports.playerLogin = async (req, res) => {
+  try {
+    const { playerId, password } = req.body;
+
+    if (!playerId || !password) {
+      return res.status(400).json({
+        success: false,
+        error: "Player ID and password are required"
+      });
+    }
+
+    // Find player by playerId or email
+    const player = await Player.findOne({
+      $or: [
+        { playerId: playerId.trim() },
+        { email: playerId.toLowerCase().trim() }
+      ]
+    });
+
+    if (!player) {
+      return res.status(404).json({
+        success: false,
+        error: "Invalid Player ID or email"
+      });
+    }
+
+    // Check if player is approved
+    if (player.status !== 'approved') {
+      return res.status(403).json({
+        success: false,
+        error: "Your registration is pending approval"
+      });
+    }
+
+    // Check if password is set
+    if (!player.password) {
+      return res.status(403).json({
+        success: false,
+        error: "Your account is not activated. Please contact administrator."
+      });
+    }
+
+    // Verify password
+    if (player.password !== password) {
+      return res.status(401).json({
+        success: false,
+        error: "Invalid password"
+      });
+    }
+
+    // Return player data (without password)
+    const playerData = player.toObject();
+    delete playerData.password;
+
+    res.status(200).json({
+      success: true,
+      message: "Login successful",
+      data: playerData
+    });
+  } catch (error) {
+    console.error("Error in player login:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error"
+    });
+  }
+};
+
+// Get player profile by ID
+exports.getPlayerProfile = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const player = await Player.findById(id).select('-password');
+    
+    if (!player) {
+      return res.status(404).json({ 
+        success: false,
+        error: "Player not found" 
+      });
+    }
+    
+    res.status(200).json({ 
+      success: true, 
+      data: player 
+    });
+  } catch (error) {
+    console.error("Error fetching player profile:", error);
+    res.status(500).json({ 
+      success: false,
+      error: "Internal server error" 
+    });
+  }
+};
+
+// Update player profile
+exports.updatePlayerProfile = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    // Remove fields that shouldn't be updated directly
+    delete updateData.password;
+    delete updateData.playerId;
+    delete updateData.status;
+    delete updateData.approvedAt;
+    delete updateData.approvedBy;
+
+    const player = await Player.findByIdAndUpdate(
+      id,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    ).select('-password');
+
+    if (!player) {
+      return res.status(404).json({
+        success: false,
+        error: "Player not found"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      data: player
+    });
+  } catch (error) {
+    console.error("Error updating player profile:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error"
+    });
+  }
+};
+
+// Upload player photo
+exports.uploadPlayerPhoto = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({
+        success: false,
+        error: "No file uploaded"
+      });
+    }
+
+    const player = await Player.findById(id);
+
+    if (!player) {
+      return res.status(404).json({
+        success: false,
+        error: "Player not found"
+      });
+    }
+
+    // Delete old photo from Cloudinary if exists
+    if (player.cloudinaryPublicId) {
+      try {
+        await deleteFromCloudinary(player.cloudinaryPublicId);
+      } catch (error) {
+        console.error("Error deleting old photo from Cloudinary:", error);
+      }
+    }
+
+    // Upload new photo to Cloudinary
+    const cloudinaryResult = await uploadBufferToCloudinary(
+      file.buffer,
+      'itu/player-photos',
+      `player-${id}-${Date.now()}`
+    );
+
+    // Update player photo
+    player.photo = cloudinaryResult.url;
+    player.cloudinaryPublicId = cloudinaryResult.public_id;
+    await player.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Photo uploaded successfully",
+      photoUrl: cloudinaryResult.url,
+      data: player
+    });
+  } catch (error) {
+    console.error("Error uploading player photo:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error"
+    });
   }
 };
 // function generatePassword(state) {

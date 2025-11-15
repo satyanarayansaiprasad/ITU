@@ -23,14 +23,17 @@ import ModernViewContact from './AdminPanel/Pages/ModernViewContact';
 import ModernNewsManager from './AdminPanel/Pages/ModernNewsManager';
 import ModernSliderManager from './AdminPanel/Pages/ModernSliderManager';
 import SelfDefenceSliderManager from './AdminPanel/Pages/SelfDefenceSliderManager';
+import CategorySliderManager from './AdminPanel/Pages/CategorySliderManager';
 import ModernGalleryMng from './AdminPanel/Pages/ModernGalleryMng';
 import Form from './Components/Form';
 import ModernFormSubmissions from './AdminPanel/Pages/ModernFormSubmissions';
 import ModernStatesDistrictsManager from './AdminPanel/Pages/ModernStatesDistrictsManager';
 import HeadsManagement from './AdminPanel/Pages/HeadsManagement';
+import PlayerManagement from './AdminPanel/Pages/PlayerManagement';
 import ScrollToTop from './Components/ScrollToTop';
 import AdminLayout from './AdminPanel/Pages/AdminLayout';
 import StateUnionDashboard from './StateUnionpanel/StateUnionDashboard';
+import PlayerDashboard from './PlayerPanel/PlayerDashboard';
 import SelfDefence from './Components/SelfDefence';
 
 const App = () => {
@@ -63,8 +66,9 @@ const App = () => {
         <Route path="/forms" element={<Form />} />
         <Route path="/self-defence" element={<SelfDefence />} />
         <Route path="/about/directors" element={<UnionAbout />} />
-        <Route path="/login" element={<LoginPage />} />
-         <Route path="/stateuniondashboard" element={<StateUnionDashboard />} />
+            <Route path="/login" element={<LoginPage />} />
+             <Route path="/stateuniondashboard" element={<StateUnionDashboard />} />
+             <Route path="/playerdashboard" element={<PlayerDashboard />} />
         {/* ✅ Admin Routes - No Header/Footer */}
        <Route element={<AdminLayout />}>
   <Route path="/admindashboard" element={<ModernAdminDash />} />
@@ -72,10 +76,12 @@ const App = () => {
   <Route path="/admin/blogs" element={<ModernNewsManager />} />
   <Route path="/admin/slider-management" element={<ModernSliderManager />} />
   <Route path="/admin/self-defence-slider" element={<SelfDefenceSliderManager />} />
+  <Route path="/admin/category-slider" element={<CategorySliderManager />} />
   <Route path="/admin/gallery" element={<ModernGalleryMng />} />
   <Route path="/admin/form-submissions" element={<ModernFormSubmissions />} />
-  <Route path="/admin/states-districts" element={<ModernStatesDistrictsManager />} />
-  <Route path="/admin/heads-management" element={<HeadsManagement />} />
+      <Route path="/admin/states-districts" element={<ModernStatesDistrictsManager />} />
+      <Route path="/admin/heads-management" element={<HeadsManagement />} />
+      <Route path="/admin/player-management" element={<PlayerManagement />} />
 </Route>
       </Routes>
 

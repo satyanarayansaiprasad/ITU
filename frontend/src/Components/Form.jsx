@@ -3,6 +3,7 @@ import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { API_ENDPOINTS } from "../config/api";
 import { MapPin, User, Mail, Phone, Landmark, CheckCircle, AlertCircle, ChevronLeft } from "lucide-react";
+import PlayerRegistrationForm from "./PlayerRegistrationForm";
 
 const Form = () => {
   const [formData, setFormData] = useState({
@@ -348,7 +349,13 @@ const Form = () => {
                   : "Join our community"}
             </motion.p>
 
-            {formType ? renderFormFields() : renderFormSelection()}
+            {formType === 'player' ? (
+              <PlayerRegistrationForm onBack={() => setFormType(null)} />
+            ) : formType ? (
+              renderFormFields()
+            ) : (
+              renderFormSelection()
+            )}
           </>
         ) : (
           <AnimatePresence>

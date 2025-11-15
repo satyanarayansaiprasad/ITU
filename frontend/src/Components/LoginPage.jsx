@@ -57,12 +57,19 @@ const LoginPage = () => {
         endpoint: endpointMap[loginType]
       });
 
+      const requestData = loginType === "player" 
+        ? {
+            playerId: formData.email.trim(), // Can be playerId or email
+            password: formData.password
+          }
+        : {
+            email: formData.email.trim().toLowerCase(),
+            password: formData.password
+          };
+
       const res = await axios.post(
         endpointMap[loginType],
-        {
-          email: formData.email.trim().toLowerCase(),
-          password: formData.password
-        },
+        requestData,
         { 
           withCredentials: true,
           headers: {
@@ -83,6 +90,11 @@ const LoginPage = () => {
         if (res.data?._id) {
           localStorage.setItem('stateUnionId', res.data._id);
         }
+      }
+
+      // Store player data for player login
+      if (loginType === "player" && res.data?.success && res.data?.data) {
+        localStorage.setItem('playerData', JSON.stringify(res.data.data));
       }
 
       navigate(redirectMap[loginType]);
@@ -208,16 +220,25 @@ const LoginPage = () => {
                         transition={{ delay: 0.1 }}
                       >
                         <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                          {loginType === "stateunion" ? "Organization Email" : "Email"}
+                          {loginType === "stateunion" 
+                            ? "Organization Email" 
+                            : loginType === "player"
+                            ? "Player ID or Email"
+                            : "Email"}
                         </label>
                         <input
-                          type="email"
+                          type={loginType === "player" ? "text" : "email"}
                           id="email"
                           name="email"
                           value={formData.email}
                           onChange={handleInputChange}
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0B2545] focus:border-transparent transition-all"
-                          placeholder={`Enter your ${loginType === "stateunion" ? "organization email" : "email"}`}
+                          placeholder={
+                            loginType === "stateunion" 
+                              ? "Enter your organization email" 
+                              : loginType === "player"
+                              ? "Enter your Player ID or Email"
+                              : "Enter your email"}
                           required
                         />
                       </motion.div>

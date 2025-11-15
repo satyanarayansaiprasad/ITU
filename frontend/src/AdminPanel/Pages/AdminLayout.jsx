@@ -14,6 +14,8 @@ import {
   MapPin,
   Crown,
   Shield,
+  Type,
+  User,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -27,12 +29,14 @@ const AdminLayout = () => {
     { title: "Dashboard", icon: <LayoutDashboard className="w-5 h-5" />, path: "/admindashboard" },
     { title: "Slider Management", icon: <Image className="w-5 h-5" />, path: "/admin/slider-management" },
     { title: "Self Defence Slider", icon: <Shield className="w-5 h-5" />, path: "/admin/self-defence-slider" },
+    { title: "Category Slider", icon: <Type className="w-5 h-5" />, path: "/admin/category-slider" },
     { title: "Contact Submissions", icon: <Mail className="w-5 h-5" />, path: "/admin/view-contacts" },
     { title: "Blog Management", icon: <Newspaper className="w-5 h-5" />, path: "/admin/blogs" },
     { title: "Gallery Management", icon: <GalleryVerticalEnd className="w-5 h-5" />, path: "/admin/gallery" },
     { title: "Form Submissions", icon: <FilePlus className="w-5 h-5" />, path: "/admin/form-submissions" },
     { title: "States & Districts", icon: <MapPin className="w-5 h-5" />, path: "/admin/states-districts" },
     { title: "District & State Heads", icon: <Crown className="w-5 h-5" />, path: "/admin/heads-management" },
+    { title: "Player Management", icon: <User className="w-5 h-5" />, path: "/admin/player-management" },
   ];
 
   const handleLogout = () => {

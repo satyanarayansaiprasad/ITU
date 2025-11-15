@@ -30,6 +30,12 @@ router.get('/getSelfDefenceSlider', adminController.getSelfDefenceSliders);
 router.put('/editSelfDefenceSlider/:id', upload.single('image'), adminController.updateSelfDefenceSlider);
 router.delete('/deleteSelfDefenceSlider/:id', adminController.deleteSelfDefenceSlider);
 
+// Category Slider routes
+router.post('/uploadCategorySlider', upload.single('image'), adminController.createCategorySlider);
+router.get('/getCategorySlider', adminController.getCategorySliders);
+router.put('/editCategorySlider/:id', upload.single('image'), adminController.updateCategorySlider);
+router.delete('/deleteCategorySlider/:id', adminController.deleteCategorySlider);
+
 
 
 
@@ -43,6 +49,11 @@ router.post('/set-district-head', adminController.setDistrictHead);
 router.post('/set-state-head', adminController.setStateHead);
 router.post('/remove-district-head', adminController.removeDistrictHead);
 router.post('/remove-state-head', adminController.removeStateHead);
+
+// Player management routes
+router.get('/getPlayers', adminController.getPlayers);
+router.post('/approvePlayers', adminController.approvePlayers);
+router.post('/rejectPlayers', adminController.rejectPlayers);
 router.get('/organizations/:stateName', adminController.getOrganizationsByState);
 // router.put('/rejectForm',adminController.rejectForm)
 

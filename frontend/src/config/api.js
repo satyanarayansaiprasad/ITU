@@ -27,6 +27,10 @@ export const API_ENDPOINTS = {
   GET_SELF_DEFENCE_SLIDER: `${API_BASE_URL}/api/admin/getSelfDefenceSlider`,
   UPLOAD_SELF_DEFENCE_SLIDER: `${API_BASE_URL}/api/admin/uploadSelfDefenceSlider`,
   DELETE_SELF_DEFENCE_SLIDER: (id) => `${API_BASE_URL}/api/admin/deleteSelfDefenceSlider/${id}`,
+  GET_CATEGORY_SLIDER: `${API_BASE_URL}/api/admin/getCategorySlider`,
+  UPLOAD_CATEGORY_SLIDER: `${API_BASE_URL}/api/admin/uploadCategorySlider`,
+  UPDATE_CATEGORY_SLIDER: (id) => `${API_BASE_URL}/api/admin/editCategorySlider/${id}`,
+  DELETE_CATEGORY_SLIDER: (id) => `${API_BASE_URL}/api/admin/deleteCategorySlider/${id}`,
   GET_ALL_NEWS: `${API_BASE_URL}/api/admin/getallNews`,
   ADD_NEWS: `${API_BASE_URL}/api/admin/addNews`,
   EDIT_NEWS: (id) => `${API_BASE_URL}/api/admin/editNews/${id}`,
@@ -46,7 +50,16 @@ export const API_ENDPOINTS = {
   STATE_UNION_LOGIN: `${API_BASE_URL}/api/user/stateunionlogin`,
   
   // Player endpoints
-  PLAYER_LOGIN: `${API_BASE_URL}/api/player/login`,
+  PLAYER_LOGIN: `${API_BASE_URL}/api/user/player/login`,
+  REGISTER_PLAYERS: `${API_BASE_URL}/api/user/playerregistration`,
+  GET_PLAYER_PROFILE: (id) => `${API_BASE_URL}/api/user/players/${id}`,
+  UPDATE_PLAYER_PROFILE: (id) => `${API_BASE_URL}/api/user/players/${id}`,
+  UPLOAD_PLAYER_PHOTO: (id) => `${API_BASE_URL}/api/user/players/${id}/photo`,
+  
+  // Admin player endpoints
+  GET_PLAYERS: `${API_BASE_URL}/api/admin/getPlayers`,
+  APPROVE_PLAYERS: `${API_BASE_URL}/api/admin/approvePlayers`,
+  REJECT_PLAYERS: `${API_BASE_URL}/api/admin/rejectPlayers`,
   
   // Blog endpoints
   BLOG_POSTS: `${API_BASE_URL}/api/admin/blog/posts`,

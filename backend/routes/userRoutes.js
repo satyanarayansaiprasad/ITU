@@ -7,6 +7,13 @@ router.post('/stateunionlogin',userController.loginStateUnion)
 router.post('/contactus',userController.contactUs)
 router.post('/accelarationform',userController.form)
 
+// Player routes
+router.post('/playerregistration', userController.registerPlayers);
+router.post('/player/login', userController.playerLogin);
+router.get('/players/:id', userController.getPlayerProfile);
+router.patch('/players/:id', userController.updatePlayerProfile);
+router.post('/players/:id/photo', upload.single('photo'), userController.uploadPlayerPhoto);
+
 // State union profile routes
 router.get('/stateunions/:id', userController.getStateUnionById);
 router.patch('/stateunions/:id', userController.updateStateUnionProfile);

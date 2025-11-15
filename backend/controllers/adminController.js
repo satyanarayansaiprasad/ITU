@@ -4,6 +4,8 @@ const News =require('../models/News')
  const Slider = require('../models/Slider');
  const Gallery=require('../models/Gallery')
  const SelfDefenceSlider = require('../models/SelfDefenceSlider');
+ const CategorySlider = require('../models/CategorySlider');
+ const Player = require('../models/Players');
  const path=require("path")
  const multer = require('multer');
  const fs = require('fs');
@@ -662,6 +664,330 @@ exports.deleteSelfDefenceSlider = async (req, res) => {
   } catch (error) {
     console.error("Delete error:", error);
     res.status(500).json({ success: false, message: "Server error", error: error.message });
+  }
+};
+
+// ========== CATEGORY SLIDER MANAGEMENT ==========
+
+// POST: Upload a new category slider image with Cloudinary
+exports.createCategorySlider = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "No image uploaded"
+      });
+    }
+
+    const { text, order } = req.body;
+
+    // Upload to Cloudinary
+    const cloudinaryResult = await uploadBufferToCloudinary(
+      req.file.buffer,
+      'itu/category-sliders',
+      `category-slider-${Date.now()}`
+    );
+
+    // Save Cloudinary URL to database
+    const newSlider = new CategorySlider({
+      image: cloudinaryResult.url, // Store Cloudinary URL
+      cloudinaryPublicId: cloudinaryResult.public_id, // Store public_id for deletion
+      text: text || '', // Caption text
+      order: order ? parseInt(order) : 0,
+      uploadedAt: new Date()
+    });
+
+    await newSlider.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Category slider uploaded successfully to Cloudinary",
+      slider: newSlider
+    });
+  } catch (error) {
+    console.error("Category Slider upload error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to upload category slider",
+      error: error.message
+    });
+  }
+};
+
+// GET: Get all category slider images
+exports.getCategorySliders = async (req, res) => {
+  try {
+    const sliders = await CategorySlider.find().sort({ order: 1, uploadedAt: -1 });
+    res.status(200).json(sliders);
+  } catch (error) {
+    console.error("Fetch error:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+// PUT: Update a category slider
+exports.updateCategorySlider = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { text, order } = req.body;
+    const slider = await CategorySlider.findById(id);
+
+    if (!slider) return res.status(404).json({ success: false, message: "Category slider not found" });
+
+    // If new image is uploaded
+    if (req.file) {
+      // Delete old image from Cloudinary if it exists
+      if (slider.cloudinaryPublicId) {
+        try {
+          await deleteFromCloudinary(slider.cloudinaryPublicId);
+        } catch (error) {
+          console.error("Error deleting old Cloudinary image:", error);
+        }
+      }
+
+      // Upload new image to Cloudinary
+      const cloudinaryResult = await uploadBufferToCloudinary(
+        req.file.buffer,
+        'itu/category-sliders',
+        `category-slider-${Date.now()}`
+      );
+
+      slider.image = cloudinaryResult.url;
+      slider.cloudinaryPublicId = cloudinaryResult.public_id;
+    }
+
+    // Update text and order
+    if (text !== undefined) slider.text = text;
+    if (order !== undefined) slider.order = parseInt(order);
+    slider.uploadedAt = new Date();
+    
+    await slider.save();
+
+    res.status(200).json({ success: true, message: "Category slider updated", slider });
+  } catch (error) {
+    console.error("Update error:", error);
+    res.status(500).json({ success: false, message: "Internal server error", error: error.message });
+  }
+};
+
+// DELETE: Delete a category slider image from Cloudinary
+exports.deleteCategorySlider = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const slider = await CategorySlider.findById(id);
+
+    if (!slider) {
+      return res.status(404).json({ success: false, message: "Category slider not found" });
+    }
+
+    // Delete from Cloudinary if public_id exists
+    if (slider.cloudinaryPublicId) {
+      try {
+        await deleteFromCloudinary(slider.cloudinaryPublicId);
+      } catch (error) {
+        console.error("Error deleting from Cloudinary:", error);
+      }
+    }
+
+    // Delete from database
+    await CategorySlider.findByIdAndDelete(id);
+
+    res.json({ success: true, message: "Category slider deleted successfully from Cloudinary and database" });
+  } catch (error) {
+    console.error("Delete error:", error);
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
+  }
+};
+
+// ========== PLAYER MANAGEMENT ==========
+
+// Get all players (for admin dashboard)
+exports.getPlayers = async (req, res) => {
+  try {
+    const { status } = req.query;
+    const query = status ? { status } : {};
+    
+    const players = await Player.find(query)
+      .sort({ createdAt: -1 })
+      .select('-password');
+    
+    res.status(200).json({
+      success: true,
+      data: players,
+      count: players.length
+    });
+  } catch (error) {
+    console.error("Error fetching players:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error"
+    });
+  }
+};
+
+// Generate player password: playerName + ITU + Union + 540720
+const generatePlayerPassword = (playerName) => {
+  const cleanName = playerName.replace(/\s+/g, '').toUpperCase();
+  return `${cleanName}ITUUnion540720`;
+};
+
+// Approve multiple players at once
+exports.approvePlayers = async (req, res) => {
+  try {
+    const { playerIds } = req.body;
+
+    if (!playerIds || !Array.isArray(playerIds) || playerIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: "Player IDs array is required"
+      });
+    }
+
+    // Find all players
+    const players = await Player.find({
+      _id: { $in: playerIds },
+      status: 'pending'
+    });
+
+    if (players.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: "No pending players found with the provided IDs"
+      });
+    }
+
+    const approvedPlayers = [];
+    const errors = [];
+
+    // Approve each player and send email
+    for (const player of players) {
+      try {
+        // Generate password: playerName + ITU + Union + 540720
+        const password = generatePlayerPassword(player.name);
+        
+        // Generate player ID if not exists
+        if (!player.playerId) {
+          const timestamp = Date.now().toString().slice(-8);
+          const random = Math.floor(1000 + Math.random() * 9000);
+          player.playerId = `ITU${timestamp}${random}`;
+        }
+
+        // Update player
+        player.password = password;
+        player.status = 'approved';
+        player.approvedAt = new Date();
+        await player.save();
+
+        // Send welcome email
+        const mailOptions = {
+          from: `"Indian Taekwondo Union" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
+          to: player.email,
+          subject: "Welcome to Indian Taekwondo Union - Your Registration is Approved!",
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+              <h2 style="color: #0E2A4E;">🎉 Welcome to Indian Taekwondo Union!</h2>
+              
+              <p>Dear <strong>${player.name}</strong>,</p>
+              
+              <p>We are delighted to inform you that your player registration has been approved!</p>
+              
+              <div style="background-color: #f0f8ff; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                <h3 style="color: #0E2A4E; margin-top: 0;">Your Login Credentials:</h3>
+                <p><strong>Player ID:</strong> ${player.playerId}</p>
+                <p><strong>Email:</strong> ${player.email}</p>
+                <p><strong>Password:</strong> ${password}</p>
+              </div>
+              
+              <h3 style="color: #0E2A4E;">Next Steps:</h3>
+              <ol>
+                <li>Login using your Player ID or Email and the password provided above</li>
+                <li>Upload your photo</li>
+                <li>Complete your profile information</li>
+              </ol>
+              
+              <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107;">
+                <p style="margin: 0;"><strong>⚠️ Important Security Notice:</strong></p>
+                <ul style="margin: 10px 0;">
+                  <li>Keep your credentials secure and confidential</li>
+                  <li>Do not share your password with anyone</li>
+                  <li>Change your password after first login (if this feature is available)</li>
+                </ul>
+              </div>
+              
+              <p>If you have any questions or need assistance, please contact our support team.</p>
+              
+              <p style="margin-top: 30px;">
+                Best regards,<br/>
+                <strong>Indian Taekwondo Union</strong><br/>
+                System Administrator
+              </p>
+            </div>
+          `
+        };
+
+        await transporter.sendMail(mailOptions);
+        approvedPlayers.push(player);
+      } catch (error) {
+        console.error(`Error approving player ${player._id}:`, error);
+        errors.push({
+          playerId: player._id,
+          name: player.name,
+          email: player.email,
+          error: error.message
+        });
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `${approvedPlayers.length} player(s) approved successfully`,
+      approved: approvedPlayers.length,
+      errors: errors.length > 0 ? errors : undefined
+    });
+  } catch (error) {
+    console.error("Error approving players:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error",
+      details: error.message
+    });
+  }
+};
+
+// Reject players
+exports.rejectPlayers = async (req, res) => {
+  try {
+    const { playerIds, reason } = req.body;
+
+    if (!playerIds || !Array.isArray(playerIds) || playerIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: "Player IDs array is required"
+      });
+    }
+
+    const result = await Player.updateMany(
+      { _id: { $in: playerIds } },
+      {
+        $set: {
+          status: 'rejected',
+          rejectedAt: new Date(),
+          rejectionReason: reason || 'Not specified'
+        }
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `${result.modifiedCount} player(s) rejected`,
+      count: result.modifiedCount
+    });
+  } catch (error) {
+    console.error("Error rejecting players:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error"
+    });
   }
 };
 
