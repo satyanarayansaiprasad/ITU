@@ -26,6 +26,15 @@ const PlayerSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    union: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'AccelerationForm',
+      required: true,
+    },
+    unionName: {
+      type: String,
+      required: true,
+    },
     address: {
       type: String,
       required: true,

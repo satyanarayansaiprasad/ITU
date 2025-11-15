@@ -360,6 +360,31 @@ exports.registerPlayers = async (req, res) => {
       });
     }
 
+    // Validate union is provided
+    const { union } = req.body;
+    if (!union) {
+      return res.status(400).json({
+        success: false,
+        error: "Union selection is required"
+      });
+    }
+
+    // Verify union exists and matches state/district
+    const unionOrg = await AccelerationForm.findById(union);
+    if (!unionOrg) {
+      return res.status(404).json({
+        success: false,
+        error: "Selected union not found"
+      });
+    }
+
+    if (unionOrg.state !== state || unionOrg.district !== district) {
+      return res.status(400).json({
+        success: false,
+        error: "Selected union does not match the selected state and district"
+      });
+    }
+
     // Validate each player
     const validatedPlayers = [];
     const errors = [];
@@ -389,6 +414,8 @@ exports.registerPlayers = async (req, res) => {
         phone: player.phone.toString(),
         state: state,
         district: district,
+        union: union,
+        unionName: unionOrg.name,
         address: player.address.trim(),
         dob: new Date(player.dob),
         beltLevel: player.beltLevel.trim(),
@@ -560,6 +587,69 @@ exports.updatePlayerProfile = async (req, res) => {
     });
   } catch (error) {
     console.error("Error updating player profile:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error"
+    });
+  }
+};
+
+// Get players by union (for organization dashboard)
+exports.getPlayersByUnion = async (req, res) => {
+  try {
+    const { unionId } = req.params;
+    const { 
+      status = 'approved', 
+      search = '', 
+      page = 1, 
+      limit = 10 
+    } = req.query;
+
+    // Build query
+    const query = {
+      union: unionId,
+      status: status
+    };
+
+    // Add search functionality
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+        { phone: { $regex: search, $options: 'i' } },
+        { beltLevel: { $regex: search, $options: 'i' } },
+        { playerId: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const skip = (pageNum - 1) * limitNum;
+
+    // Get total count for pagination
+    const total = await Player.countDocuments(query);
+
+    // Get players with pagination
+    const players = await Player.find(query)
+      .select('-password')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum)
+      .populate('union', 'name email phone')
+      .lean();
+
+    res.status(200).json({
+      success: true,
+      data: players,
+      pagination: {
+        currentPage: pageNum,
+        totalPages: Math.ceil(total / limitNum),
+        totalPlayers: total,
+        limit: limitNum
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching players by union:", error);
     res.status(500).json({
       success: false,
       error: "Internal server error"

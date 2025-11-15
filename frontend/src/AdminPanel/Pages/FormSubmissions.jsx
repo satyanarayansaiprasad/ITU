@@ -36,20 +36,34 @@ const FormSubmissions = () => {
       setApprovingId(formId);
       const password = generatePassword(state);
       
-      await axios.put(API_ENDPOINTS.APPROVE_FORM, {
+      const response = await axios.put(API_ENDPOINTS.APPROVE_FORM, {
         formId,
         email,
         password
       });
 
-      await fetchForms();
-      
-      toast.success(`Credentials sent to ${email}`, {
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-      });
+      if (response.data.success) {
+        // Update local state immediately
+        setForms(prevForms => 
+          prevForms.map(form => 
+            form._id === formId 
+              ? { ...form, password: password, status: 'approved' }
+              : form
+          )
+        );
+        
+        toast.success(`Credentials sent to ${email}`, {
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+        });
+        
+        // Also fetch fresh data to ensure consistency
+        await fetchForms();
+      } else {
+        toast.error("Failed to approve form");
+      }
     } catch (error) {
       console.error("Error approving form:", error);
       toast.error("Failed to approve form");

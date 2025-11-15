@@ -54,6 +54,7 @@ router.post('/remove-state-head', adminController.removeStateHead);
 router.get('/getPlayers', adminController.getPlayers);
 router.post('/approvePlayers', adminController.approvePlayers);
 router.post('/rejectPlayers', adminController.rejectPlayers);
+router.delete('/deletePlayers', adminController.deletePlayers);
 router.get('/organizations/:stateName', adminController.getOrganizationsByState);
 // router.put('/rejectForm',adminController.rejectForm)
 

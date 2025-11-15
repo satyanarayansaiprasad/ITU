@@ -13,6 +13,7 @@ router.post('/player/login', userController.playerLogin);
 router.get('/players/:id', userController.getPlayerProfile);
 router.patch('/players/:id', userController.updatePlayerProfile);
 router.post('/players/:id/photo', upload.single('photo'), userController.uploadPlayerPhoto);
+router.get('/unions/:unionId/players', userController.getPlayersByUnion);
 
 // State union profile routes
 router.get('/stateunions/:id', userController.getStateUnionById);

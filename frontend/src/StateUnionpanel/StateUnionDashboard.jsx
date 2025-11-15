@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { API_ENDPOINTS } from '../config/api';
+import { Search, User, Mail, Phone, Award, Calendar, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const StateUnionDashboard = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -9,6 +11,10 @@ const StateUnionDashboard = () => {
   const [activeMenu, setActiveMenu] = useState('profile');
   const [players, setPlayers] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1, totalPlayers: 0, limit: 10 });
+  const [loadingPlayers, setLoadingPlayers] = useState(false);
   const [logoPreview, setLogoPreview] = useState(null);
   const [secretaryImagePreview, setSecretaryImagePreview] = useState(null);
   const { id: paramId } = useParams();
@@ -43,22 +49,38 @@ const StateUnionDashboard = () => {
       }
     };
 
+    fetchProfile();
+  }, [userId, navigate]);
+
+  // Fetch players when menu changes to players or when search/page changes
+  useEffect(() => {
     const fetchPlayers = async () => {
-      try {
-        const response = await axios.get('/api/players', {
-          params: { status: 'approved', state: profileData?.state }
-        });
-        setPlayers(response.data.data);
-      } catch (error) {
-        alert('Failed to fetch players data');
+      if (activeMenu === 'players' && userId) {
+        setLoadingPlayers(true);
+        try {
+          const response = await axios.get(API_ENDPOINTS.GET_PLAYERS_BY_UNION(userId), {
+            params: {
+              status: 'approved',
+              search: searchTerm,
+              page: currentPage,
+              limit: 10
+            }
+          });
+          if (response.data.success) {
+            setPlayers(response.data.data || []);
+            setPagination(response.data.pagination || { currentPage: 1, totalPages: 1, totalPlayers: 0, limit: 10 });
+          }
+        } catch (error) {
+          console.error('Error fetching players:', error);
+          setPlayers([]);
+        } finally {
+          setLoadingPlayers(false);
+        }
       }
     };
 
-    fetchProfile();
-    if (activeMenu === 'players') {
-      fetchPlayers();
-    }
-  }, [userId, activeMenu, profileData?.state, navigate]);
+    fetchPlayers();
+  }, [activeMenu, userId, searchTerm, currentPage]);
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
@@ -441,36 +463,120 @@ const StateUnionDashboard = () => {
       case 'players':
         return (
           <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-2xl font-bold mb-6">Approved Players</h2>
-            {loading ? (
-              <p>Loading...</p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {players.map(player => (
-                      <tr key={player._id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{player.name}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{player.email}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{player.phone}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${player.status === 'approved' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                            {player.status.toUpperCase()}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+              <h2 className="text-2xl font-bold mb-4 md:mb-0">Approved Players</h2>
+              <div className="relative w-full md:w-64">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <input
+                  type="text"
+                  placeholder="Search by name, email, phone, belt..."
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1); // Reset to first page on search
+                  }}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
               </div>
+            </div>
+
+            {loadingPlayers ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                <span className="ml-3 text-gray-600">Loading players...</span>
+              </div>
+            ) : players.length === 0 ? (
+              <div className="text-center py-12">
+                <User size={48} className="mx-auto text-gray-400 mb-4" />
+                <p className="text-gray-600">
+                  {searchTerm ? 'No players found matching your search' : 'No approved players yet'}
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="mb-4 text-sm text-gray-600">
+                  Showing {((currentPage - 1) * 10) + 1} - {Math.min(currentPage * 10, pagination.totalPlayers)} of {pagination.totalPlayers} players
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Player ID</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Belt Level</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Experience</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DOB</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {players.map(player => (
+                        <tr key={player._id} className="hover:bg-gray-50">
+                          <td className="px-4 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              {player.photo ? (
+                                <img
+                                  src={player.photo.startsWith('http') ? player.photo : `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/${player.photo}`}
+                                  alt={player.name}
+                                  className="h-10 w-10 rounded-full mr-3 object-cover"
+                                  onError={(e) => {
+                                    e.target.style.display = 'none';
+                                  }}
+                                />
+                              ) : (
+                                <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                                  <User size={20} className="text-gray-400" />
+                                </div>
+                              )}
+                              <span className="text-sm font-medium text-gray-900">{player.name}</span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{player.playerId || 'N/A'}</td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{player.email}</td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{player.phone}</td>
+                          <td className="px-4 py-4 whitespace-nowrap">
+                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                              {player.beltLevel}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{player.yearsOfExperience} years</td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {player.dob ? new Date(player.dob).toLocaleDateString() : 'N/A'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Pagination */}
+                {pagination.totalPages > 1 && (
+                  <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
+                    <div className="text-sm text-gray-700">
+                      Page {pagination.currentPage} of {pagination.totalPages}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        disabled={currentPage === 1}
+                        className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                      >
+                        <ChevronLeft size={16} />
+                        Previous
+                      </button>
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.min(pagination.totalPages, prev + 1))}
+                        disabled={currentPage === pagination.totalPages}
+                        className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                      >
+                        Next
+                        <ChevronRight size={16} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
         );

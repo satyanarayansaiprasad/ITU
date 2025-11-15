@@ -7,6 +7,9 @@ import { MapPin, User, Mail, Phone, Landmark, CheckCircle, AlertCircle, ChevronL
 const PlayerRegistrationForm = ({ onBack }) => {
   const [state, setState] = useState("");
   const [district, setDistrict] = useState("");
+  const [union, setUnion] = useState("");
+  const [unions, setUnions] = useState([]);
+  const [loadingUnions, setLoadingUnions] = useState(false);
   const [players, setPlayers] = useState([
     {
       name: "",
@@ -59,10 +62,36 @@ const PlayerRegistrationForm = ({ onBack }) => {
       } else {
         setDistricts([]);
         setDistrict("");
+        setUnions([]);
+        setUnion("");
       }
     };
     fetchDistricts();
   }, [state]);
+
+  // Fetch unions when district changes
+  useEffect(() => {
+    const fetchUnions = async () => {
+      if (state && district) {
+        setLoadingUnions(true);
+        try {
+          const response = await axios.get(API_ENDPOINTS.GET_ORGANIZATIONS_BY_DISTRICT(state, district));
+          if (response.data.success) {
+            setUnions(response.data.data || []);
+          }
+        } catch (err) {
+          console.error('Error fetching unions:', err);
+          setUnions([]);
+        } finally {
+          setLoadingUnions(false);
+        }
+      } else {
+        setUnions([]);
+        setUnion("");
+      }
+    };
+    fetchUnions();
+  }, [state, district]);
 
   const handleStateChange = (e) => {
     setState(e.target.value);
@@ -71,6 +100,11 @@ const PlayerRegistrationForm = ({ onBack }) => {
 
   const handleDistrictChange = (e) => {
     setDistrict(e.target.value);
+    setUnion(""); // Reset union when district changes
+  };
+
+  const handleUnionChange = (e) => {
+    setUnion(e.target.value);
   };
 
   const addPlayer = () => {
@@ -106,9 +140,9 @@ const PlayerRegistrationForm = ({ onBack }) => {
     setIsSubmitting(true);
     setError(null);
 
-    // Validate state and district
-    if (!state || !district) {
-      setError("Please select both State and District");
+    // Validate state, district, and union
+    if (!state || !district || !union) {
+      setError("Please select State, District, and Union");
       setIsSubmitting(false);
       return;
     }
@@ -132,6 +166,7 @@ const PlayerRegistrationForm = ({ onBack }) => {
       const response = await axios.post(API_ENDPOINTS.REGISTER_PLAYERS, {
         state,
         district,
+        union,
         players
       });
 
@@ -242,8 +277,8 @@ const PlayerRegistrationForm = ({ onBack }) => {
         </motion.div>
       )}
 
-      {/* State and District Selection */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-blue-50 rounded-lg">
+      {/* State, District, and Union Selection */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-blue-50 rounded-lg">
         <div className="relative">
           <div className="absolute top-1/2 -translate-y-1/2 left-3 z-10">
             <Landmark className="w-5 h-5 text-blue-600" />
@@ -282,6 +317,29 @@ const PlayerRegistrationForm = ({ onBack }) => {
             {districts.map((d) => (
               <option key={d} value={d}>
                 {d}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="relative">
+          <div className="absolute top-1/2 -translate-y-1/2 left-3 z-10">
+            <User className="w-5 h-5 text-orange-600" />
+          </div>
+          <select
+            name="union"
+            value={union}
+            onChange={handleUnionChange}
+            required
+            disabled={!district || loadingUnions}
+            className="w-full p-3 pl-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 appearance-none bg-white cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed"
+          >
+            <option value="">
+              {loadingUnions ? "Loading unions..." : district ? "Select Union" : "Select District first"}
+            </option>
+            {unions.map((u) => (
+              <option key={u._id} value={u._id}>
+                {u.name}
               </option>
             ))}
           </select>
@@ -435,9 +493,9 @@ const PlayerRegistrationForm = ({ onBack }) => {
         whileTap={{ scale: 0.95 }}
         whileHover={{ scale: 1.03 }}
         type="submit"
-        disabled={isSubmitting || !state || !district}
+        disabled={isSubmitting || !state || !district || !union}
         className={`w-full bg-gradient-to-r from-orange-500 to-green-600 text-white font-bold py-3 rounded-xl shadow-md transition duration-300 ${
-          isSubmitting || !state || !district
+          isSubmitting || !state || !district || !union
             ? "opacity-70 cursor-not-allowed"
             : "hover:from-orange-600 hover:to-green-700"
         }`}

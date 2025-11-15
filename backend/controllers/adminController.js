@@ -9,7 +9,7 @@ const News =require('../models/News')
  const path=require("path")
  const multer = require('multer');
  const fs = require('fs');
-const nodemailer = require("nodemailer");
+const { transporter, getEmailFrom } = require('../config/email');
 const AccelerationForm = require('../models/AccelerationForm');
 const { uploadBufferToCloudinary, deleteFromCloudinary } = require('../config/cloudinary');
 
@@ -809,7 +809,8 @@ exports.getPlayers = async (req, res) => {
     
     const players = await Player.find(query)
       .sort({ createdAt: -1 })
-      .select('-password');
+      .select('-password')
+      .populate('union', 'name email phone');
     
     res.status(200).json({
       success: true,
@@ -880,7 +881,7 @@ exports.approvePlayers = async (req, res) => {
 
         // Send welcome email
         const mailOptions = {
-          from: `"Indian Taekwondo Union" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
+          from: `"Indian Taekwondo Union" <${getEmailFrom()}>`,
           to: player.email,
           subject: "Welcome to Indian Taekwondo Union - Your Registration is Approved!",
           html: `
@@ -925,7 +926,11 @@ exports.approvePlayers = async (req, res) => {
           `
         };
 
-        await transporter.sendMail(mailOptions);
+        if (transporter) {
+          await transporter.sendMail(mailOptions);
+        } else {
+          console.error('Email transporter not configured. Email not sent to:', player.email);
+        }
         approvedPlayers.push(player);
       } catch (error) {
         console.error(`Error approving player ${player._id}:`, error);
@@ -991,20 +996,56 @@ exports.rejectPlayers = async (req, res) => {
   }
 };
 
+// Delete player(s)
+exports.deletePlayers = async (req, res) => {
+  try {
+    const { playerIds } = req.body;
+
+    if (!playerIds || !Array.isArray(playerIds) || playerIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: "Player IDs array is required"
+      });
+    }
+
+    // Find players to delete their photos from Cloudinary
+    const playersToDelete = await Player.find({ _id: { $in: playerIds } });
+
+    // Delete photos from Cloudinary
+    for (const player of playersToDelete) {
+      if (player.cloudinaryPublicId) {
+        try {
+          await deleteFromCloudinary(player.cloudinaryPublicId);
+        } catch (error) {
+          console.error(`Error deleting photo for player ${player._id}:`, error);
+        }
+      }
+    }
+
+    // Delete players from database
+    const result = await Player.deleteMany({ _id: { $in: playerIds } });
+
+    res.status(200).json({
+      success: true,
+      message: `${result.deletedCount} player(s) deleted successfully`,
+      count: result.deletedCount
+    });
+  } catch (error) {
+    console.error("Error deleting players:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error"
+    });
+  }
+};
+
 //UserApproved
 
 // In your backend routes
 
 
 
-// Create transporter for sending emails
-const transporter = nodemailer.createTransport({
-  service: 'gmail', // or your email service
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
+// Email transporter is now configured in backend/config/email.js
 
 
 
@@ -1033,7 +1074,7 @@ exports.approveForm = async (req, res) => {
 
     // 2. Send email with credentials
 const mailOptions = {
-  from: `"Indian Taekwondo Union" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
+  from: `"Indian Taekwondo Union" <${getEmailFrom()}>`,
   to: email,
   subject: "Your Affiliation Request Has Been Approved",
   html: `
@@ -1067,13 +1108,21 @@ const mailOptions = {
   `
 };
 
-    await transporter.sendMail(mailOptions);
-
-    res.status(200).json({
-      success: true,
-      message: "Form approved and email sent",
-      form: updatedForm
-    });
+    if (transporter) {
+      await transporter.sendMail(mailOptions);
+      res.status(200).json({
+        success: true,
+        message: "Form approved and email sent",
+        form: updatedForm
+      });
+    } else {
+      console.error('Email transporter not configured. Email not sent to:', email);
+      res.status(200).json({
+        success: true,
+        message: "Form approved but email could not be sent (email not configured)",
+        form: updatedForm
+      });
+    }
 
   } catch (error) {
     console.error("Error approving form:", error);

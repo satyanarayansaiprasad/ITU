@@ -55,11 +55,13 @@ export const API_ENDPOINTS = {
   GET_PLAYER_PROFILE: (id) => `${API_BASE_URL}/api/user/players/${id}`,
   UPDATE_PLAYER_PROFILE: (id) => `${API_BASE_URL}/api/user/players/${id}`,
   UPLOAD_PLAYER_PHOTO: (id) => `${API_BASE_URL}/api/user/players/${id}/photo`,
+  GET_PLAYERS_BY_UNION: (unionId) => `${API_BASE_URL}/api/user/unions/${unionId}/players`,
   
   // Admin player endpoints
   GET_PLAYERS: `${API_BASE_URL}/api/admin/getPlayers`,
   APPROVE_PLAYERS: `${API_BASE_URL}/api/admin/approvePlayers`,
   REJECT_PLAYERS: `${API_BASE_URL}/api/admin/rejectPlayers`,
+  DELETE_PLAYERS: `${API_BASE_URL}/api/admin/deletePlayers`,
   
   // Blog endpoints
   BLOG_POSTS: `${API_BASE_URL}/api/admin/blog/posts`,

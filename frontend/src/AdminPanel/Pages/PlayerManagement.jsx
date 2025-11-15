@@ -15,7 +15,8 @@ import {
   Loader,
   CheckSquare,
   Square,
-  AlertCircle
+  AlertCircle,
+  Building2
 } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -81,7 +82,19 @@ const PlayerManagement = () => {
 
       if (response.data.success) {
         toast.success(`${response.data.approved} player(s) approved successfully! Welcome emails sent.`);
+        
+        // Update local state immediately
+        setPlayers(prevPlayers => 
+          prevPlayers.map(player => 
+            selectedPlayers.includes(player._id)
+              ? { ...player, status: 'approved', approvedAt: new Date() }
+              : player
+          )
+        );
+        
         setSelectedPlayers([]);
+        
+        // Also fetch fresh data to ensure consistency
         await fetchPlayers();
       } else {
         toast.error(response.data.error || "Failed to approve players");
@@ -108,6 +121,17 @@ const PlayerManagement = () => {
       if (response.data.success) {
         toast.success("Player approved successfully! Welcome email sent.");
         setSelectedPlayers(selectedPlayers.filter(id => id !== playerId));
+        
+        // Update local state immediately
+        setPlayers(prevPlayers => 
+          prevPlayers.map(player => 
+            player._id === playerId 
+              ? { ...player, status: 'approved', approvedAt: new Date() }
+              : player
+          )
+        );
+        
+        // Also fetch fresh data to ensure consistency
         await fetchPlayers();
       } else {
         toast.error(response.data.error || "Failed to approve player");
@@ -136,6 +160,17 @@ const PlayerManagement = () => {
 
       if (response.data.success) {
         toast.success("Player rejected successfully");
+        
+        // Update local state immediately
+        setPlayers(prevPlayers => 
+          prevPlayers.map(player => 
+            player._id === playerId 
+              ? { ...player, status: 'rejected', rejectedAt: new Date() }
+              : player
+          )
+        );
+        
+        // Also fetch fresh data to ensure consistency
         await fetchPlayers();
       } else {
         toast.error(response.data.error || "Failed to reject player");
@@ -145,6 +180,7 @@ const PlayerManagement = () => {
       toast.error(error.response?.data?.error || "Failed to reject player");
     }
   };
+
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
@@ -345,6 +381,12 @@ const PlayerManagement = () => {
                         <MapPin size={16} className="text-orange-500" />
                         <span className="text-sm">{player.district}, {player.state}</span>
                       </div>
+                      {(player.unionName || (player.union && typeof player.union === 'object' && player.union.name)) && (
+                        <div className="flex items-center gap-2 text-gray-700">
+                          <Building2 size={16} className="text-purple-500" />
+                          <span className="text-sm">Union: {player.unionName || (player.union && player.union.name) || 'N/A'}</span>
+                        </div>
+                      )}
                       <div className="flex items-center gap-2 text-gray-700">
                         <Calendar size={16} className="text-purple-500" />
                         <span className="text-sm">DOB: {formatDate(player.dob)}</span>
