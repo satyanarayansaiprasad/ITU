@@ -6,6 +6,7 @@ const AccelerationForm = require("../models/AccelerationForm"); // update path a
 const generatePassword = require("../utils/passwordGenerator");
 const path = require("path");
 const fs = require("fs");
+const { uploadBufferToCloudinary, deleteFromCloudinary } = require('../config/cloudinary');
 // const News =require("../models/News")
 // Handle new contact form submission
 exports.contactUs = async (req, res) => {
@@ -160,33 +161,49 @@ exports.updateStateUnionProfile = async (req, res) => {
   }
 };
 
-// Upload logo
+// Upload logo to Cloudinary
 exports.uploadLogo = async (req, res) => {
   try {
     const { id } = req.params;
     const file = req.file;
     
-    console.log('Upload Logo Request:', { id, file: file ? { filename: file.filename, size: file.size, mimetype: file.mimetype, path: file.path } : null });
+    console.log('Upload Logo Request:', { id, file: file ? { size: file.size, mimetype: file.mimetype } : null });
     
     if (!file) {
       console.error('No file received in uploadLogo');
       return res.status(400).json({ success: false, error: "No file uploaded" });
     }
     
-    // Save path with folder structure: uploads/logos/filename
-    const imageUrl = `uploads/logos/${file.filename}`;
-    console.log('Saving logo to database:', { id, imageUrl, filePath: file.path });
+    // Get existing profile to delete old Cloudinary image if exists
+    const existingProfile = await AccelerationForm.findById(id);
     
-    // Verify file was actually saved
-    const filePath = path.join(__dirname, '..', 'uploads', 'logos', file.filename);
-    if (!fs.existsSync(filePath)) {
-      console.error('File was not saved to disk:', filePath);
-      return res.status(500).json({ success: false, error: "File upload failed - file not saved" });
+    // Upload to Cloudinary
+    const cloudinaryResult = await uploadBufferToCloudinary(
+      file.buffer,
+      'itu/logos',
+      `logo-${id}-${Date.now()}`
+    );
+    
+    // Delete old logo from Cloudinary if it exists and is a Cloudinary URL
+    if (existingProfile && existingProfile.logo && existingProfile.logo.includes('cloudinary.com')) {
+      // Extract public_id from Cloudinary URL or use stored cloudinaryPublicId
+      if (existingProfile.logoCloudinaryPublicId) {
+        try {
+          await deleteFromCloudinary(existingProfile.logoCloudinaryPublicId);
+        } catch (error) {
+          console.error('Error deleting old logo from Cloudinary:', error);
+          // Continue even if deletion fails
+        }
+      }
     }
     
+    // Save Cloudinary URL to database
     const updatedProfile = await AccelerationForm.findByIdAndUpdate(
       id,
-      { logo: imageUrl },
+      { 
+        logo: cloudinaryResult.url,
+        logoCloudinaryPublicId: cloudinaryResult.public_id
+      },
       { new: true, runValidators: true }
     );
     
@@ -195,18 +212,15 @@ exports.uploadLogo = async (req, res) => {
       return res.status(404).json({ success: false, error: "State union not found" });
     }
     
-    // Verify the field was actually updated
-    const verifyProfile = await AccelerationForm.findById(id);
-    console.log('Logo saved successfully:', { 
+    console.log('Logo saved successfully to Cloudinary:', { 
       id, 
       logo: updatedProfile.logo,
-      verified: verifyProfile.logo,
-      fileExists: fs.existsSync(filePath)
+      cloudinaryPublicId: updatedProfile.logoCloudinaryPublicId
     });
     
     res.status(200).json({ 
       success: true, 
-      logoUrl: imageUrl,
+      logoUrl: cloudinaryResult.url,
       data: updatedProfile 
     });
   } catch (error) {
@@ -215,33 +229,49 @@ exports.uploadLogo = async (req, res) => {
   }
 };
 
-// Upload general secretary image
+// Upload general secretary image to Cloudinary
 exports.uploadGeneralSecretaryImage = async (req, res) => {
   try {
     const { id } = req.params;
     const file = req.file;
     
-    console.log('Upload General Secretary Image Request:', { id, file: file ? { filename: file.filename, size: file.size, mimetype: file.mimetype, path: file.path } : null });
+    console.log('Upload General Secretary Image Request:', { id, file: file ? { size: file.size, mimetype: file.mimetype } : null });
     
     if (!file) {
       console.error('No file received in uploadGeneralSecretaryImage');
       return res.status(400).json({ success: false, error: "No file uploaded" });
     }
     
-    // Save path with folder structure: uploads/secretary-images/filename
-    const imageUrl = `uploads/secretary-images/${file.filename}`;
-    console.log('Saving general secretary image to database:', { id, imageUrl, filePath: file.path });
+    // Get existing profile to delete old Cloudinary image if exists
+    const existingProfile = await AccelerationForm.findById(id);
     
-    // Verify file was actually saved
-    const filePath = path.join(__dirname, '..', 'uploads', 'secretary-images', file.filename);
-    if (!fs.existsSync(filePath)) {
-      console.error('File was not saved to disk:', filePath);
-      return res.status(500).json({ success: false, error: "File upload failed - file not saved" });
+    // Upload to Cloudinary
+    const cloudinaryResult = await uploadBufferToCloudinary(
+      file.buffer,
+      'itu/secretary-images',
+      `secretary-${id}-${Date.now()}`
+    );
+    
+    // Delete old secretary image from Cloudinary if it exists and is a Cloudinary URL
+    if (existingProfile && existingProfile.generalSecretaryImage && existingProfile.generalSecretaryImage.includes('cloudinary.com')) {
+      // Extract public_id from Cloudinary URL or use stored cloudinaryPublicId
+      if (existingProfile.generalSecretaryImageCloudinaryPublicId) {
+        try {
+          await deleteFromCloudinary(existingProfile.generalSecretaryImageCloudinaryPublicId);
+        } catch (error) {
+          console.error('Error deleting old secretary image from Cloudinary:', error);
+          // Continue even if deletion fails
+        }
+      }
     }
     
+    // Save Cloudinary URL to database
     const updatedProfile = await AccelerationForm.findByIdAndUpdate(
       id,
-      { generalSecretaryImage: imageUrl },
+      { 
+        generalSecretaryImage: cloudinaryResult.url,
+        generalSecretaryImageCloudinaryPublicId: cloudinaryResult.public_id
+      },
       { new: true, runValidators: true }
     );
     
@@ -250,18 +280,15 @@ exports.uploadGeneralSecretaryImage = async (req, res) => {
       return res.status(404).json({ success: false, error: "State union not found" });
     }
     
-    // Verify the field was actually updated
-    const verifyProfile = await AccelerationForm.findById(id);
-    console.log('General secretary image saved successfully:', { 
+    console.log('General secretary image saved successfully to Cloudinary:', { 
       id, 
       generalSecretaryImage: updatedProfile.generalSecretaryImage,
-      verified: verifyProfile.generalSecretaryImage,
-      fileExists: fs.existsSync(filePath)
+      cloudinaryPublicId: updatedProfile.generalSecretaryImageCloudinaryPublicId
     });
     
     res.status(200).json({ 
       success: true, 
-      generalSecretaryImageUrl: imageUrl,
+      generalSecretaryImageUrl: cloudinaryResult.url,
       data: updatedProfile 
     });
   } catch (error) {

@@ -74,7 +74,9 @@ const accelerationFormSchema = new mongoose.Schema(
     ],
   galleryImages: [String],
   logo: String,
+  logoCloudinaryPublicId: String, // Store Cloudinary public_id for logo deletion
   generalSecretaryImage: String,
+  generalSecretaryImageCloudinaryPublicId: String, // Store Cloudinary public_id for secretary image deletion
   isDistrictHead: {
     type: Boolean,
     default: false
