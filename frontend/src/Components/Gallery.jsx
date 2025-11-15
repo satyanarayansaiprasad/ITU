@@ -19,6 +19,7 @@ const Gallery = () => {
     try {
       setLoading(true);
       const response = await axios.get(API_ENDPOINTS.GET_GALLERY);
+      console.log("Gallery data received:", response.data);
       setGalleryImages(response.data || []);
     } catch (error) {
       console.error('Error fetching gallery images:', error);
@@ -28,10 +29,26 @@ const Gallery = () => {
   };
 
   const getImageUrl = (filename) => {
-    if (!filename) return "/default-image.png";
-    if (/^(https?|data):/i.test(filename)) return filename;
-    if (filename.startsWith('/')) return filename;
-    return GET_UPLOAD_URL(filename);
+    if (!filename) {
+      console.warn("No filename provided for gallery image");
+      return "/default-image.png";
+    }
+    // If it's already a full URL, return as is
+    if (/^(https?|data):/i.test(filename)) {
+      return filename;
+    }
+    // If filename already includes uploads/, use it directly
+    if (filename.startsWith('uploads/')) {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+      return `${baseUrl}/${filename}`;
+    }
+    // Construct the URL - ensure we're using the correct path
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+    // Remove any leading slashes from filename
+    const cleanFilename = filename.replace(/^\/+/, '');
+    const imageUrl = `${baseUrl}/uploads/${cleanFilename}`;
+    console.log("Constructed gallery image URL:", imageUrl, "from filename:", filename);
+    return imageUrl;
   };
 
   const handleImageError = (id) => {
@@ -147,7 +164,17 @@ const Gallery = () => {
                     <img
                       src={hasError ? "/default-image.png" : imageUrl}
                       alt={img.title || `Indian Taekwondo Union Training Session - Professional Martial Arts Training in India`}
-                      onError={() => handleImageError(img._id)}
+                      onError={(e) => {
+                        console.error("Gallery image load error:", { 
+                          src: e.target.src, 
+                          filename: img.filename,
+                          imageId: img._id 
+                        });
+                        handleImageError(img._id);
+                      }}
+                      onLoad={() => {
+                        console.log("Gallery image loaded successfully:", imageUrl);
+                      }}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                       loading="lazy"
                     />
