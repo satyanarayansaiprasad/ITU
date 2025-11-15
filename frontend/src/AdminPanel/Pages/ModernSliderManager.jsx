@@ -22,7 +22,8 @@ import {
   Filter
 } from 'lucide-react';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
+                    (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-r1qa.onrender.com');
 
 const ModernSliderManager = () => {
   const [sliderImages, setSliderImages] = useState([]);
@@ -181,6 +182,25 @@ const ModernSliderManager = () => {
       month: 'short',
       day: 'numeric'
     });
+  };
+
+  // Helper function to get image URL (handles both Cloudinary URLs and legacy filenames)
+  const getImageUrl = (filename) => {
+    if (!filename) return '/api/placeholder/400/300';
+    
+    // If it's already a full URL (Cloudinary or other CDN), return as is
+    if (/^(https?|data):/i.test(filename)) {
+      return filename;
+    }
+    
+    // If filename already includes uploads/, use it directly (legacy local storage)
+    if (filename.startsWith('uploads/')) {
+      return `${API_BASE_URL}/${filename}`;
+    }
+    
+    // Construct the URL for legacy local storage files
+    const cleanFilename = filename.replace(/^\/+/, '');
+    return `${API_BASE_URL}/uploads/${cleanFilename}`;
   };
 
   const filteredImages = sliderImages.filter(image =>
@@ -416,11 +436,11 @@ const ModernSliderManager = () => {
                 >
                   <div className={`relative ${viewMode === 'list' ? 'w-24 h-16 flex-shrink-0' : 'aspect-video'}`}>
                     <img
-                      src={`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/uploads/${image.filename}`}
+                      src={getImageUrl(image.filename)}
                       alt={`Slider ${index + 1}`}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover bg-gray-100"
                       onError={(e) => {
-                        e.target.src = '/api/placeholder/400/300';
+                        e.target.style.display = 'none';
                         console.error('Image failed to load:', image.filename);
                       }}
                     />
@@ -429,7 +449,7 @@ const ModernSliderManager = () => {
                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
                         <button
-                          onClick={() => setShowPreview(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/uploads/${image.filename}`)}
+                          onClick={() => setShowPreview(getImageUrl(image.filename))}
                           className="p-2 bg-white bg-opacity-20 rounded-full text-white hover:bg-opacity-30 transition-all"
                         >
                           <Eye size={16} />
@@ -466,7 +486,7 @@ const ModernSliderManager = () => {
                         </h3>
                         <div className="flex items-center gap-1">
                           <button
-                            onClick={() => setShowPreview(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/uploads/${image.filename}`)}
+                            onClick={() => setShowPreview(getImageUrl(image.filename))}
                             className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
                           >
                             <Eye size={14} />
