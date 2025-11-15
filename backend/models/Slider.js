@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 
 const sliderSchema = new mongoose.Schema({
-  filename: String,
+  filename: String, // Now stores Cloudinary URL
+  cloudinaryPublicId: String, // Store Cloudinary public_id for deletion
   uploadedAt: {
     type: Date,
     default: Date.now

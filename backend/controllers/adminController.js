@@ -8,6 +8,7 @@ const News =require('../models/News')
  const fs = require('fs');
 const nodemailer = require("nodemailer");
 const AccelerationForm = require('../models/AccelerationForm');
+const { uploadBufferToCloudinary, deleteFromCloudinary } = require('../config/cloudinary');
 
 exports.login = async (req, res) => {
   try {
@@ -264,19 +265,9 @@ exports.deleteNews = async (req, res) => {
 
 
 
-// POST: Upload a new slider image
-
-// Your controller
-exports.createSlider = (req, res) => {
-  upload.single("image")(req, res, async (err) => {
-    if (err) {
-      console.error("File upload error:", err);
-      return res.status(500).json({
-        success: false,
-        message: "File upload failed"
-      });
-    }
-
+// POST: Upload a new slider image with Cloudinary
+exports.createSlider = async (req, res) => {
+  try {
     if (!req.file) {
       return res.status(400).json({
         success: false,
@@ -284,27 +275,35 @@ exports.createSlider = (req, res) => {
       });
     }
 
-    try {
-      const newSlider = new Slider({
-        filename: req.file.filename, // e.g., 1749670368854.jpg
-        uploadedAt: new Date()
-      });
+    // Upload to Cloudinary
+    const cloudinaryResult = await uploadBufferToCloudinary(
+      req.file.buffer,
+      'itu/sliders',
+      `slider-${Date.now()}`
+    );
 
-      await newSlider.save();
+    // Save Cloudinary URL to database
+    const newSlider = new Slider({
+      filename: cloudinaryResult.url, // Store Cloudinary URL instead of filename
+      cloudinaryPublicId: cloudinaryResult.public_id, // Store public_id for deletion
+      uploadedAt: new Date()
+    });
 
-      res.status(201).json({
-        success: true,
-        message: "Slider uploaded successfully",
-        slider: newSlider
-      });
-    } catch (error) {
-      console.error("Database save error:", error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to save slider"
-      });
-    }
-  });
+    await newSlider.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Slider uploaded successfully to Cloudinary",
+      slider: newSlider
+    });
+  } catch (error) {
+    console.error("Slider upload error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to upload slider",
+      error: error.message
+    });
+  }
 };
 
 
@@ -328,23 +327,41 @@ exports.updateSlider = async (req, res) => {
 
     if (!slider) return res.status(404).json({ success: false, message: "Slider not found" });
 
-    // Delete old image from disk
-    const oldPath = path.join(__dirname, "../uploads", slider.filename);
-    if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No image uploaded" });
+    }
 
-    // Save new image file
-    slider.filename = req.file.filename;
+    // Delete old image from Cloudinary if it exists
+    if (slider.cloudinaryPublicId) {
+      try {
+        await deleteFromCloudinary(slider.cloudinaryPublicId);
+      } catch (error) {
+        console.error("Error deleting old Cloudinary image:", error);
+        // Continue even if deletion fails
+      }
+    }
+
+    // Upload new image to Cloudinary
+    const cloudinaryResult = await uploadBufferToCloudinary(
+      req.file.buffer,
+      'itu/sliders',
+      `slider-${Date.now()}`
+    );
+
+    // Update slider with new Cloudinary URL
+    slider.filename = cloudinaryResult.url;
+    slider.cloudinaryPublicId = cloudinaryResult.public_id;
     slider.uploadedAt = new Date();
     await slider.save();
 
     res.status(200).json({ success: true, message: "Slider updated", slider });
   } catch (error) {
     console.error("Update error:", error);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    res.status(500).json({ success: false, message: "Internal server error", error: error.message });
   }
 };
 
-// DELETE: Delete a slider image
+// DELETE: Delete a slider image from Cloudinary
 exports.deleteSlider = async (req, res) => {
   try {
     const { id } = req.params;
@@ -354,17 +371,23 @@ exports.deleteSlider = async (req, res) => {
       return res.status(404).json({ success: false, message: "Slider not found" });
     }
 
-    const imagePath = path.join(__dirname, "../uploads", slider.filename);
-    if (fs.existsSync(imagePath)) {
-      fs.unlinkSync(imagePath); // delete the image file
+    // Delete from Cloudinary if public_id exists
+    if (slider.cloudinaryPublicId) {
+      try {
+        await deleteFromCloudinary(slider.cloudinaryPublicId);
+      } catch (error) {
+        console.error("Error deleting from Cloudinary:", error);
+        // Continue with database deletion even if Cloudinary deletion fails
+      }
     }
 
+    // Delete from database
     await Slider.findByIdAndDelete(id);
 
-    res.json({ success: true, message: "Slider deleted successfully" });
+    res.json({ success: true, message: "Slider deleted successfully from Cloudinary and database" });
   } catch (error) {
     console.error("Delete error:", error);
-    res.status(500).json({ success: false, message: "Server error" });
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
   }
 };
 
@@ -388,16 +411,8 @@ exports.getForm = async (req, res) => {
 
 //GalleryMngment
 
-exports.createGallery = (req, res) => {
-  upload.single("image")(req, res, async (err) => {
-    if (err) {
-      console.error("File upload error:", err);
-      return res.status(500).json({
-        success: false,
-        message: "File upload failed"
-      });
-    }
-
+exports.createGallery = async (req, res) => {
+  try {
     if (!req.file) {
       return res.status(400).json({
         success: false,
@@ -405,27 +420,36 @@ exports.createGallery = (req, res) => {
       });
     }
 
-    try {
-      const newGallery = new Gallery({
-        filename: req.file.filename, // e.g., 1749670368854.jpg
-        uploadedAt: new Date()
-      });
+    // Upload to Cloudinary
+    const cloudinaryResult = await uploadBufferToCloudinary(
+      req.file.buffer,
+      'itu/gallery',
+      `gallery-${Date.now()}`
+    );
 
-      await newGallery.save();
+    // Save Cloudinary URL to database
+    const newGallery = new Gallery({
+      filename: cloudinaryResult.url, // Store Cloudinary URL instead of filename
+      cloudinaryPublicId: cloudinaryResult.public_id, // Store public_id for deletion
+      title: req.body.title || null, // Optional title
+      uploadedAt: new Date()
+    });
 
-      res.status(201).json({
-        success: true,
-        message: "Slider uploaded successfully",
-        gallery: newGallery
-      });
-    } catch (error) {
-      console.error("Database save error:", error);
-      res.status(500).json({
-        success: false,
-        message: "Failed to save slider"
-      });
-    }
-  });
+    await newGallery.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Gallery image uploaded successfully to Cloudinary",
+      gallery: newGallery
+    });
+  } catch (error) {
+    console.error("Gallery upload error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to upload gallery image",
+      error: error.message
+    });
+  }
 };
 
 
@@ -441,48 +465,73 @@ exports.getGallery = async (req, res) => {
   }
 };
 
-// PUT: Update a slider image by replacing the image
+// PUT: Update a gallery image by replacing the image
 exports.updateGallery = async (req, res) => {
   try {
     const { id } = req.params;
     const gallery = await Gallery.findById(id);
 
-    if (!gallery) return res.status(404).json({ success: false, message: "Slider not found" });
+    if (!gallery) return res.status(404).json({ success: false, message: "Gallery image not found" });
 
-    // Delete old image from disk
-    const oldPath = path.join(__dirname, "../uploads", gallery.filename);
-    if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No image uploaded" });
+    }
 
-    // Save new image file
-    gallery.filename = req.file.filename;
+    // Delete old image from Cloudinary if it exists
+    if (gallery.cloudinaryPublicId) {
+      try {
+        await deleteFromCloudinary(gallery.cloudinaryPublicId);
+      } catch (error) {
+        console.error("Error deleting old Cloudinary image:", error);
+        // Continue even if deletion fails
+      }
+    }
+
+    // Upload new image to Cloudinary
+    const cloudinaryResult = await uploadBufferToCloudinary(
+      req.file.buffer,
+      'itu/gallery',
+      `gallery-${Date.now()}`
+    );
+
+    // Update gallery with new Cloudinary URL
+    gallery.filename = cloudinaryResult.url;
+    gallery.cloudinaryPublicId = cloudinaryResult.public_id;
+    if (req.body.title) gallery.title = req.body.title;
     gallery.uploadedAt = new Date();
     await gallery.save();
 
-    res.status(200).json({ success: true, message: "Slider updated", slider });
+    res.status(200).json({ success: true, message: "Gallery image updated", gallery });
   } catch (error) {
     console.error("Update error:", error);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    res.status(500).json({ success: false, message: "Internal server error", error: error.message });
   }
 };
 
-// DELETE: Delete a slider image
+// DELETE: Delete a gallery image from Cloudinary
 exports.deleteGallery = async (req, res) => {
   try {
     const { id } = req.params;
     const gallery = await Gallery.findById(id);
 
     if (!gallery) {
-      return res.status(404).json({ success: false, message: "Slider not found" });
+      return res.status(404).json({ success: false, message: "Gallery image not found" });
     }
 
-    const imagePath = path.join(__dirname, "../uploads", slider.filename);
-    if (fs.existsSync(imagePath)) {
-      fs.unlinkSync(imagePath); // delete the image file
+    // Delete from Cloudinary if public_id exists
+    if (gallery.cloudinaryPublicId) {
+      try {
+        await deleteFromCloudinary(gallery.cloudinaryPublicId);
+      } catch (error) {
+        console.error("Error deleting from Cloudinary:", error);
+        // Continue with database deletion even if Cloudinary deletion fails
+      }
     }
 
+    // Delete from database
     await Gallery.findByIdAndDelete(id);
 
-    res.json({ success: true, message: "Slider deleted successfully" });
+    res.json({ success: true, message: "Gallery image deleted successfully from Cloudinary and database" });
   } catch (error) {
     console.error("Delete error:", error);
     res.status(500).json({ success: false, message: "Server error" });

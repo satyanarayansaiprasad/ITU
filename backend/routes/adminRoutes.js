@@ -1,4 +1,4 @@
-const upload =require("../middleware/multer.js");
+const { upload } = require("../middleware/multer.js");
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/adminController');
@@ -13,13 +13,13 @@ router.put("/editNews/:id", upload.single("image"), adminController.editNews);
 router.delete("/deleteNews/:id", adminController.deleteNews);
 
 
-router.post('/uploadSlider', adminController.createSlider);
+router.post('/uploadSlider', upload.single('image'), adminController.createSlider);
 router.get('/getSlider', adminController.getSliders);
 router.put('/editSlider/:id', upload.single('image'), adminController.updateSlider);
 router.delete('/deleteSlider/:id', adminController.deleteSlider);
 
 
-router.post('/uploadGallery', adminController.createGallery);
+router.post('/uploadGallery', upload.single('image'), adminController.createGallery);
 router.get('/getGallery', adminController.getGallery);
  router.put('/editGallery/:id', upload.single('image'), adminController.updateGallery);
 router.delete('/deleteGallery/:id', adminController.deleteGallery);

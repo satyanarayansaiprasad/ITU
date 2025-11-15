@@ -2,7 +2,7 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
-// Ensure upload directories exist
+// Ensure upload directories exist (for fallback/local storage)
 const uploadDir = path.join(__dirname, "../uploads");
 const logosDir = path.join(__dirname, "../uploads/logos");
 const secretaryImagesDir = path.join(__dirname, "../uploads/secretary-images");
@@ -14,8 +14,11 @@ const secretaryImagesDir = path.join(__dirname, "../uploads/secretary-images");
   }
 });
 
-// Multer storage config
-const storage = multer.diskStorage({
+// Memory storage for Cloudinary uploads (uploads directly from buffer)
+const memoryStorage = multer.memoryStorage();
+
+// Disk storage for local fallback (if needed)
+const diskStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     // Determine destination folder based on field name
     let destinationFolder = uploadDir;
@@ -45,10 +48,18 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
+// Use memory storage for Cloudinary (default)
 const upload = multer({
-  storage,
+  storage: memoryStorage,
+  fileFilter,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB max for Cloudinary
+});
+
+// Disk storage upload (for fallback)
+const uploadDisk = multer({
+  storage: diskStorage,
   fileFilter,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
 });
 
-module.exports = upload;
+module.exports = { upload, uploadDisk };

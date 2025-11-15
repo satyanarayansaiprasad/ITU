@@ -33,21 +33,19 @@ const Gallery = () => {
       console.warn("No filename provided for gallery image");
       return "/default-image.png";
     }
-    // If it's already a full URL, return as is
+    // If it's already a full URL (Cloudinary or other CDN), return as is
     if (/^(https?|data):/i.test(filename)) {
       return filename;
     }
-    // If filename already includes uploads/, use it directly
+    // If filename already includes uploads/, use it directly (legacy local storage)
     if (filename.startsWith('uploads/')) {
       const baseUrl = import.meta.env.VITE_API_BASE_URL || 
                       (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-r1qa.onrender.com');
       return `${baseUrl}/${filename}`;
     }
-    // Construct the URL - ensure we're using the correct path
-    // Use production URL as default for deployed sites
+    // Construct the URL for legacy local storage files
     const baseUrl = import.meta.env.VITE_API_BASE_URL || 
                     (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-r1qa.onrender.com');
-    // Remove any leading slashes from filename
     const cleanFilename = filename.replace(/^\/+/, '');
     const imageUrl = `${baseUrl}/uploads/${cleanFilename}`;
     console.log("Constructed gallery image URL:", imageUrl, "from filename:", filename, "baseUrl:", baseUrl);
