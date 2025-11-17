@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { toPng } from 'html-to-image';
+import html2canvas from 'html2canvas';
 import { Download, RotateCcw, RotateCw, CreditCard } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
@@ -536,7 +536,6 @@ const PlayerIDCard = ({ player }) => {
       // Additional wait to ensure all styles are applied
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Use html-to-image which handles modern CSS colors (oklab/oklch) much better
       // Target the element that's actually in the DOM (in tempContainer)
       const elementToCapture = tempContainer.firstElementChild || targetClonedElement;
       
@@ -553,68 +552,125 @@ const PlayerIDCard = ({ player }) => {
       elementToCapture.style.height = '330px';
       elementToCapture.style.position = 'relative';
       
-      // Temporarily make container visible for better rendering
-      const originalLeft = tempContainer.style.left;
-      tempContainer.style.position = 'fixed';
-      tempContainer.style.left = '0';
-      tempContainer.style.top = '0';
-      tempContainer.style.zIndex = '999999';
-      
-      try {
-        const dataUrl = await toPng(elementToCapture, {
-          backgroundColor: '#1e3a8a',
-          width: 525,
-          height: 330,
-          pixelRatio: 4, // High quality (4x pixel ratio)
-          quality: 1.0, // Maximum quality
-          cacheBust: true, // Ensure fresh render
-          includeQueryParams: true, // Include query params for images
-          useCORS: true, // Allow cross-origin images
-          filter: (node) => {
-            // Filter out animated elements that might cause issues
-            if (node.classList && node.classList.contains('animate-shine')) {
-              return false;
+      // Remove ALL CSS classes that might generate oklab/oklch colors
+      const removeProblematicClasses = (el) => {
+        if (!el || el.nodeType !== 1) return;
+        
+        // Remove all Tailwind classes that might use modern color functions
+        const classesToRemove = [];
+        if (el.classList) {
+          Array.from(el.classList).forEach(cls => {
+            // Remove any class that might generate colors
+            if (cls.includes('bg-') || cls.includes('text-') || cls.includes('border-') ||
+                cls.includes('from-') || cls.includes('via-') || cls.includes('to-') ||
+                cls.includes('gradient') || cls.includes('blue') || cls.includes('indigo') ||
+                cls.includes('white') || cls.includes('orange') || cls.includes('gray')) {
+              classesToRemove.push(cls);
             }
-            // Don't filter out text nodes or important elements
-            return true;
-          },
-          style: {
-            transform: 'scale(1)',
-            transformOrigin: 'top left',
-            width: '525px',
-            height: '330px',
-          },
-        });
-        
-        // Restore container position
-        tempContainer.style.position = 'absolute';
-        tempContainer.style.left = originalLeft;
-        
-        // Create download link
-        const link = document.createElement('a');
-        const sanitizedName = player.name.replace(/[^a-zA-Z0-9]/g, '_');
-        const fileName = `${sanitizedName}_ID_Card_${side}_${Date.now()}.png`;
-        link.download = fileName;
-        link.href = dataUrl;
-        
-        // Trigger download
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        // Cleanup
-        if (document.body.contains(tempContainer)) {
-          document.body.removeChild(tempContainer);
+          });
+          classesToRemove.forEach(cls => el.classList.remove(cls));
         }
-      } catch (error) {
-        // Restore container position even on error
-        tempContainer.style.position = 'absolute';
-        tempContainer.style.left = originalLeft;
-        console.error(`Error downloading ${side} side:`, error);
-        if (document.body.contains(tempContainer)) {
-          document.body.removeChild(tempContainer);
-        }
-        throw error;
+        
+        // Process children
+        Array.from(el.children).forEach(child => removeProblematicClasses(child));
+      };
+      
+      // Remove all problematic classes before capture
+      removeProblematicClasses(elementToCapture);
+      
+      // Use html2canvas with aggressive color conversion
+      const canvas = await html2canvas(elementToCapture, {
+        backgroundColor: '#1e3a8a',
+        scale: 4,
+        logging: false,
+        useCORS: true,
+        allowTaint: false,
+        width: 525,
+        height: 330,
+        windowWidth: 525,
+        windowHeight: 330,
+        pixelRatio: 2,
+        ignoreElements: (element) => {
+          return element.classList && element.classList.contains('animate-shine');
+        },
+        onclone: (clonedDoc) => {
+          // Final aggressive pass: remove ALL classes and set explicit styles from original
+          const allElements = clonedDoc.querySelectorAll('*');
+          allElements.forEach(el => {
+            try {
+              // Remove ALL classes to prevent oklab/oklch generation
+              el.className = '';
+              
+              // Use original styles we collected (already RGB from browser)
+              const originalStyles = styleMap.get(el);
+              
+              if (originalStyles) {
+                // Apply original rendered colors (already RGB)
+                if (originalStyles.backgroundColor) {
+                  el.style.setProperty('background-color', originalStyles.backgroundColor, 'important');
+                }
+                
+                if (originalStyles.backgroundImage && originalStyles.backgroundImage !== 'none' &&
+                    !originalStyles.backgroundImage.includes('oklch') && !originalStyles.backgroundImage.includes('oklab')) {
+                  el.style.setProperty('background-image', originalStyles.backgroundImage, 'important');
+                }
+                
+                // TEXT COLOR - preserve exact color as displayed
+                if (originalStyles.color) {
+                  el.style.setProperty('color', originalStyles.color, 'important');
+                }
+                
+                if (originalStyles.borderColor && originalStyles.borderColor !== 'rgba(0, 0, 0, 0)') {
+                  el.style.setProperty('border-color', originalStyles.borderColor, 'important');
+                }
+                
+                // Preserve typography
+                if (originalStyles.fontSize) el.style.setProperty('font-size', originalStyles.fontSize, 'important');
+                if (originalStyles.fontWeight) el.style.setProperty('font-weight', originalStyles.fontWeight, 'important');
+                if (originalStyles.fontFamily) el.style.setProperty('font-family', originalStyles.fontFamily, 'important');
+                if (originalStyles.lineHeight) el.style.setProperty('line-height', originalStyles.lineHeight, 'important');
+              } else {
+                // Fallback: get from computed style
+                try {
+                  const style = window.getComputedStyle(el);
+                  
+                  const bg = style.backgroundColor;
+                  if (bg && (bg.startsWith('#') || bg.startsWith('rgb'))) {
+                    el.style.setProperty('background-color', bg, 'important');
+                  }
+                  
+                  const color = style.color;
+                  if (color && (color.startsWith('#') || color.startsWith('rgb'))) {
+                    el.style.setProperty('color', color, 'important');
+                  }
+                } catch (e) {
+                  // Use safe defaults
+                  el.style.setProperty('background-color', '#1e3a8a', 'important');
+                  el.style.setProperty('color', '#ffffff', 'important');
+                }
+              }
+            } catch (e) {
+              // Ignore errors
+            }
+          });
+        },
+      });
+      
+      // Create download link
+      const link = document.createElement('a');
+      const sanitizedName = player.name.replace(/[^a-zA-Z0-9]/g, '_');
+      const fileName = `${sanitizedName}_ID_Card_${side}_${Date.now()}.png`;
+      link.download = fileName;
+      link.href = canvas.toDataURL('image/png', 1.0);
+      
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Cleanup
+      if (document.body.contains(tempContainer)) {
+        document.body.removeChild(tempContainer);
       }
     } catch (error) {
       console.error(`Error downloading ${side} side:`, error);
