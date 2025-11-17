@@ -50,6 +50,23 @@ app.use(session({
   }
 }));
 
+// Health check endpoint (required for Render)
+app.get('/', (req, res) => {
+  res.json({ 
+    status: 'success', 
+    message: 'ITU Backend API is running',
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'healthy', 
+    message: 'Server is running',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Routes
 app.use('/api/admin', adminRoutes);
 app.use('/api/user', userRoutes);
@@ -57,10 +74,30 @@ app.use('/api/user', userRoutes);
 // app.use('/api/firebase', firebaseRoutes);
 app.use('/api/states', statesRoutes); // States and Districts routes (uses static data)
 
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ 
+    status: 'error', 
+    message: 'Route not found' 
+  });
+});
+
+// Error handler
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(err.status || 500).json({ 
+    status: 'error', 
+    message: err.message || 'Internal server error' 
+  });
+});
+
 // Start Server - Restart trigger
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
+const HOST = process.env.HOST || '0.0.0.0'; // Bind to 0.0.0.0 for Render
+
+app.listen(PORT, HOST, () => {
+  console.log(`✅ Server running on ${HOST}:${PORT}`);
+  console.log(`✅ Health check available at http://${HOST}:${PORT}/health`);
 });
 
 
