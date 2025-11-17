@@ -593,7 +593,7 @@ const StateUnionDashboard = () => {
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{player.yearsOfExperience} years</td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                             {player.dob ? new Date(player.dob).toLocaleDateString() : 'N/A'}
-                          </td>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
