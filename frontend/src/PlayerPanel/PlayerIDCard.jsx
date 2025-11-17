@@ -73,11 +73,95 @@ const PlayerIDCard = ({ player }) => {
     clonedElement.style.opacity = '1';
     clonedElement.style.visibility = 'visible';
     
+    // Comprehensive function to recursively process all elements and set explicit hex colors
+    const processElementColors = (el) => {
+      if (!el || el.nodeType !== 1) return; // Skip non-element nodes
+      
+      try {
+        // Get computed styles safely
+        let computedStyle;
+        try {
+          computedStyle = window.getComputedStyle(el);
+        } catch (e) {
+          return; // Skip if we can't get computed style
+        }
+        
+        // Process background color
+        try {
+          const bgColor = computedStyle.backgroundColor;
+          if (bgColor) {
+            if (bgColor.includes('oklch') || bgColor.includes('oklab') || 
+                (!bgColor.startsWith('#') && !bgColor.startsWith('rgb') && bgColor !== 'transparent' && bgColor !== 'rgba(0, 0, 0, 0)')) {
+              // Determine color based on element context
+              const classList = Array.from(el.classList || []);
+              if (classList.some(c => c.includes('blue') || c.includes('indigo'))) {
+                el.style.backgroundColor = '#1e3a8a';
+              } else if (classList.some(c => c.includes('white'))) {
+                el.style.backgroundColor = '#ffffff';
+              } else if (classList.some(c => c.includes('orange'))) {
+                el.style.backgroundColor = '#fb923c';
+              } else {
+                el.style.backgroundColor = '#1e3a8a';
+              }
+            } else if (bgColor.startsWith('#') || bgColor.startsWith('rgb')) {
+              el.style.backgroundColor = bgColor;
+            }
+          }
+        } catch (e) {
+          el.style.backgroundColor = '#1e3a8a';
+        }
+        
+        // Process text color
+        try {
+          const textColor = computedStyle.color;
+          if (textColor) {
+            if (textColor.includes('oklch') || textColor.includes('oklab') || 
+                (!textColor.startsWith('#') && !textColor.startsWith('rgb'))) {
+              const classList = Array.from(el.classList || []);
+              if (classList.some(c => c.includes('white'))) {
+                el.style.color = '#ffffff';
+              } else if (classList.some(c => c.includes('orange'))) {
+                el.style.color = '#fb923c';
+              } else {
+                el.style.color = '#ffffff';
+              }
+            } else if (textColor.startsWith('#') || textColor.startsWith('rgb')) {
+              el.style.color = textColor;
+            }
+          }
+        } catch (e) {
+          el.style.color = '#ffffff';
+        }
+        
+        // Process border color
+        try {
+          const borderColor = computedStyle.borderColor;
+          if (borderColor && (borderColor.includes('oklch') || borderColor.includes('oklab') || 
+              (!borderColor.startsWith('#') && !borderColor.startsWith('rgb') && borderColor !== 'transparent' && borderColor !== 'rgba(0, 0, 0, 0)'))) {
+            el.style.borderColor = '#ffffff';
+          } else if (borderColor && (borderColor.startsWith('#') || borderColor.startsWith('rgb'))) {
+            el.style.borderColor = borderColor;
+          }
+        } catch (e) {
+          // Ignore border color errors
+        }
+        
+        // Process all children recursively
+        Array.from(el.children).forEach(child => processElementColors(child));
+      } catch (e) {
+        // Continue processing children even if this element fails
+        Array.from(el.children).forEach(child => processElementColors(child));
+      }
+    };
+    
     // Get the inner card div and fix all color references
     const innerCard = clonedElement.querySelector('div > div');
     if (innerCard) {
       innerCard.style.transform = 'none';
       innerCard.style.position = 'relative';
+      
+      // Process all elements recursively to set explicit hex colors
+      processElementColors(innerCard);
       
       // Helper function to safely get and convert color values
       const safeGetColor = (colorValue, defaultColor = '#1e3a8a') => {
@@ -221,10 +305,88 @@ const PlayerIDCard = ({ player }) => {
     }
     
     tempContainer.appendChild(clonedElement);
+    
+    // Process the entire cloned element tree again after it's in the DOM
+    // This ensures all computed styles are converted to explicit hex colors
+    const finalProcessColors = (el) => {
+      if (!el || el.nodeType !== 1) return;
+      
+      try {
+        // Remove any Tailwind classes that might generate oklch colors
+        // Keep only essential classes
+        const classesToKeep = ['rounded', 'overflow', 'flex', 'grid', 'absolute', 'relative'];
+        const currentClasses = Array.from(el.classList || []);
+        currentClasses.forEach(cls => {
+          // Remove color-related classes that might generate oklch
+          if (cls.includes('bg-') || cls.includes('text-') || cls.includes('border-') || 
+              cls.includes('from-') || cls.includes('via-') || cls.includes('to-') ||
+              cls.includes('gradient')) {
+            el.classList.remove(cls);
+          }
+        });
+        
+        // Get computed style and set explicit hex colors
+        try {
+          const style = window.getComputedStyle(el);
+          
+          // Force set background color as hex
+          try {
+            const bg = style.backgroundColor;
+            if (bg && (bg.includes('oklch') || bg.includes('oklab') || 
+                (!bg.startsWith('#') && !bg.startsWith('rgb') && bg !== 'transparent' && bg !== 'rgba(0, 0, 0, 0)'))) {
+              el.style.setProperty('background-color', '#1e3a8a', 'important');
+            } else if (bg && (bg.startsWith('#') || bg.startsWith('rgb'))) {
+              el.style.setProperty('background-color', bg, 'important');
+            }
+          } catch (e) {
+            el.style.setProperty('background-color', '#1e3a8a', 'important');
+          }
+          
+          // Force set text color as hex
+          try {
+            const color = style.color;
+            if (color && (color.includes('oklch') || color.includes('oklab') || 
+                (!color.startsWith('#') && !color.startsWith('rgb')))) {
+              el.style.setProperty('color', '#ffffff', 'important');
+            } else if (color && (color.startsWith('#') || color.startsWith('rgb'))) {
+              el.style.setProperty('color', color, 'important');
+            }
+          } catch (e) {
+            el.style.setProperty('color', '#ffffff', 'important');
+          }
+          
+          // Force set border color as hex
+          try {
+            const border = style.borderColor;
+            if (border && (border.includes('oklch') || border.includes('oklab') || 
+                (!border.startsWith('#') && !border.startsWith('rgb') && border !== 'transparent' && border !== 'rgba(0, 0, 0, 0)'))) {
+              el.style.setProperty('border-color', '#ffffff', 'important');
+            } else if (border && (border.startsWith('#') || border.startsWith('rgb'))) {
+              el.style.setProperty('border-color', border, 'important');
+            }
+          } catch (e) {
+            // Ignore border errors
+          }
+        } catch (e) {
+          // Set safe defaults
+          el.style.setProperty('background-color', '#1e3a8a', 'important');
+          el.style.setProperty('color', '#ffffff', 'important');
+        }
+        
+        // Process children
+        Array.from(el.children).forEach(child => finalProcessColors(child));
+      } catch (e) {
+        // Continue with children
+        Array.from(el.children).forEach(child => finalProcessColors(child));
+      }
+    };
+    
+    // Process the entire tree after it's in the DOM
+    finalProcessColors(clonedElement);
 
     try {
-      // Wait for images to load
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Wait for images to load and styles to be applied
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       const canvas = await html2canvas(tempContainer, {
         backgroundColor: '#1e3a8a', // Use hex color
@@ -241,57 +403,70 @@ const PlayerIDCard = ({ player }) => {
           return element.classList && element.classList.contains('animate-shine');
         },
         onclone: (clonedDoc) => {
-          // Convert all oklch/oklab colors to hex/rgb in the cloned document
+          // Final pass: remove CSS classes and convert all oklch/oklab colors to hex/rgb
           const allElements = clonedDoc.querySelectorAll('*');
           allElements.forEach(el => {
             try {
-              const style = window.getComputedStyle(el);
+              // Remove all CSS classes that might generate oklch colors
+              // This prevents html2canvas from reading stylesheets with oklch
+              const classesToRemove = Array.from(el.classList || []);
+              classesToRemove.forEach(cls => {
+                if (cls.includes('bg-') || cls.includes('text-') || cls.includes('border-') || 
+                    cls.includes('from-') || cls.includes('via-') || cls.includes('to-') ||
+                    cls.includes('gradient') || cls.includes('blue') || cls.includes('indigo') ||
+                    cls.includes('white') || cls.includes('orange')) {
+                  el.classList.remove(cls);
+                }
+              });
+              
+              // Try to get computed style, but if it fails or contains oklch, use defaults
+              let bgColor, textColor, borderColor;
+              try {
+                const style = window.getComputedStyle(el);
+                bgColor = style.backgroundColor;
+                textColor = style.color;
+                borderColor = style.borderColor;
+              } catch (e) {
+                // If we can't read computed style, use defaults
+                bgColor = null;
+                textColor = null;
+                borderColor = null;
+              }
               
               // Convert background colors - handle both oklch and oklab
-              let bgColor = style.backgroundColor;
-              if (bgColor && (bgColor.includes('oklch') || bgColor.includes('oklab'))) {
-                // Replace with hex equivalent
-                if (bgColor.includes('blue') || bgColor.includes('indigo')) {
-                  el.style.backgroundColor = '#1e3a8a';
-                } else if (bgColor.includes('white')) {
-                  el.style.backgroundColor = '#ffffff';
-                } else if (bgColor.includes('orange')) {
-                  el.style.backgroundColor = '#fb923c';
-                } else {
-                  el.style.backgroundColor = '#1e3a8a';
-                }
-              } else if (bgColor && !bgColor.startsWith('#') && !bgColor.startsWith('rgb') && bgColor !== 'transparent' && bgColor !== 'rgba(0, 0, 0, 0)') {
-                // Convert any other non-standard color format to safe default
-                el.style.backgroundColor = '#1e3a8a';
+              if (bgColor && (bgColor.includes('oklch') || bgColor.includes('oklab') || 
+                  (!bgColor.startsWith('#') && !bgColor.startsWith('rgb') && bgColor !== 'transparent' && bgColor !== 'rgba(0, 0, 0, 0)'))) {
+                // Use inline style with !important to override
+                el.style.setProperty('background-color', '#1e3a8a', 'important');
+              } else if (bgColor && (bgColor.startsWith('#') || bgColor.startsWith('rgb'))) {
+                el.style.setProperty('background-color', bgColor, 'important');
+              } else {
+                // Set default if no valid color
+                el.style.setProperty('background-color', '#1e3a8a', 'important');
               }
               
               // Convert text colors - handle both oklch and oklab
-              let textColor = style.color;
-              if (textColor && (textColor.includes('oklch') || textColor.includes('oklab'))) {
-                if (textColor.includes('white')) {
-                  el.style.color = '#ffffff';
-                } else if (textColor.includes('orange')) {
-                  el.style.color = '#fb923c';
-                } else {
-                  el.style.color = '#ffffff';
-                }
-              } else if (textColor && !textColor.startsWith('#') && !textColor.startsWith('rgb')) {
-                // Convert any other non-standard color format to safe default
-                el.style.color = '#ffffff';
+              if (textColor && (textColor.includes('oklch') || textColor.includes('oklab') || 
+                  (!textColor.startsWith('#') && !textColor.startsWith('rgb')))) {
+                el.style.setProperty('color', '#ffffff', 'important');
+              } else if (textColor && (textColor.startsWith('#') || textColor.startsWith('rgb'))) {
+                el.style.setProperty('color', textColor, 'important');
+              } else {
+                el.style.setProperty('color', '#ffffff', 'important');
               }
               
               // Convert border colors - handle both oklch and oklab
-              let borderColor = style.borderColor;
-              if (borderColor && (borderColor.includes('oklch') || borderColor.includes('oklab'))) {
-                el.style.borderColor = '#ffffff';
-              } else if (borderColor && !borderColor.startsWith('#') && !borderColor.startsWith('rgb') && borderColor !== 'transparent' && borderColor !== 'rgba(0, 0, 0, 0)') {
-                el.style.borderColor = '#ffffff';
+              if (borderColor && (borderColor.includes('oklch') || borderColor.includes('oklab') || 
+                  (!borderColor.startsWith('#') && !borderColor.startsWith('rgb') && borderColor !== 'transparent' && borderColor !== 'rgba(0, 0, 0, 0)'))) {
+                el.style.setProperty('border-color', '#ffffff', 'important');
+              } else if (borderColor && (borderColor.startsWith('#') || borderColor.startsWith('rgb'))) {
+                el.style.setProperty('border-color', borderColor, 'important');
               }
             } catch (e) {
-              // Ignore errors - set safe defaults
+              // Set safe defaults on error
               try {
-                el.style.backgroundColor = el.style.backgroundColor || '#1e3a8a';
-                el.style.color = el.style.color || '#ffffff';
+                el.style.setProperty('background-color', '#1e3a8a', 'important');
+                el.style.setProperty('color', '#ffffff', 'important');
               } catch (e2) {
                 // Final fallback - ignore
               }
