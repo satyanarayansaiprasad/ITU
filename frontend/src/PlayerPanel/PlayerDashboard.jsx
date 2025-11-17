@@ -23,9 +23,11 @@ import {
   X as XIcon,
   Newspaper,
   Trophy,
-  ChevronRight
+  ChevronRight,
+  CreditCard
 } from "lucide-react";
 import { toast } from "react-toastify";
+import PlayerIDCard from "./PlayerIDCard";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
                     (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-r1qa.onrender.com');
@@ -588,6 +590,9 @@ const PlayerDashboard = () => {
           </div>
         );
 
+      case 'id-card':
+        return <PlayerIDCard player={player} />;
+
       default:
         return null;
     }
@@ -662,6 +667,18 @@ const PlayerDashboard = () => {
             <Trophy size={20} />
             {sidebarOpen && <span>Belt Promotion</span>}
           </button>
+
+          <button
+            onClick={() => setActiveMenu('id-card')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+              activeMenu === 'id-card'
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            <CreditCard size={20} />
+            {sidebarOpen && <span>ID Card</span>}
+          </button>
         </nav>
 
         {/* Logout Button */}
@@ -683,7 +700,10 @@ const PlayerDashboard = () => {
           <div className="px-6 py-4 flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
-                {activeMenu === 'profile' ? 'Profile' : activeMenu === 'events' ? 'Events & News' : 'Belt Promotion Results'}
+                {activeMenu === 'profile' ? 'Profile' : 
+                 activeMenu === 'events' ? 'Events & News' : 
+                 activeMenu === 'belt-promotion' ? 'Belt Promotion Results' :
+                 activeMenu === 'id-card' ? 'Player ID Card' : 'Dashboard'}
               </h1>
               <p className="text-sm text-gray-600 mt-1">Welcome back, {player.name}</p>
             </div>

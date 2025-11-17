@@ -1,0 +1,433 @@
+import React, { useRef, useState } from 'react';
+import html2canvas from 'html2canvas';
+import { Download, RotateCcw, RotateCw, CreditCard } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { toast } from 'react-toastify';
+
+const PlayerIDCard = ({ player }) => {
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const cardRef = useRef(null);
+  const frontRef = useRef(null);
+  const backRef = useRef(null);
+
+  const getImageUrl = (image) => {
+    if (!image) return null;
+    if (/^(https?|data):/i.test(image)) return image;
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
+                        (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-r1qa.onrender.com');
+    if (image.startsWith('uploads/')) return `${API_BASE_URL}/${image}`;
+    const cleanImage = image.replace(/^\/+/, '');
+    return `${API_BASE_URL}/uploads/${cleanImage}`;
+  };
+
+  const downloadCard = async (side = 'both') => {
+    if (!cardRef.current) return;
+
+    try {
+      setIsDownloading(true);
+      
+      if (side === 'both') {
+        // Download both sides as separate images
+        await downloadSide('front');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        await downloadSide('back');
+        toast.success('Both sides downloaded successfully!');
+      } else {
+        await downloadSide(side);
+        toast.success(`${side === 'front' ? 'Front' : 'Back'} side downloaded successfully!`);
+      }
+    } catch (error) {
+      console.error('Error downloading ID card:', error);
+      toast.error('Failed to download ID card');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const downloadSide = async (side) => {
+    const element = side === 'front' ? frontRef.current : backRef.current;
+    if (!element) return;
+
+    // Create a temporary container to capture the correct side
+    const tempContainer = document.createElement('div');
+    tempContainer.style.position = 'absolute';
+    tempContainer.style.left = '-9999px';
+    tempContainer.style.width = '525px';
+    tempContainer.style.height = '330px';
+    document.body.appendChild(tempContainer);
+
+    // Clone the element
+    const clonedElement = element.cloneNode(true);
+    clonedElement.style.transform = 'none';
+    clonedElement.style.position = 'relative';
+    clonedElement.style.backfaceVisibility = 'visible';
+    clonedElement.style.WebkitBackfaceVisibility = 'visible';
+    tempContainer.appendChild(clonedElement);
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      const canvas = await html2canvas(tempContainer, {
+        backgroundColor: '#1e3a8a',
+        scale: 3,
+        logging: false,
+        useCORS: true,
+        allowTaint: true,
+        width: 525,
+        height: 330,
+      });
+
+      const link = document.createElement('a');
+      const fileName = `${player.name.replace(/\s+/g, '_')}_ID_Card_${side}_${Date.now()}.png`;
+      link.download = fileName;
+      link.href = canvas.toDataURL('image/png', 1.0);
+      link.click();
+
+      // Cleanup
+      document.body.removeChild(tempContainer);
+    } catch (error) {
+      console.error(`Error downloading ${side} side:`, error);
+      if (document.body.contains(tempContainer)) {
+        document.body.removeChild(tempContainer);
+      }
+      throw error;
+    }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <CreditCard className="text-blue-600" size={28} />
+            Player ID Card
+          </h2>
+          <p className="text-sm text-gray-600 mt-1">Premium 3D ID Card - View front and back</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setIsFlipped(!isFlipped)}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            {isFlipped ? (
+              <>
+                <RotateCcw size={18} />
+                View Front
+              </>
+            ) : (
+              <>
+                <RotateCw size={18} />
+                View Back
+              </>
+            )}
+          </button>
+          <div className="relative">
+            <button
+              onClick={() => downloadCard('both')}
+              disabled={isDownloading}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+            >
+              <Download size={18} />
+              {isDownloading ? 'Downloading...' : 'Download Both'}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* 3D Card Container */}
+      <div className="flex items-center justify-center min-h-[600px] perspective-1000">
+        <div
+          ref={cardRef}
+          className="relative w-full max-w-[525px] h-[330px] preserve-3d"
+          style={{
+            transformStyle: 'preserve-3d',
+            transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+            transition: 'transform 0.8s cubic-bezier(0.4, 0.2, 0.2, 1)',
+          }}
+        >
+          {/* Front Side */}
+          <div
+            ref={frontRef}
+            className="absolute inset-0 backface-hidden"
+            style={{
+              backfaceVisibility: 'hidden',
+              WebkitBackfaceVisibility: 'hidden',
+            }}
+          >
+            <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl">
+              {/* Premium Gradient Background */}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900">
+                {/* Decorative Pattern */}
+                <div className="absolute inset-0 opacity-10">
+                  <div className="absolute top-0 left-0 w-full h-full" style={{
+                    backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+                    backgroundSize: '40px 40px'
+                  }}></div>
+                </div>
+                
+                {/* Shine Effect */}
+                <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-transparent transform -skew-x-12 -translate-x-full animate-shine"></div>
+              </div>
+
+              {/* Content */}
+              <div className="relative z-10 h-full p-6 flex flex-col">
+                {/* Header Section */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm p-2 border-2 border-white/30">
+                      <img
+                        src="/ITU LOGO.png"
+                        alt="ITU Logo"
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                    <div>
+                      <h3 className="text-white font-bold text-lg leading-tight">INDIAN TAEKWONDO</h3>
+                      <h3 className="text-orange-400 font-bold text-lg leading-tight">UNION</h3>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-white/80 text-xs font-semibold">PLAYER ID CARD</p>
+                    <p className="text-orange-400 text-xs font-bold mt-1">{player.playerId || 'N/A'}</p>
+                  </div>
+                </div>
+
+                {/* Main Content */}
+                <div className="flex-1 flex items-center gap-6">
+                  {/* Photo Section */}
+                  <div className="relative">
+                    <div className="w-32 h-40 rounded-lg overflow-hidden border-4 border-white/50 shadow-xl bg-white/10 backdrop-blur-sm">
+                      {player.photo ? (
+                        <img
+                          src={getImageUrl(player.photo)}
+                          alt={player.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextElementSibling.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div className="w-full h-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center" style={{ display: player.photo ? 'none' : 'flex' }}>
+                        <span className="text-white text-4xl font-bold">{player.name.charAt(0).toUpperCase()}</span>
+                      </div>
+                    </div>
+                    {/* Photo Badge */}
+                    <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                      {player.beltLevel || 'N/A'}
+                    </div>
+                  </div>
+
+                  {/* Player Info */}
+                  <div className="flex-1 space-y-2">
+                    <div>
+                      <p className="text-white/60 text-xs font-semibold uppercase tracking-wide">Name</p>
+                      <p className="text-white font-bold text-xl">{player.name}</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 mt-4">
+                      <div>
+                        <p className="text-white/60 text-xs font-semibold uppercase tracking-wide">State</p>
+                        <p className="text-white font-semibold">{player.state}</p>
+                      </div>
+                      <div>
+                        <p className="text-white/60 text-xs font-semibold uppercase tracking-wide">District</p>
+                        <p className="text-white font-semibold">{player.district}</p>
+                      </div>
+                    </div>
+                    <div className="mt-3">
+                      <p className="text-white/60 text-xs font-semibold uppercase tracking-wide">Union</p>
+                      <p className="text-white font-semibold text-sm">{player.unionName || 'N/A'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="flex items-center justify-between pt-3 border-t border-white/20">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">ITU</span>
+                    </div>
+                    <p className="text-white/80 text-xs">Official Member</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-white/60 text-xs">Valid Until</p>
+                    <p className="text-white font-semibold text-xs">
+                      {player.approvedAt 
+                        ? new Date(new Date(player.approvedAt).setFullYear(new Date(player.approvedAt).getFullYear() + 1)).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })
+                        : 'N/A'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Back Side */}
+          <div
+            ref={backRef}
+            className="absolute inset-0 backface-hidden"
+            style={{
+              backfaceVisibility: 'hidden',
+              WebkitBackfaceVisibility: 'hidden',
+              transform: 'rotateY(180deg)',
+            }}
+          >
+            <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl">
+              {/* Premium Gradient Background */}
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-blue-800 to-blue-900">
+                {/* Decorative Pattern */}
+                <div className="absolute inset-0 opacity-10">
+                  <div className="absolute top-0 left-0 w-full h-full" style={{
+                    backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+                    backgroundSize: '40px 40px'
+                  }}></div>
+                </div>
+                
+                {/* Shine Effect */}
+                <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-transparent transform -skew-x-12 -translate-x-full animate-shine"></div>
+              </div>
+
+              {/* Content */}
+              <div className="relative z-10 h-full p-6 flex flex-col">
+                {/* Header */}
+                <div className="text-center mb-6">
+                  <div className="inline-block mb-3">
+                    <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm p-3 border-2 border-white/30 mx-auto">
+                      <img
+                        src="/ITU LOGO.png"
+                        alt="ITU Logo"
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                  </div>
+                  <h3 className="text-white font-bold text-xl mb-1">INDIAN TAEKWONDO UNION</h3>
+                  <p className="text-orange-400 text-sm font-semibold">Official Player Identification Card</p>
+                </div>
+
+                {/* Player Details Grid */}
+                <div className="flex-1 space-y-3">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+                    <p className="text-white/60 text-xs font-semibold uppercase tracking-wide mb-1">Player ID</p>
+                    <p className="text-white font-bold text-lg">{player.playerId || 'N/A'}</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+                      <p className="text-white/60 text-xs font-semibold uppercase tracking-wide mb-1">Date of Birth</p>
+                      <p className="text-white font-semibold">{formatDate(player.dob)}</p>
+                    </div>
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+                      <p className="text-white/60 text-xs font-semibold uppercase tracking-wide mb-1">Belt Level</p>
+                      <p className="text-white font-bold text-lg">{player.beltLevel || 'N/A'}</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+                    <p className="text-white/60 text-xs font-semibold uppercase tracking-wide mb-1">Experience</p>
+                    <p className="text-white font-semibold">{player.yearsOfExperience || 0} Years</p>
+                  </div>
+
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+                    <p className="text-white/60 text-xs font-semibold uppercase tracking-wide mb-1">Address</p>
+                    <p className="text-white font-semibold text-sm">{player.address || 'N/A'}</p>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="mt-4 pt-4 border-t border-white/20">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-white/60 text-xs">Status</p>
+                      <p className="text-green-400 font-bold text-sm uppercase">{player.status || 'PENDING'}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-white/60 text-xs">Issued Date</p>
+                      <p className="text-white font-semibold text-xs">
+                        {player.approvedAt ? formatDate(player.approvedAt) : 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-3 text-center">
+                    <p className="text-white/40 text-xs">This card is the property of Indian Taekwondo Union</p>
+                    <p className="text-white/40 text-xs mt-1">Unauthorized use is prohibited</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Download Options */}
+      <div className="bg-white rounded-xl shadow-md p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Download Options</h3>
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={() => downloadCard('front')}
+            disabled={isDownloading}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+          >
+            <Download size={18} />
+            Download Front
+          </button>
+          <button
+            onClick={() => downloadCard('back')}
+            disabled={isDownloading}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
+          >
+            <Download size={18} />
+            Download Back
+          </button>
+          <button
+            onClick={() => downloadCard('both')}
+            disabled={isDownloading}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+          >
+            <Download size={18} />
+            Download Both Sides
+          </button>
+        </div>
+        <p className="text-sm text-gray-600 mt-4">
+          💡 Tip: Use the flip button to view both sides, then download for printing. Images are high-resolution (300 DPI) suitable for professional printing.
+        </p>
+      </div>
+
+      <style>{`
+        .perspective-1000 {
+          perspective: 1000px;
+        }
+        .preserve-3d {
+          transform-style: preserve-3d;
+        }
+        .backface-hidden {
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
+        }
+        @keyframes shine {
+          0% {
+            transform: translateX(-100%) skewX(-12deg);
+          }
+          100% {
+            transform: translateX(200%) skewX(-12deg);
+          }
+        }
+        .animate-shine {
+          animation: shine 3s infinite;
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default PlayerIDCard;
+
