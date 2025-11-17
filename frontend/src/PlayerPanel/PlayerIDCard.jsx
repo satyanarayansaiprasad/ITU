@@ -286,11 +286,11 @@ const PlayerIDCard = ({ player }) => {
               </div>
 
               {/* Content */}
-              <div className="relative z-10 h-full p-6 flex flex-col">
+              <div className="relative z-10 h-full p-5 flex flex-col">
                 {/* Header */}
-                <div className="text-center mb-6">
-                  <div className="inline-block mb-3">
-                    <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm p-3 border-2 border-white/30 mx-auto">
+                <div className="text-center mb-4">
+                  <div className="inline-block mb-2">
+                    <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm p-2 border-2 border-white/30 mx-auto">
                       <img
                         src="/ITU LOGO.png"
                         alt="ITU Logo"
@@ -298,56 +298,43 @@ const PlayerIDCard = ({ player }) => {
                       />
                     </div>
                   </div>
-                  <h3 className="text-white font-bold text-xl mb-1">INDIAN TAEKWONDO UNION</h3>
-                  <p className="text-orange-400 text-sm font-semibold">Official Player Identification Card</p>
+                  <h3 className="text-white font-bold text-lg mb-1">INDIAN TAEKWONDO UNION</h3>
+                  <p className="text-orange-400 text-xs font-semibold">Official Player Identification Card</p>
                 </div>
 
-                {/* Player Details Grid */}
-                <div className="flex-1 space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
-                      <p className="text-white/60 text-xs font-semibold uppercase tracking-wide mb-1">Date of Birth</p>
-                      <p className="text-white font-semibold">{formatDate(player.dob)}</p>
-                    </div>
-                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
-                      <p className="text-white/60 text-xs font-semibold uppercase tracking-wide mb-1">Belt Level</p>
-                      <p className="text-white font-bold text-lg">{player.beltLevel || 'N/A'}</p>
-                    </div>
-                  </div>
-
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
-                    <p className="text-white/60 text-xs font-semibold uppercase tracking-wide mb-1">Email</p>
-                    <p className="text-white font-semibold text-sm break-all">{player.email || 'N/A'}</p>
-                  </div>
-
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
-                    <p className="text-white/60 text-xs font-semibold uppercase tracking-wide mb-1">Phone</p>
-                    <p className="text-white font-semibold">{player.phone || 'N/A'}</p>
-                  </div>
-
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
-                    <p className="text-white/60 text-xs font-semibold uppercase tracking-wide mb-1">Address</p>
-                    <p className="text-white font-semibold text-sm">{player.address || 'N/A'}</p>
-                  </div>
-                </div>
-
-                {/* Footer */}
-                <div className="mt-4 pt-4 border-t border-white/20">
-                  <div className="flex items-center justify-between">
+                {/* Player Details - No Boxes */}
+                <div className="flex-1 space-y-3 px-2 overflow-y-auto">
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-white/60 text-xs">Status</p>
-                      <p className="text-green-400 font-bold text-sm uppercase">{player.status || 'PENDING'}</p>
+                      <p className="text-white/70 text-xs font-semibold uppercase tracking-wide mb-1">Date of Birth</p>
+                      <p className="text-white font-bold text-sm">{formatDate(player.dob)}</p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-white/60 text-xs">Issued Date</p>
-                      <p className="text-white font-semibold text-xs">
-                        {player.approvedAt ? formatDate(player.approvedAt) : 'N/A'}
-                      </p>
+                    <div>
+                      <p className="text-white/70 text-xs font-semibold uppercase tracking-wide mb-1">Belt Level</p>
+                      <p className="text-white font-bold text-sm">{player.beltLevel || 'N/A'}</p>
                     </div>
                   </div>
-                  <div className="mt-3 text-center">
+
+                  <div>
+                    <p className="text-white/70 text-xs font-semibold uppercase tracking-wide mb-1">Email</p>
+                    <p className="text-white font-semibold text-xs break-words leading-tight">{player.email || 'N/A'}</p>
+                  </div>
+
+                  <div>
+                    <p className="text-white/70 text-xs font-semibold uppercase tracking-wide mb-1">Phone</p>
+                    <p className="text-white font-semibold text-sm">{player.phone || 'N/A'}</p>
+                  </div>
+
+                  <div>
+                    <p className="text-white/70 text-xs font-semibold uppercase tracking-wide mb-1">Address</p>
+                    <p className="text-white font-semibold text-xs leading-tight">{player.address || 'N/A'}</p>
+                  </div>
+                </div>
+
+                {/* Footer - Minimal */}
+                <div className="mt-3 pt-3 border-t border-white/20">
+                  <div className="text-center">
                     <p className="text-white/40 text-xs">This card is the property of Indian Taekwondo Union</p>
-                    <p className="text-white/40 text-xs mt-1">Unauthorized use is prohibited</p>
                   </div>
                 </div>
               </div>
