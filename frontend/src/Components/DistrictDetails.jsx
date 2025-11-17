@@ -63,6 +63,67 @@ const DistrictDetails = () => {
       // Store original styles to restore later
       const originalStyles = new Map();
       
+      // Set fixed dimensions for consistent ID card across all devices
+      const originalWidth = element.style.width;
+      const originalMinWidth = element.style.minWidth;
+      const originalMaxWidth = element.style.maxWidth;
+      element.style.width = '800px';
+      element.style.minWidth = '800px';
+      element.style.maxWidth = '800px';
+      
+      // Apply fixed styles to key elements
+      const photoContainer = element.querySelector('.id-card-photo');
+      const photoImg = element.querySelector('.id-card-img');
+      const title = element.querySelector('.id-card-title');
+      const secretaryName = element.querySelector('.id-card-secretary-name');
+      const location = element.querySelector('.id-card-location');
+      const address = element.querySelector('.id-card-address');
+      const header = element.querySelector('.id-card-header');
+      
+      if (photoImg) {
+        originalStyles.set(photoImg, {
+          width: photoImg.style.width,
+          height: photoImg.style.height,
+        });
+        photoImg.style.width = '160px';
+        photoImg.style.height = '160px';
+      }
+      
+      if (title) {
+        originalStyles.set(title, {
+          fontSize: title.style.fontSize,
+        });
+        title.style.fontSize = '32px';
+      }
+      
+      if (secretaryName) {
+        originalStyles.set(secretaryName, {
+          fontSize: secretaryName.style.fontSize,
+        });
+        secretaryName.style.fontSize = '14px';
+      }
+      
+      if (location) {
+        originalStyles.set(location, {
+          fontSize: location.style.fontSize,
+        });
+        location.style.fontSize = '16px';
+      }
+      
+      if (address) {
+        originalStyles.set(address, {
+          fontSize: address.style.fontSize,
+        });
+        address.style.fontSize = '16px';
+      }
+      
+      if (header) {
+        originalStyles.set(header, {
+          flexDirection: header.style.flexDirection,
+        });
+        header.style.flexDirection = 'row';
+      }
+      
       // Convert all styles to inline RGB - including gradients and all color properties
       allElements.forEach((el) => {
         try {
@@ -136,7 +197,7 @@ const DistrictDetails = () => {
       });
       
       // Wait a bit for styles to apply
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 200));
       
       // Ensure element has white background
       const originalBg = element.style.backgroundColor;
@@ -145,6 +206,8 @@ const DistrictDetails = () => {
       const canvas = await html2canvas(element, {
         backgroundColor: '#ffffff',
         scale: 2,
+        width: 800,
+        height: element.scrollHeight,
         logging: false,
         useCORS: true,
         allowTaint: true,
@@ -156,10 +219,47 @@ const DistrictDetails = () => {
           const body = clonedDoc.body;
           if (body) {
             body.style.backgroundColor = '#ffffff';
-            // Find the main content div (the one with p-6 class)
-            const mainDiv = body.querySelector('.p-6') || body.querySelector('div');
+            // Find the main content div (the one with id-card-container class)
+            const mainDiv = body.querySelector('.id-card-container') || body.querySelector('div');
             if (mainDiv) {
               mainDiv.style.backgroundColor = '#ffffff';
+              mainDiv.style.width = '800px';
+              mainDiv.style.minWidth = '800px';
+              mainDiv.style.maxWidth = '800px';
+              
+              // Apply fixed styles in cloned document
+              const clonedPhotoImg = mainDiv.querySelector('.id-card-img');
+              const clonedTitle = mainDiv.querySelector('.id-card-title');
+              const clonedSecretaryName = mainDiv.querySelector('.id-card-secretary-name');
+              const clonedLocation = mainDiv.querySelector('.id-card-location');
+              const clonedAddress = mainDiv.querySelector('.id-card-address');
+              const clonedHeader = mainDiv.querySelector('.id-card-header');
+              
+              if (clonedPhotoImg) {
+                clonedPhotoImg.style.width = '160px';
+                clonedPhotoImg.style.height = '160px';
+              }
+              
+              if (clonedTitle) {
+                clonedTitle.style.fontSize = '32px';
+              }
+              
+              if (clonedSecretaryName) {
+                clonedSecretaryName.style.fontSize = '14px';
+              }
+              
+              if (clonedLocation) {
+                clonedLocation.style.fontSize = '16px';
+              }
+              
+              if (clonedAddress) {
+                clonedAddress.style.fontSize = '16px';
+              }
+              
+              if (clonedHeader) {
+                clonedHeader.style.flexDirection = 'row';
+              }
+              
               // Ensure all child elements with transparent/black backgrounds get white
               const allElements = mainDiv.querySelectorAll('*');
               allElements.forEach((el) => {
@@ -178,6 +278,23 @@ const DistrictDetails = () => {
           }
         }
       });
+      
+      // Restore original dimensions
+      if (originalWidth) {
+        element.style.width = originalWidth;
+      } else {
+        element.style.removeProperty('width');
+      }
+      if (originalMinWidth) {
+        element.style.minWidth = originalMinWidth;
+      } else {
+        element.style.removeProperty('minWidth');
+      }
+      if (originalMaxWidth) {
+        element.style.maxWidth = originalMaxWidth;
+      } else {
+        element.style.removeProperty('maxWidth');
+      }
       
       // Restore original background
       if (originalBg) {
@@ -306,7 +423,7 @@ const DistrictDetails = () => {
                               e.target.style.display = 'none';
                             }}
                           />
-                          <p className="text-sm font-semibold text-gray-700 mt-3">Secretary Photo</p>
+                          <p className="text-sm font-semibold text-gray-700 mt-3">{districtHead.secretaryName || 'Secretary'}</p>
                         </div>
                       </div>
                     )}
@@ -511,7 +628,7 @@ const DistrictDetails = () => {
                   </button>
                 </div>
               </div>
-              <div className="p-4 sm:p-6 relative bg-white" ref={idCardRef} style={{ backgroundColor: '#ffffff' }}>
+              <div className="p-4 sm:p-6 relative bg-white id-card-container" ref={idCardRef} style={{ backgroundColor: '#ffffff' }}>
                 {/* Transparent Logo Background */}
                 <div 
                   className="absolute inset-0 opacity-5 pointer-events-none"
@@ -525,15 +642,15 @@ const DistrictDetails = () => {
                 />
                 <div className="relative z-10" style={{ backgroundColor: 'transparent' }}>
                 {/* Header Section: Secretary Photo and Organization Name */}
-                <div className="flex flex-col md:flex-row gap-6 mb-8 pb-6 border-b-2 border-gray-200">
+                <div className="flex flex-col md:flex-row gap-6 mb-8 pb-6 border-b-2 border-gray-200 id-card-header">
                   {/* Secretary Photo - Left Side */}
-                  <div className="flex-shrink-0">
+                  <div className="flex-shrink-0 id-card-photo">
                     {selectedUnion.generalSecretaryImage ? (
                       <div className="text-center">
                         <img
                           src={getImageUrl(selectedUnion.generalSecretaryImage)}
                           alt="Secretary"
-                          className="w-32 h-32 sm:w-40 sm:h-40 rounded-lg object-cover border-4 border-orange-500 shadow-xl mx-auto"
+                          className="w-32 h-32 sm:w-40 sm:h-40 rounded-lg object-cover border-4 border-orange-500 shadow-xl mx-auto id-card-img"
                           onError={(e) => {
                             e.target.style.display = 'none';
                             const fallback = e.target.nextElementSibling;
@@ -543,27 +660,27 @@ const DistrictDetails = () => {
                         <div className="w-40 h-40 rounded-lg bg-orange-100 flex items-center justify-center border-4 border-orange-500 shadow-xl mx-auto hidden">
                           <User className="w-20 h-20 text-orange-600" />
                         </div>
-                        <p className="text-sm font-semibold text-gray-700 mt-3">Secretary Photo</p>
+                        <p className="text-sm font-semibold text-gray-700 mt-3 id-card-secretary-name">{selectedUnion.secretaryName || 'Secretary'}</p>
                       </div>
                     ) : (
                       <div className="text-center">
                         <div className="w-40 h-40 rounded-lg bg-orange-100 flex items-center justify-center border-4 border-orange-500 shadow-xl mx-auto">
                           <User className="w-20 h-20 text-orange-600" />
                         </div>
-                        <p className="text-sm font-semibold text-gray-700 mt-3">Secretary Photo</p>
+                        <p className="text-sm font-semibold text-gray-700 mt-3 id-card-secretary-name">{selectedUnion.secretaryName || 'Secretary'}</p>
                       </div>
                     )}
                   </div>
                   
                   {/* Organization Info - Right Side */}
-                  <div className="flex-1 flex flex-col justify-center">
+                  <div className="flex-1 flex flex-col justify-center id-card-info">
                     <div className="flex items-start gap-3 mb-3">
-                      <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 leading-tight flex-1">
+                      <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-800 leading-tight flex-1 id-card-title">
                         {selectedUnion.name}
                       </h3>
                       {/* District/State Head Badges */}
                       {selectedUnion.isDistrictHead && (
-                        <div className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2">
+                        <div className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 id-card-badge">
                           <Crown className="w-5 h-5" />
                           <span className="font-bold text-sm">District Head</span>
                         </div>
@@ -577,11 +694,11 @@ const DistrictDetails = () => {
                     </div>
                     {selectedUnion.district && selectedUnion.state && (
                       <div className="space-y-2">
-                        <p className="text-base text-gray-600 font-medium">
+                        <p className="text-base text-gray-600 font-medium id-card-location">
                           {selectedUnion.district}, {selectedUnion.state}
                         </p>
                         {(selectedUnion.headOfficeAddress || selectedUnion.address) && (
-                          <p className="text-base text-gray-700 font-semibold leading-relaxed mt-1">
+                          <p className="text-base text-gray-700 font-semibold leading-relaxed mt-1 id-card-address">
                             📍 {selectedUnion.headOfficeAddress || selectedUnion.address}
                           </p>
                         )}
@@ -591,7 +708,7 @@ const DistrictDetails = () => {
                 </div>
 
                 {/* Organization Details Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 id-card-details">
                   {/* President Name */}
                   {selectedUnion.presidentName && (
                     <div className="flex items-start gap-3 p-5 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border-2 border-blue-200 shadow-sm hover:shadow-md transition-shadow">
