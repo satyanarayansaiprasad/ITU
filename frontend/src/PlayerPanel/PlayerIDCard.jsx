@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import html2canvas from 'html2canvas';
+import { toPng } from 'html-to-image';
 import { Download, RotateCcw, RotateCw, CreditCard } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
@@ -508,79 +508,24 @@ const PlayerIDCard = ({ player }) => {
       // Wait for images to load and styles to be applied
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      const canvas = await html2canvas(tempContainer, {
-        backgroundColor: '#1e3a8a', // Use hex color
-        scale: 4, // Increased scale for better quality
-        logging: false,
-        useCORS: true,
-        allowTaint: false,
+      // Use html-to-image which handles modern CSS colors (oklab/oklch) much better
+      const dataUrl = await toPng(tempContainer, {
+        backgroundColor: '#1e3a8a',
         width: 525,
         height: 330,
-        windowWidth: 525,
-        windowHeight: 330,
-        pixelRatio: 2, // Higher pixel ratio for better quality
-        ignoreElements: (element) => {
-          // Ignore elements that might cause issues
-          return element.classList && element.classList.contains('animate-shine');
+        pixelRatio: 4, // High quality (4x pixel ratio)
+        quality: 1.0, // Maximum quality
+        cacheBust: true, // Ensure fresh render
+        filter: (node) => {
+          // Filter out animated elements that might cause issues
+          if (node.classList && node.classList.contains('animate-shine')) {
+            return false;
+          }
+          return true;
         },
-        onclone: (clonedDoc) => {
-          // Final pass: preserve actual colors while avoiding oklch parsing
-          const allElements = clonedDoc.querySelectorAll('*');
-          allElements.forEach(el => {
-            try {
-              // Only remove color-related classes that might cause oklch issues
-              // Keep layout and other styling classes
-              const classesToRemove = Array.from(el.classList || []);
-              classesToRemove.forEach(cls => {
-                // Only remove classes that directly set colors and might use oklch
-                if ((cls.startsWith('bg-') && (cls.includes('blue') || cls.includes('indigo') || cls.includes('white') || cls.includes('orange'))) ||
-                    (cls.startsWith('text-') && (cls.includes('white') || cls.includes('orange'))) ||
-                    cls.startsWith('from-') || cls.startsWith('via-') || cls.startsWith('to-')) {
-                  el.classList.remove(cls);
-                }
-              });
-              
-              // Get computed styles - these should already be converted to RGB by browser
-              try {
-                const style = window.getComputedStyle(el);
-                
-                // Preserve background (including gradients)
-                const bgImage = style.backgroundImage;
-                const bgColor = style.backgroundColor;
-                
-                if (bgImage && bgImage !== 'none' && !bgImage.includes('oklch') && !bgImage.includes('oklab')) {
-                  // Keep gradients that don't contain oklch
-                  el.style.backgroundImage = bgImage;
-                }
-                
-                // Set background color if it's valid RGB/hex
-                if (bgColor && (bgColor.startsWith('#') || bgColor.startsWith('rgb'))) {
-                  el.style.backgroundColor = bgColor;
-                } else if (bgColor && (bgColor.includes('oklch') || bgColor.includes('oklab'))) {
-                  // Skip setting if it contains oklch - let browser handle it
-                  // The browser should have already converted it, but if not, skip
-                }
-                
-                // Preserve text color - CRITICAL for premium look
-                // Use original styles if available, otherwise use computed
-                const originalStyles = styleMap.get(el);
-                const textColor = originalStyles?.color || style.color;
-                if (textColor && (textColor.startsWith('#') || textColor.startsWith('rgb'))) {
-                  el.style.setProperty('color', textColor, 'important');
-                }
-                
-                // Preserve border color
-                if (style.borderColor && style.borderColor !== 'rgba(0, 0, 0, 0)' && 
-                    (style.borderColor.startsWith('#') || style.borderColor.startsWith('rgb'))) {
-                  el.style.borderColor = style.borderColor;
-                }
-              } catch (e) {
-                // If we can't read styles, that's okay - html2canvas will use what's there
-              }
-            } catch (e) {
-              // Continue processing other elements
-            }
-          });
+        style: {
+          transform: 'scale(1)',
+          transformOrigin: 'top left',
         },
       });
 
@@ -588,8 +533,7 @@ const PlayerIDCard = ({ player }) => {
       const sanitizedName = player.name.replace(/[^a-zA-Z0-9]/g, '_');
       const fileName = `${sanitizedName}_ID_Card_${side}_${Date.now()}.png`;
       link.download = fileName;
-      // Use maximum quality for PNG
-      link.href = canvas.toDataURL('image/png', 1.0);
+      link.href = dataUrl;
       
       // Trigger download
       document.body.appendChild(link);
