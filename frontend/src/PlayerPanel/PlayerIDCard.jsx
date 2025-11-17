@@ -315,19 +315,15 @@ const PlayerIDCard = ({ player }) => {
                     </div>
                   </div>
 
-                  <div>
-                    <p className="text-white/70 text-xs font-semibold uppercase tracking-wide mb-1">Email</p>
-                    <p className="text-white font-semibold text-xs break-words leading-tight">{player.email || 'N/A'}</p>
-                  </div>
-
-                  <div>
-                    <p className="text-white/70 text-xs font-semibold uppercase tracking-wide mb-1">Phone</p>
-                    <p className="text-white font-semibold text-sm">{player.phone || 'N/A'}</p>
-                  </div>
-
-                  <div>
-                    <p className="text-white/70 text-xs font-semibold uppercase tracking-wide mb-1">Address</p>
-                    <p className="text-white font-semibold text-xs leading-tight">{player.address || 'N/A'}</p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-white/70 text-xs font-semibold uppercase tracking-wide mb-1">Email</p>
+                      <p className="text-white font-semibold text-xs break-words leading-tight">{player.email || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <p className="text-white/70 text-xs font-semibold uppercase tracking-wide mb-1">Phone</p>
+                      <p className="text-white font-semibold text-sm">{player.phone || 'N/A'}</p>
+                    </div>
                   </div>
                 </div>
 

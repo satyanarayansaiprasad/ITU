@@ -73,7 +73,7 @@ const StateUnionDashboard = () => {
             setPlayers(response.data.data || []);
             setPagination(response.data.pagination || { currentPage: 1, totalPages: 1, totalPlayers: 0, limit: 10 });
           }
-        } catch (error) {
+      } catch (error) {
           console.error('Error fetching players:', error);
           setPlayers([]);
         } finally {
@@ -82,7 +82,7 @@ const StateUnionDashboard = () => {
       }
     };
 
-    fetchPlayers();
+      fetchPlayers();
   }, [activeMenu, userId, searchTerm, currentPage]);
 
   // Fetch news when menu changes to events
@@ -171,7 +171,7 @@ const StateUnionDashboard = () => {
         const profileResponse = await axios.get(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/user/stateunions/${userId}`);
         setProfileData(profileResponse.data.data);
         setLogoPreview(null);
-        alert('Logo uploaded successfully');
+      alert('Logo uploaded successfully');
       } else {
         throw new Error(response.data.error || 'Upload failed');
       }
@@ -359,7 +359,7 @@ const StateUnionDashboard = () => {
                     ) : profileData?.logo ? (
                       <img 
                         src={getImageUrl(profileData.logo)} 
-                        alt="Union Logo" 
+                      alt="Union Logo" 
                         className="h-32 w-auto rounded-lg object-cover border-2 border-gray-300" 
                         onError={(e) => {
                           console.error('Logo image error:', e.target.src);
@@ -400,12 +400,12 @@ const StateUnionDashboard = () => {
                 </div>
                 
                 <div className="flex gap-3">
-                  <button 
-                    type="submit" 
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                  >
-                    Update Profile
-                  </button>
+                <button 
+                  type="submit" 
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                >
+                  Update Profile
+                </button>
                   <button 
                     type="button"
                     onClick={() => setIsEditing(false)}
@@ -537,10 +537,10 @@ const StateUnionDashboard = () => {
                 <div className="mb-4 text-sm text-gray-600">
                   Showing {((currentPage - 1) * 10) + 1} - {Math.min(currentPage * 10, pagination.totalPlayers)} of {pagination.totalPlayers} players
                 </div>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Player ID</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
@@ -549,10 +549,10 @@ const StateUnionDashboard = () => {
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Belt Level</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Experience</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DOB</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {players.map(player => (
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {players.map(player => (
                         <tr key={player._id} className="hover:bg-gray-50">
                           <td className="px-4 py-4 whitespace-nowrap">
                             <div className="flex items-center">
@@ -588,17 +588,17 @@ const StateUnionDashboard = () => {
                           <td className="px-4 py-4 whitespace-nowrap">
                             <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                               {player.beltLevel}
-                            </span>
-                          </td>
+                          </span>
+                        </td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{player.yearsOfExperience} years</td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                             {player.dob ? new Date(player.dob).toLocaleDateString() : 'N/A'}
                           </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
                 {/* Pagination */}
                 {pagination.totalPages > 1 && (
@@ -730,7 +730,7 @@ const StateUnionDashboard = () => {
                         <button className="mt-4 text-blue-600 hover:text-blue-800 font-medium text-sm">
                           Read More →
                         </button>
-                      </div>
+            </div>
                     </div>
                   ))}
                 </div>
