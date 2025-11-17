@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API_ENDPOINTS } from '../config/api';
-import { Search, User, Mail, Phone, Award, Calendar, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, User, Mail, Phone, Award, Calendar, MapPin, ChevronLeft, ChevronRight, Newspaper } from 'lucide-react';
 
 const StateUnionDashboard = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -17,6 +17,9 @@ const StateUnionDashboard = () => {
   const [loadingPlayers, setLoadingPlayers] = useState(false);
   const [logoPreview, setLogoPreview] = useState(null);
   const [secretaryImagePreview, setSecretaryImagePreview] = useState(null);
+  const [newsList, setNewsList] = useState([]);
+  const [loadingNews, setLoadingNews] = useState(false);
+  const [selectedNews, setSelectedNews] = useState(null);
   const { id: paramId } = useParams();
   const navigate = useNavigate();
   
@@ -81,6 +84,28 @@ const StateUnionDashboard = () => {
 
     fetchPlayers();
   }, [activeMenu, userId, searchTerm, currentPage]);
+
+  // Fetch news when menu changes to events
+  useEffect(() => {
+    const fetchNews = async () => {
+      if (activeMenu === 'events') {
+        setLoadingNews(true);
+        try {
+          const response = await axios.get(API_ENDPOINTS.GET_ALL_NEWS);
+          if (response.data.news) {
+            setNewsList(response.data.news);
+          }
+        } catch (error) {
+          console.error('Error fetching news:', error);
+          setNewsList([]);
+        } finally {
+          setLoadingNews(false);
+        }
+      }
+    };
+
+    fetchNews();
+  }, [activeMenu]);
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
@@ -619,10 +644,102 @@ const StateUnionDashboard = () => {
       case 'events':
         return (
           <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-2xl font-bold mb-6">Events</h2>
-            <div className="border border-gray-200 rounded-md p-4">
-              <p>Event management feature will be available soon</p>
-            </div>
+            <h2 className="text-2xl font-bold mb-6">Events & News</h2>
+            
+            {loadingNews ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                <span className="ml-3 text-gray-600">Loading events...</span>
+              </div>
+            ) : selectedNews ? (
+              <div>
+                <button
+                  onClick={() => setSelectedNews(null)}
+                  className="mb-4 flex items-center gap-2 text-blue-600 hover:text-blue-800"
+                >
+                  <ChevronLeft size={20} />
+                  Back to Events
+                </button>
+                <div className="relative w-full h-64 bg-gray-200 rounded-lg overflow-hidden mb-6">
+                  <img
+                    src={getImageUrl(selectedNews.image)}
+                    alt={selectedNews.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                    }}
+                  />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">{selectedNews.title}</h3>
+                <p className="text-gray-700 font-semibold mb-4">{selectedNews.content}</p>
+                {selectedNews.moreContent && (
+                  <div className="text-gray-600 whitespace-pre-line">{selectedNews.moreContent}</div>
+                )}
+                {selectedNews.author && (
+                  <p className="text-sm text-gray-500 mt-4">By {selectedNews.author}</p>
+                )}
+              </div>
+            ) : newsList.length > 0 ? (
+              <>
+                {newsList.length > 0 && (
+                  <div
+                    className="relative bg-white rounded-xl shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow mb-6"
+                    onClick={() => setSelectedNews(newsList[0])}
+                  >
+                    <div className="relative w-full h-64 overflow-hidden">
+                      <img
+                        src={getImageUrl(newsList[0].image)}
+                        alt="Featured News"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent flex flex-col justify-end p-6">
+                      <h3 className="text-white text-2xl font-bold mb-2">{newsList[0].title}</h3>
+                      <p className="text-gray-200">
+                        {newsList[0].content.substring(0, 150)}...
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {newsList.slice(1).map((news) => (
+                    <div
+                      key={news._id}
+                      className="bg-white rounded-xl shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-all"
+                      onClick={() => setSelectedNews(news)}
+                    >
+                      <div className="relative w-full h-40 bg-gray-200 overflow-hidden">
+                        <img
+                          src={getImageUrl(news.image)}
+                          alt={news.title}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                      <div className="p-4">
+                        <h4 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">{news.title}</h4>
+                        <p className="text-gray-600 text-sm line-clamp-3">
+                          {news.content.substring(0, 100)}...
+                        </p>
+                        <button className="mt-4 text-blue-600 hover:text-blue-800 font-medium text-sm">
+                          Read More →
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-gray-600">No events or news available at the moment.</p>
+              </div>
+            )}
           </div>
         );
       

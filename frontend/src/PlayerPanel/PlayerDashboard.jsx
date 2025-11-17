@@ -18,7 +18,12 @@ import {
   Upload,
   X,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Menu,
+  X as XIcon,
+  Newspaper,
+  Trophy,
+  ChevronRight
 } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -34,6 +39,11 @@ const PlayerDashboard = () => {
   const [formData, setFormData] = useState({});
   const [photoPreview, setPhotoPreview] = useState(null);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
+  const [activeMenu, setActiveMenu] = useState('profile');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [newsList, setNewsList] = useState([]);
+  const [loadingNews, setLoadingNews] = useState(false);
+  const [selectedNews, setSelectedNews] = useState(null);
 
   useEffect(() => {
     const playerData = localStorage.getItem("playerData");
@@ -64,6 +74,12 @@ const PlayerDashboard = () => {
     }
   }, [navigate]);
 
+  useEffect(() => {
+    if (activeMenu === 'events') {
+      fetchNews();
+    }
+  }, [activeMenu]);
+
   const fetchPlayerProfile = async (playerId) => {
     try {
       const response = await axios.get(API_ENDPOINTS.GET_PLAYER_PROFILE(playerId));
@@ -80,6 +96,21 @@ const PlayerDashboard = () => {
       toast.error("Failed to load profile");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchNews = async () => {
+    try {
+      setLoadingNews(true);
+      const response = await axios.get(API_ENDPOINTS.GET_ALL_NEWS);
+      if (response.data.news) {
+        setNewsList(response.data.news);
+      }
+    } catch (error) {
+      console.error("Error fetching news:", error);
+      toast.error("Failed to load events/news");
+    } finally {
+      setLoadingNews(false);
     }
   };
 
@@ -173,6 +204,395 @@ const PlayerDashboard = () => {
     navigate("/login");
   };
 
+  const renderContent = () => {
+    switch (activeMenu) {
+      case 'profile':
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Profile</h2>
+              {!isEditing && (
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Edit2 size={18} />
+                  Edit Profile
+                </button>
+              )}
+            </div>
+
+            <div className="bg-white rounded-xl shadow-md p-6">
+              {/* Profile Header */}
+              <div className="flex flex-col md:flex-row items-start md:items-center gap-6 mb-8 pb-8 border-b">
+                {/* Photo Section */}
+                <div className="relative">
+                  <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-200 border-4 border-blue-500">
+                    {photoPreview ? (
+                      <img
+                        src={photoPreview}
+                        alt={player.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <User size={48} className="text-gray-400" />
+                      </div>
+                    )}
+                  </div>
+                  {isEditing && (
+                    <div className="mt-4 space-y-2">
+                      <label className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg cursor-pointer hover:bg-blue-600 transition-colors">
+                        <Camera size={18} />
+                        Choose Photo
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handlePhotoSelect}
+                          className="hidden"
+                        />
+                      </label>
+                      {selectedPhoto && (
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={handlePhotoUpload}
+                            disabled={uploadingPhoto}
+                            className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                          >
+                            {uploadingPhoto ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                                Uploading...
+                              </>
+                            ) : (
+                              <>
+                                <Upload size={16} />
+                                Upload
+                              </>
+                            )}
+                          </button>
+                          <button
+                            onClick={() => {
+                              setSelectedPhoto(null);
+                              setPhotoPreview(getImageUrl(player.photo));
+                            }}
+                            className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Player Info */}
+                <div className="flex-1">
+                  <h3 className="text-3xl font-bold text-gray-900 mb-2">
+                    {player.name}
+                  </h3>
+                  {player.playerId && (
+                    <p className="text-lg text-gray-600 mb-4">
+                      Player ID: <span className="font-semibold text-blue-600">{player.playerId}</span>
+                    </p>
+                  )}
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        player.status === "approved"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}
+                    >
+                      {player.status.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Profile Details */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <Mail className="inline mr-2" size={16} />
+                      Email
+                    </label>
+                    {isEditing ? (
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                    ) : (
+                      <p className="text-gray-900">{player.email}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <Phone className="inline mr-2" size={16} />
+                      Phone
+                    </label>
+                    {isEditing ? (
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                    ) : (
+                      <p className="text-gray-900">{player.phone}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <MapPin className="inline mr-2" size={16} />
+                      Location
+                    </label>
+                    <p className="text-gray-900">
+                      {player.district}, {player.state}
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <MapPin className="inline mr-2" size={16} />
+                      Address
+                    </label>
+                    {isEditing ? (
+                      <textarea
+                        name="address"
+                        value={formData.address}
+                        onChange={handleInputChange}
+                        rows={3}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                    ) : (
+                      <p className="text-gray-900">{player.address}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <Calendar className="inline mr-2" size={16} />
+                      Date of Birth
+                    </label>
+                    {isEditing ? (
+                      <input
+                        type="date"
+                        name="dob"
+                        value={formData.dob}
+                        onChange={handleInputChange}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                    ) : (
+                      <p className="text-gray-900">
+                        {player.dob ? new Date(player.dob).toLocaleDateString() : "N/A"}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <Award className="inline mr-2" size={16} />
+                      Belt Level
+                    </label>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="beltLevel"
+                        value={formData.beltLevel}
+                        onChange={handleInputChange}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                    ) : (
+                      <p className="text-gray-900">{player.beltLevel}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <Clock className="inline mr-2" size={16} />
+                      Years of Experience
+                    </label>
+                    {isEditing ? (
+                      <input
+                        type="number"
+                        name="yearsOfExperience"
+                        value={formData.yearsOfExperience}
+                        onChange={handleInputChange}
+                        min="0"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      />
+                    ) : (
+                      <p className="text-gray-900">{player.yearsOfExperience} years</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              {isEditing && (
+                <div className="mt-8 flex items-center gap-4">
+                  <button
+                    onClick={handleSaveProfile}
+                    className="flex items-center gap-2 px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                  >
+                    <Save size={18} />
+                    Save Changes
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsEditing(false);
+                      setFormData({
+                        name: player.name || "",
+                        email: player.email || "",
+                        phone: player.phone || "",
+                        address: player.address || "",
+                        dob: player.dob ? new Date(player.dob).toISOString().split('T')[0] : "",
+                        beltLevel: player.beltLevel || "",
+                        yearsOfExperience: player.yearsOfExperience || ""
+                      });
+                      setSelectedPhoto(null);
+                      setPhotoPreview(getImageUrl(player.photo));
+                    }}
+                    className="flex items-center gap-2 px-6 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+
+      case 'events':
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-900">Events & News</h2>
+            
+            {loadingNews ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                <span className="ml-3 text-gray-600">Loading events...</span>
+              </div>
+            ) : selectedNews ? (
+              <div className="bg-white rounded-xl shadow-md p-6">
+                <button
+                  onClick={() => setSelectedNews(null)}
+                  className="mb-4 flex items-center gap-2 text-blue-600 hover:text-blue-800"
+                >
+                  <ChevronRight className="rotate-180" size={20} />
+                  Back to Events
+                </button>
+                <div className="relative w-full h-64 bg-gray-200 rounded-lg overflow-hidden mb-6">
+                  <img
+                    src={getImageUrl(selectedNews.image)}
+                    alt={selectedNews.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                    }}
+                  />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">{selectedNews.title}</h3>
+                <p className="text-gray-700 font-semibold mb-4">{selectedNews.content}</p>
+                {selectedNews.moreContent && (
+                  <div className="text-gray-600 whitespace-pre-line">{selectedNews.moreContent}</div>
+                )}
+                {selectedNews.author && (
+                  <p className="text-sm text-gray-500 mt-4">By {selectedNews.author}</p>
+                )}
+              </div>
+            ) : newsList.length > 0 ? (
+              <>
+                {newsList.length > 0 && (
+                  <div
+                    className="relative bg-white rounded-xl shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+                    onClick={() => setSelectedNews(newsList[0])}
+                  >
+                    <div className="relative w-full h-64 overflow-hidden">
+                      <img
+                        src={getImageUrl(newsList[0].image)}
+                        alt="Featured News"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent flex flex-col justify-end p-6">
+                      <h3 className="text-white text-2xl font-bold mb-2">{newsList[0].title}</h3>
+                      <p className="text-gray-200">
+                        {newsList[0].content.substring(0, 150)}...
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {newsList.slice(1).map((news) => (
+                    <div
+                      key={news._id}
+                      className="bg-white rounded-xl shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-all"
+                      onClick={() => setSelectedNews(news)}
+                    >
+                      <div className="relative w-full h-40 bg-gray-200 overflow-hidden">
+                        <img
+                          src={getImageUrl(news.image)}
+                          alt={news.title}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                      <div className="p-4">
+                        <h4 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">{news.title}</h4>
+                        <p className="text-gray-600 text-sm line-clamp-3">
+                          {news.content.substring(0, 100)}...
+                        </p>
+                        <button className="mt-4 text-blue-600 hover:text-blue-800 font-medium text-sm">
+                          Read More →
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="bg-white rounded-xl shadow-md p-12 text-center">
+                <Newspaper size={48} className="mx-auto text-gray-400 mb-4" />
+                <p className="text-gray-600">No events or news available at the moment.</p>
+              </div>
+            )}
+          </div>
+        );
+
+      case 'belt-promotion':
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-900">Belt Promotion Results</h2>
+            <div className="bg-white rounded-xl shadow-md p-12 text-center">
+              <Trophy size={48} className="mx-auto text-gray-400 mb-4" />
+              <p className="text-gray-600">Belt promotion results will be displayed here.</p>
+              <p className="text-sm text-gray-500 mt-2">This section is coming soon.</p>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
@@ -189,289 +609,108 @@ const PlayerDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Header */}
-      <div className="bg-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">Player Dashboard</h1>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex">
+      {/* Sidebar */}
+      <div className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-white shadow-lg transition-all duration-300 flex flex-col`}>
+        {/* Sidebar Header */}
+        <div className="p-4 border-b flex items-center justify-between">
+          {sidebarOpen && (
+            <h2 className="text-xl font-bold text-gray-900">Player Dashboard</h2>
+          )}
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            {sidebarOpen ? <XIcon size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
+
+        {/* Navigation Menu */}
+        <nav className="flex-1 p-4 space-y-2">
+          <button
+            onClick={() => setActiveMenu('profile')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+              activeMenu === 'profile'
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            <User size={20} />
+            {sidebarOpen && <span>Profile</span>}
+          </button>
+
+          <button
+            onClick={() => setActiveMenu('events')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+              activeMenu === 'events'
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            <Newspaper size={20} />
+            {sidebarOpen && <span>Events</span>}
+          </button>
+
+          <button
+            onClick={() => setActiveMenu('belt-promotion')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+              activeMenu === 'belt-promotion'
+                ? 'bg-blue-600 text-white'
+                : 'text-gray-700 hover:bg-gray-100'
+            }`}
+          >
+            <Trophy size={20} />
+            {sidebarOpen && <span>Belt Promotion</span>}
+          </button>
+        </nav>
+
+        {/* Logout Button */}
+        <div className="p-4 border-t">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
           >
-            <LogOut size={18} />
-            Logout
+            <LogOut size={20} />
+            {sidebarOpen && <span>Logout</span>}
           </button>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl shadow-xl p-8"
-        >
-          {/* Profile Header */}
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-6 mb-8 pb-8 border-b">
-            {/* Photo Section */}
-            <div className="relative">
-              <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-200 border-4 border-blue-500">
-                {photoPreview ? (
-                  <img
-                    src={photoPreview}
-                    alt={player.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <User size={48} className="text-gray-400" />
-                  </div>
-                )}
-              </div>
-              {isEditing && (
-                <div className="mt-4 space-y-2">
-                  <label className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg cursor-pointer hover:bg-blue-600 transition-colors">
-                    <Camera size={18} />
-                    Choose Photo
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handlePhotoSelect}
-                      className="hidden"
-                    />
-                  </label>
-                  {selectedPhoto && (
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={handlePhotoUpload}
-                        disabled={uploadingPhoto}
-                        className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                      >
-                        {uploadingPhoto ? (
-                          <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
-                            Uploading...
-                          </>
-                        ) : (
-                          <>
-                            <Upload size={16} />
-                            Upload
-                          </>
-                        )}
-                      </button>
-                      <button
-                        onClick={() => {
-                          setSelectedPhoto(null);
-                          setPhotoPreview(getImageUrl(player.photo));
-                        }}
-                        className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
-                      >
-                        <X size={16} />
-                      </button>
-                    </div>
-                  )}
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        {/* Top Header */}
+        <div className="bg-white shadow-md">
+          <div className="px-6 py-4 flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {activeMenu === 'profile' ? 'Profile' : activeMenu === 'events' ? 'Events & News' : 'Belt Promotion Results'}
+              </h1>
+              <p className="text-sm text-gray-600 mt-1">Welcome back, {player.name}</p>
+            </div>
+            <div className="flex items-center gap-4">
+              {player.playerId && (
+                <div className="text-right">
+                  <p className="text-xs text-gray-500">Player ID</p>
+                  <p className="text-sm font-semibold text-blue-600">{player.playerId}</p>
                 </div>
               )}
             </div>
-
-            {/* Player Info */}
-            <div className="flex-1">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                {player.name}
-              </h2>
-              {player.playerId && (
-                <p className="text-lg text-gray-600 mb-4">
-                  Player ID: <span className="font-semibold text-blue-600">{player.playerId}</span>
-                </p>
-              )}
-              <div className="flex items-center gap-2">
-                <span
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    player.status === "approved"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-yellow-100 text-yellow-800"
-                  }`}
-                >
-                  {player.status.toUpperCase()}
-                </span>
-              </div>
-            </div>
-
-            {/* Edit Button */}
-            {!isEditing && (
-              <button
-                onClick={() => setIsEditing(true)}
-                className="flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-              >
-                <Edit2 size={18} />
-                Edit Profile
-              </button>
-            )}
           </div>
+        </div>
 
-          {/* Profile Details */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  <Mail className="inline mr-2" size={16} />
-                  Email
-                </label>
-                {isEditing ? (
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                ) : (
-                  <p className="text-gray-900">{player.email}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  <Phone className="inline mr-2" size={16} />
-                  Phone
-                </label>
-                {isEditing ? (
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                ) : (
-                  <p className="text-gray-900">{player.phone}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  <MapPin className="inline mr-2" size={16} />
-                  Location
-                </label>
-                <p className="text-gray-900">
-                  {player.district}, {player.state}
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  <MapPin className="inline mr-2" size={16} />
-                  Address
-                </label>
-                {isEditing ? (
-                  <textarea
-                    name="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    rows={3}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                ) : (
-                  <p className="text-gray-900">{player.address}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  <Calendar className="inline mr-2" size={16} />
-                  Date of Birth
-                </label>
-                {isEditing ? (
-                  <input
-                    type="date"
-                    name="dob"
-                    value={formData.dob}
-                    onChange={handleInputChange}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                ) : (
-                  <p className="text-gray-900">
-                    {player.dob ? new Date(player.dob).toLocaleDateString() : "N/A"}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  <Award className="inline mr-2" size={16} />
-                  Belt Level
-                </label>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    name="beltLevel"
-                    value={formData.beltLevel}
-                    onChange={handleInputChange}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                ) : (
-                  <p className="text-gray-900">{player.beltLevel}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  <Clock className="inline mr-2" size={16} />
-                  Years of Experience
-                </label>
-                {isEditing ? (
-                  <input
-                    type="number"
-                    name="yearsOfExperience"
-                    value={formData.yearsOfExperience}
-                    onChange={handleInputChange}
-                    min="0"
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  />
-                ) : (
-                  <p className="text-gray-900">{player.yearsOfExperience} years</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          {isEditing && (
-            <div className="mt-8 flex items-center gap-4">
-              <button
-                onClick={handleSaveProfile}
-                className="flex items-center gap-2 px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-              >
-                <Save size={18} />
-                Save Changes
-              </button>
-              <button
-                onClick={() => {
-                  setIsEditing(false);
-                  setFormData({
-                    name: player.name || "",
-                    email: player.email || "",
-                    phone: player.phone || "",
-                    address: player.address || "",
-                    dob: player.dob ? new Date(player.dob).toISOString().split('T')[0] : "",
-                    beltLevel: player.beltLevel || "",
-                    yearsOfExperience: player.yearsOfExperience || ""
-                  });
-                  setSelectedPhoto(null);
-                  setPhotoPreview(getImageUrl(player.photo));
-                }}
-                className="flex items-center gap-2 px-6 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          )}
-        </motion.div>
+        {/* Content Area */}
+        <div className="flex-1 p-6 overflow-y-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {renderContent()}
+          </motion.div>
+        </div>
       </div>
     </div>
   );
 };
 
 export default PlayerDashboard;
-
