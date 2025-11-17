@@ -21,25 +21,25 @@ const PlayerIDCard = ({ player }) => {
     return `${API_BASE_URL}/uploads/${cleanImage}`;
   };
 
-  const downloadCard = async (side = 'both') => {
-    if (!cardRef.current) return;
+  const downloadCard = async () => {
+    if (!cardRef.current || !frontRef.current || !backRef.current) {
+      toast.error('ID card elements not found');
+      return;
+    }
 
     try {
       setIsDownloading(true);
+      toast.info('Preparing ID card download...');
       
-      if (side === 'both') {
-        // Download both sides as separate images
-        await downloadSide('front');
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        await downloadSide('back');
-        toast.success('Both sides downloaded successfully!');
-      } else {
-        await downloadSide(side);
-        toast.success(`${side === 'front' ? 'Front' : 'Back'} side downloaded successfully!`);
-      }
+      // Download both sides as separate images
+      await downloadSide('front');
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Wait between downloads
+      await downloadSide('back');
+      
+      toast.success('ID card downloaded successfully!');
     } catch (error) {
       console.error('Error downloading ID card:', error);
-      toast.error('Failed to download ID card');
+      toast.error('Failed to download ID card. Please try again.');
     } finally {
       setIsDownloading(false);
     }
@@ -47,45 +47,207 @@ const PlayerIDCard = ({ player }) => {
 
   const downloadSide = async (side) => {
     const element = side === 'front' ? frontRef.current : backRef.current;
-    if (!element) return;
+    if (!element) {
+      throw new Error(`${side} side element not found`);
+    }
 
     // Create a temporary container to capture the correct side
     const tempContainer = document.createElement('div');
     tempContainer.style.position = 'absolute';
     tempContainer.style.left = '-9999px';
+    tempContainer.style.top = '0';
     tempContainer.style.width = '525px';
     tempContainer.style.height = '330px';
+    tempContainer.style.backgroundColor = '#1e3a8a'; // Use hex color instead of oklch
+    tempContainer.style.overflow = 'hidden';
     document.body.appendChild(tempContainer);
 
-    // Clone the element
+    // Clone the element and its children
     const clonedElement = element.cloneNode(true);
+    
+    // Reset all transforms and positioning
     clonedElement.style.transform = 'none';
     clonedElement.style.position = 'relative';
     clonedElement.style.backfaceVisibility = 'visible';
     clonedElement.style.WebkitBackfaceVisibility = 'visible';
+    clonedElement.style.opacity = '1';
+    clonedElement.style.visibility = 'visible';
+    
+    // Get the inner card div and fix all color references
+    const innerCard = clonedElement.querySelector('div > div');
+    if (innerCard) {
+      innerCard.style.transform = 'none';
+      innerCard.style.position = 'relative';
+      
+      // Helper function to convert any color to RGB/hex
+      const convertColorToHex = (colorValue) => {
+        if (!colorValue || colorValue === 'transparent' || colorValue === 'rgba(0, 0, 0, 0)') {
+          return 'transparent';
+        }
+        // If it's already hex or rgb, return as is
+        if (colorValue.startsWith('#') || colorValue.startsWith('rgb')) {
+          return colorValue;
+        }
+        // If it contains oklch, convert to a safe default
+        if (colorValue.includes('oklch')) {
+          // Try to extract approximate color from context
+          if (colorValue.includes('blue') || colorValue.includes('indigo')) {
+            return '#1e3a8a';
+          }
+          if (colorValue.includes('white')) {
+            return '#ffffff';
+          }
+          if (colorValue.includes('orange')) {
+            return '#fb923c';
+          }
+          return '#1e3a8a'; // Default blue
+        }
+        return colorValue;
+      };
+      
+      // Replace all computed styles with explicit hex/rgb colors
+      // Process all elements and set explicit styles to avoid oklch parsing
+      const allElements = innerCard.querySelectorAll('*');
+      allElements.forEach(el => {
+        try {
+          // Get computed styles from the original element (before cloning)
+          const originalEl = element.querySelector(
+            el.tagName.toLowerCase() + 
+            (el.id ? `#${el.id}` : '') + 
+            (el.className ? `.${el.className.split(' ').join('.')}` : '')
+          ) || el;
+          
+          const computedStyle = window.getComputedStyle(originalEl);
+          
+          // Set explicit background color
+          const bgColor = computedStyle.backgroundColor;
+          if (bgColor) {
+            if (bgColor.includes('oklch')) {
+              // Convert oklch to hex based on context
+              if (bgColor.includes('blue') || bgColor.includes('indigo') || bgColor.includes('rgb(30, 58, 138)')) {
+                el.style.backgroundColor = '#1e3a8a';
+              } else if (bgColor.includes('white') || bgColor.includes('rgb(255, 255, 255)')) {
+                el.style.backgroundColor = '#ffffff';
+              } else if (bgColor.includes('orange') || bgColor.includes('rgb(251, 146, 60)')) {
+                el.style.backgroundColor = '#fb923c';
+              } else {
+                el.style.backgroundColor = '#1e3a8a';
+              }
+            } else if (bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
+              el.style.backgroundColor = bgColor;
+            }
+          }
+          
+          // Set explicit text color
+          const textColor = computedStyle.color;
+          if (textColor) {
+            if (textColor.includes('oklch')) {
+              if (textColor.includes('white') || textColor.includes('rgb(255, 255, 255)')) {
+                el.style.color = '#ffffff';
+              } else if (textColor.includes('orange') || textColor.includes('rgb(251, 146, 60)')) {
+                el.style.color = '#fb923c';
+              } else {
+                el.style.color = '#ffffff';
+              }
+            } else {
+              el.style.color = textColor;
+            }
+          }
+          
+          // Set explicit border color
+          const borderColor = computedStyle.borderColor;
+          if (borderColor && borderColor.includes('oklch')) {
+            el.style.borderColor = '#ffffff';
+          } else if (borderColor && borderColor !== 'rgba(0, 0, 0, 0)') {
+            el.style.borderColor = borderColor;
+          }
+        } catch (e) {
+          // Ignore errors for individual elements
+        }
+      });
+    }
+    
     tempContainer.appendChild(clonedElement);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Wait for images to load
+      await new Promise(resolve => setTimeout(resolve, 800));
 
       const canvas = await html2canvas(tempContainer, {
-        backgroundColor: '#1e3a8a',
+        backgroundColor: '#1e3a8a', // Use hex color
         scale: 3,
         logging: false,
         useCORS: true,
-        allowTaint: true,
+        allowTaint: false,
         width: 525,
         height: 330,
+        windowWidth: 525,
+        windowHeight: 330,
+        ignoreElements: (element) => {
+          // Ignore elements that might cause issues
+          return element.classList && element.classList.contains('animate-shine');
+        },
+        onclone: (clonedDoc) => {
+          // Convert all oklch colors to hex/rgb in the cloned document
+          const allElements = clonedDoc.querySelectorAll('*');
+          allElements.forEach(el => {
+            try {
+              const style = window.getComputedStyle(el);
+              
+              // Convert background colors
+              let bgColor = style.backgroundColor;
+              if (bgColor && bgColor.includes('oklch')) {
+                // Replace with hex equivalent
+                if (bgColor.includes('blue') || bgColor.includes('indigo')) {
+                  el.style.backgroundColor = '#1e3a8a';
+                } else if (bgColor.includes('white')) {
+                  el.style.backgroundColor = '#ffffff';
+                } else if (bgColor.includes('orange')) {
+                  el.style.backgroundColor = '#fb923c';
+                } else {
+                  el.style.backgroundColor = '#1e3a8a';
+                }
+              }
+              
+              // Convert text colors
+              let textColor = style.color;
+              if (textColor && textColor.includes('oklch')) {
+                if (textColor.includes('white')) {
+                  el.style.color = '#ffffff';
+                } else if (textColor.includes('orange')) {
+                  el.style.color = '#fb923c';
+                } else {
+                  el.style.color = '#ffffff';
+                }
+              }
+              
+              // Convert border colors
+              let borderColor = style.borderColor;
+              if (borderColor && borderColor.includes('oklch')) {
+                el.style.borderColor = '#ffffff';
+              }
+            } catch (e) {
+              // Ignore errors
+            }
+          });
+        },
       });
 
       const link = document.createElement('a');
-      const fileName = `${player.name.replace(/\s+/g, '_')}_ID_Card_${side}_${Date.now()}.png`;
+      const sanitizedName = player.name.replace(/[^a-zA-Z0-9]/g, '_');
+      const fileName = `${sanitizedName}_ID_Card_${side}_${Date.now()}.png`;
       link.download = fileName;
       link.href = canvas.toDataURL('image/png', 1.0);
+      
+      // Trigger download
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
 
       // Cleanup
-      document.body.removeChild(tempContainer);
+      if (document.body.contains(tempContainer)) {
+        document.body.removeChild(tempContainer);
+      }
     } catch (error) {
       console.error(`Error downloading ${side} side:`, error);
       if (document.body.contains(tempContainer)) {
@@ -131,16 +293,14 @@ const PlayerIDCard = ({ player }) => {
               </>
             )}
           </button>
-          <div className="relative">
-            <button
-              onClick={() => downloadCard('both')}
-              disabled={isDownloading}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
-            >
-              <Download size={18} />
-              {isDownloading ? 'Downloading...' : 'Download Both'}
-            </button>
-          </div>
+          <button
+            onClick={downloadCard}
+            disabled={isDownloading}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+          >
+            <Download size={18} />
+            {isDownloading ? 'Downloading...' : 'Download ID Card'}
+          </button>
         </div>
       </div>
 
@@ -166,7 +326,7 @@ const PlayerIDCard = ({ player }) => {
           >
             <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl">
               {/* Premium Gradient Background */}
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900">
+              <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom right, #1e3a8a, #1e40af, #312e81)' }}>
                 {/* Decorative Pattern */}
                 <div className="absolute inset-0 opacity-10">
                   <div className="absolute top-0 left-0 w-full h-full" style={{
@@ -272,7 +432,7 @@ const PlayerIDCard = ({ player }) => {
           >
             <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl">
               {/* Premium Gradient Background */}
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-blue-800 to-blue-900">
+              <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom right, #312e81, #1e40af, #1e3a8a)' }}>
                 {/* Decorative Pattern */}
                 <div className="absolute inset-0 opacity-10">
                   <div className="absolute top-0 left-0 w-full h-full" style={{
@@ -339,25 +499,37 @@ const PlayerIDCard = ({ player }) => {
         </div>
       </div>
 
-      {/* Download Options */}
-      <div className="bg-white rounded-xl shadow-md p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Download Options</h3>
-        <div className="flex flex-wrap gap-3">
-          <button
-            onClick={() => downloadCard('front')}
-            disabled={isDownloading}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-          >
-            <Download size={18} />
-            Download Front
-          </button>
-          <button
-            onClick={() => downloadCard('back')}
-            disabled={isDownloading}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
-          >
-            <Download size={18} />
-            Download Back
+
+      <style>{`
+        .perspective-1000 {
+          perspective: 1000px;
+        }
+        .preserve-3d {
+          transform-style: preserve-3d;
+        }
+        .backface-hidden {
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
+        }
+        @keyframes shine {
+          0% {
+            transform: translateX(-100%) skewX(-12deg);
+          }
+          100% {
+            transform: translateX(200%) skewX(-12deg);
+          }
+        }
+        .animate-shine {
+          animation: shine 3s infinite;
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default PlayerIDCard;
+
+
           </button>
           <button
             onClick={() => downloadCard('both')}
