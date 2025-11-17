@@ -21,6 +21,45 @@ const PlayerIDCard = ({ player }) => {
     return `${API_BASE_URL}/uploads/${cleanImage}`;
   };
 
+  // Helper function to convert any CSS color to RGB
+  const colorToRgb = (colorValue) => {
+    if (!colorValue || colorValue === 'none' || colorValue === 'transparent') {
+      return null;
+    }
+    
+    // If already RGB or hex, return as is
+    if (colorValue.startsWith('#') || colorValue.startsWith('rgb')) {
+      return colorValue;
+    }
+    
+    // If contains oklab/oklch, use canvas trick to get RGB
+    if (colorValue.includes('oklab') || colorValue.includes('oklch')) {
+      try {
+        const tempDiv = document.createElement('div');
+        tempDiv.style.position = 'absolute';
+        tempDiv.style.left = '-9999px';
+        tempDiv.style.width = '1px';
+        tempDiv.style.height = '1px';
+        tempDiv.style.color = colorValue;
+        document.body.appendChild(tempDiv);
+        
+        const computed = window.getComputedStyle(tempDiv);
+        const rgb = computed.color;
+        document.body.removeChild(tempDiv);
+        
+        // If still contains oklab, use fallback
+        if (rgb.includes('oklab') || rgb.includes('oklch')) {
+          return '#ffffff'; // Fallback to white
+        }
+        return rgb;
+      } catch (e) {
+        return '#ffffff'; // Fallback to white
+      }
+    }
+    
+    return colorValue;
+  };
+
   const downloadCard = async () => {
     if (!cardRef.current || !frontRef.current || !backRef.current) {
       toast.error('ID card elements not found');
@@ -80,30 +119,32 @@ const PlayerIDCard = ({ player }) => {
       if (!originalEl || !clonedEl || originalEl.nodeType !== 1 || clonedEl.nodeType !== 1) return;
       
       try {
-        // Get computed styles from original (already RGB)
+        // Get computed styles from original
         const style = window.getComputedStyle(originalEl);
         
         // Remove ALL classes to prevent html2canvas from reading stylesheets with oklab
         clonedEl.className = '';
+        clonedEl.removeAttribute('class');
         
-        // Apply ALL computed styles as inline styles to preserve everything
-        // Colors - ensure they're RGB/hex format
-        if (style.backgroundColor && (style.backgroundColor.startsWith('#') || style.backgroundColor.startsWith('rgb'))) {
-          clonedEl.style.backgroundColor = style.backgroundColor;
-        } else if (style.backgroundColor && !style.backgroundColor.includes('oklch') && !style.backgroundColor.includes('oklab')) {
-          clonedEl.style.backgroundColor = style.backgroundColor;
+        // Convert and apply colors using our helper function
+        const bgColor = colorToRgb(style.backgroundColor);
+        if (bgColor) {
+          clonedEl.style.backgroundColor = bgColor;
         }
         
-        // Text color - CRITICAL - ensure it's visible
-        if (style.color && (style.color.startsWith('#') || style.color.startsWith('rgb'))) {
-          clonedEl.style.color = style.color;
-        } else if (style.color && !style.color.includes('oklch') && !style.color.includes('oklab')) {
-          clonedEl.style.color = style.color;
+        const textColor = colorToRgb(style.color);
+        if (textColor) {
+          clonedEl.style.color = textColor;
         } else {
-          // Fallback to white if color can't be determined
-          clonedEl.style.color = '#ffffff';
+          clonedEl.style.color = '#ffffff'; // Fallback to white
         }
         
+        const borderColor = colorToRgb(style.borderColor);
+        if (borderColor && style.borderWidth !== '0px') {
+          clonedEl.style.borderColor = borderColor;
+        }
+        
+        // Background image - only if it doesn't contain oklab
         if (style.backgroundImage && style.backgroundImage !== 'none' && 
             !style.backgroundImage.includes('oklch') && !style.backgroundImage.includes('oklab')) {
           clonedEl.style.backgroundImage = style.backgroundImage;
@@ -212,10 +253,18 @@ const PlayerIDCard = ({ player }) => {
           height: 330,
           windowWidth: 525,
           windowHeight: 330,
+          foreignObjectRendering: true, // Use foreignObject to avoid stylesheet parsing
           ignoreElements: (element) => {
             return element.classList && element.classList.contains('animate-shine');
           },
           onclone: (clonedDoc) => {
+            // Remove ALL style and link tags that might contain oklab
+            const styleTags = clonedDoc.querySelectorAll('style');
+            styleTags.forEach(style => style.remove());
+            
+            const linkTags = clonedDoc.querySelectorAll('link[rel="stylesheet"]');
+            linkTags.forEach(link => link.remove());
+            
             // Remove ALL classes and attributes that might reference stylesheets
             const allElements = clonedDoc.querySelectorAll('*');
             allElements.forEach(el => {
