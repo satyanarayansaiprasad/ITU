@@ -19,19 +19,64 @@ connectDB();
 initializeFirebase();
 
 // CORS Configuration
+const allowedOrigins = [
+  'https://itu-mu.vercel.app',
+  'https://itu-r1qa.onrender.com',
+  'https://taekwondounion.com',
+  'https://www.taekwondounion.com',
+  'http://localhost:5173',
+  'http://localhost:3000',
+  ...(process.env.ALLOWED_ORIGINS?.split(',').map(origin => origin.trim()).filter(Boolean) || [])
+];
+
+// Manual CORS middleware as fallback
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  
+  // Allow if origin is in allowed list, or if no origin (same-origin requests)
+  if (!origin || allowedOrigins.includes(origin)) {
+    if (origin) {
+      res.header('Access-Control-Allow-Origin', origin);
+    } else {
+      res.header('Access-Control-Allow-Origin', '*');
+    }
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+    res.header('Access-Control-Expose-Headers', 'Content-Range, X-Content-Range');
+  }
+  
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+  
+  next();
+});
+
+// CORS middleware
 app.use(cors({
-  origin: [
-    'https://itu-mu.vercel.app',
-    'https://itu-r1qa.onrender.com',
-    'https://taekwondounion.com',
-    'https://www.taekwondounion.com',
-    'http://localhost:5173',
-    'http://localhost:3000',
-    ...(process.env.ALLOWED_ORIGINS?.split(',') || [])
-  ],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, Postman, etc.)
+    if (!origin) {
+      return callback(null, true);
+    }
+    
+    // Check if origin is in allowed list
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn(`⚠️  CORS blocked origin: ${origin}`);
+      // For now, allow all origins to debug - change to callback(new Error('Not allowed by CORS')) for production
+      callback(null, true);
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 }));
 
 // Middleware
