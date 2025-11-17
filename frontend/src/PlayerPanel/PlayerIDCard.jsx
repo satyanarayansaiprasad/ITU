@@ -58,23 +58,48 @@ const PlayerIDCard = ({ player }) => {
     tempContainer.style.top = '0';
     tempContainer.style.width = '525px';
     tempContainer.style.height = '330px';
-    tempContainer.style.backgroundColor = '#1e3a8a'; // Use hex color instead of oklch
-    tempContainer.style.overflow = 'hidden';
+    tempContainer.style.backgroundColor = '#1e3a8a';
+    tempContainer.style.overflow = 'visible';
+    tempContainer.style.zIndex = '99999';
     document.body.appendChild(tempContainer);
 
     // Clone the element and its children
     const clonedElement = element.cloneNode(true);
     
-    // Reset all transforms and positioning
-    clonedElement.style.transform = 'none';
-    clonedElement.style.position = 'relative';
-    clonedElement.style.backfaceVisibility = 'visible';
-    clonedElement.style.WebkitBackfaceVisibility = 'visible';
-    clonedElement.style.opacity = '1';
-    clonedElement.style.visibility = 'visible';
+    // Extract the inner card div which contains the actual content
+    // The ref points to a wrapper, but we need the inner div with the card content
+    let cardContent = clonedElement.querySelector('div > div');
+    
+    // If we found the inner card, use it; otherwise use the cloned element
+    if (!cardContent) {
+      cardContent = clonedElement;
+    }
+    
+    // Reset all transforms and positioning to make content visible
+    cardContent.style.transform = 'none';
+    cardContent.style.position = 'relative';
+    cardContent.style.backfaceVisibility = 'visible';
+    cardContent.style.WebkitBackfaceVisibility = 'visible';
+    cardContent.style.opacity = '1';
+    cardContent.style.visibility = 'visible';
+    cardContent.style.width = '525px';
+    cardContent.style.height = '330px';
+    cardContent.style.display = 'block';
+    
+    // If we extracted the inner card, replace clonedElement with it
+    if (cardContent !== clonedElement) {
+      // Remove the wrapper and use just the inner content
+      tempContainer.innerHTML = '';
+      tempContainer.appendChild(cardContent);
+    } else {
+      // If we're using the cloned element, append it to container
+      tempContainer.appendChild(clonedElement);
+    }
     
     // Store original element colors before processing
+    // Get the inner card content from the original element
     const originalElement = side === 'front' ? frontRef.current : backRef.current;
+    const originalCardContent = originalElement?.querySelector('div > div') || originalElement;
     const styleMap = new Map();
     
     // First pass: collect ALL computed styles from original element (already rendered as RGB)
@@ -140,7 +165,9 @@ const PlayerIDCard = ({ player }) => {
     };
     
     // Collect ALL styles from original element
-    collectOriginalStyles(originalElement, clonedElement);
+    // Use the inner card content for style collection
+    const targetClonedElement = cardContent !== clonedElement ? cardContent : clonedElement;
+    collectOriginalStyles(originalCardContent, targetClonedElement);
     
     // Comprehensive function to recursively process all elements and set explicit hex colors
     const processElementColors = (el) => {
@@ -254,14 +281,9 @@ const PlayerIDCard = ({ player }) => {
       }
     };
     
-    // Get the inner card div and fix all color references
-    const innerCard = clonedElement.querySelector('div > div');
-    if (innerCard) {
-      innerCard.style.transform = 'none';
-      innerCard.style.position = 'relative';
-      
-      // Process all elements recursively to set explicit hex colors
-      processElementColors(innerCard);
+    // Process all elements recursively to set explicit hex colors
+    // Use the card content element
+    processElementColors(targetClonedElement);
       
       // Helper function to safely get and convert color values
       const safeGetColor = (colorValue, defaultColor = '#1e3a8a') => {
@@ -404,24 +426,16 @@ const PlayerIDCard = ({ player }) => {
       });
     }
     
-    tempContainer.appendChild(clonedElement);
-    
-    // Helper function to convert any color format to RGB
-    const colorToRgb = (colorValue) => {
-      if (!colorValue || colorValue === 'transparent' || colorValue === 'rgba(0, 0, 0, 0)') {
-        return null;
+    // Ensure all content is visible and properly sized
+    const allElements = targetClonedElement.querySelectorAll('*');
+    allElements.forEach(el => {
+      // Make sure all elements are visible
+      if (el.style) {
+        if (el.style.display === 'none') el.style.display = '';
+        if (el.style.visibility === 'hidden') el.style.visibility = 'visible';
+        if (el.style.opacity === '0') el.style.opacity = '1';
       }
-      // If already RGB/RGBA, return as is
-      if (colorValue.startsWith('rgb')) {
-        return colorValue;
-      }
-      // If hex, return as is
-      if (colorValue.startsWith('#')) {
-        return colorValue;
-      }
-      // For oklch/oklab, we'll need to get the computed RGB value
-      return null;
-    };
+    });
     
     // Process the entire cloned element tree again after it's in the DOM
     // Use the collected original styles to ensure exact match
@@ -502,47 +516,105 @@ const PlayerIDCard = ({ player }) => {
     };
     
     // Process the entire tree after it's in the DOM
-    finalProcessColors(clonedElement);
+    finalProcessColors(targetClonedElement);
 
     try {
       // Wait for images to load and styles to be applied
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Ensure images are loaded
+      const images = tempContainer.querySelectorAll('img');
+      await Promise.all(Array.from(images).map(img => {
+        if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+        return new Promise((resolve) => {
+          img.onload = () => resolve();
+          img.onerror = () => resolve(); // Continue even if image fails
+          setTimeout(() => resolve(), 2000); // Timeout after 2s
+        });
+      }));
+      
+      // Additional wait to ensure all styles are applied
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       // Use html-to-image which handles modern CSS colors (oklab/oklch) much better
-      const dataUrl = await toPng(tempContainer, {
-        backgroundColor: '#1e3a8a',
-        width: 525,
-        height: 330,
-        pixelRatio: 4, // High quality (4x pixel ratio)
-        quality: 1.0, // Maximum quality
-        cacheBust: true, // Ensure fresh render
-        filter: (node) => {
-          // Filter out animated elements that might cause issues
-          if (node.classList && node.classList.contains('animate-shine')) {
-            return false;
-          }
-          return true;
-        },
-        style: {
-          transform: 'scale(1)',
-          transformOrigin: 'top left',
-        },
-      });
-
-      const link = document.createElement('a');
-      const sanitizedName = player.name.replace(/[^a-zA-Z0-9]/g, '_');
-      const fileName = `${sanitizedName}_ID_Card_${side}_${Date.now()}.png`;
-      link.download = fileName;
-      link.href = dataUrl;
+      // Target the element that's actually in the DOM (in tempContainer)
+      const elementToCapture = tempContainer.firstElementChild || targetClonedElement;
       
-      // Trigger download
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      // Cleanup
-      if (document.body.contains(tempContainer)) {
-        document.body.removeChild(tempContainer);
+      // Verify element has content
+      if (!elementToCapture || !elementToCapture.textContent) {
+        throw new Error('Element has no content to capture');
+      }
+      
+      // Ensure element is visible and properly sized
+      elementToCapture.style.display = 'block';
+      elementToCapture.style.visibility = 'visible';
+      elementToCapture.style.opacity = '1';
+      elementToCapture.style.width = '525px';
+      elementToCapture.style.height = '330px';
+      elementToCapture.style.position = 'relative';
+      
+      // Temporarily make container visible for better rendering
+      const originalLeft = tempContainer.style.left;
+      tempContainer.style.position = 'fixed';
+      tempContainer.style.left = '0';
+      tempContainer.style.top = '0';
+      tempContainer.style.zIndex = '999999';
+      
+      try {
+        const dataUrl = await toPng(elementToCapture, {
+          backgroundColor: '#1e3a8a',
+          width: 525,
+          height: 330,
+          pixelRatio: 4, // High quality (4x pixel ratio)
+          quality: 1.0, // Maximum quality
+          cacheBust: true, // Ensure fresh render
+          includeQueryParams: true, // Include query params for images
+          useCORS: true, // Allow cross-origin images
+          filter: (node) => {
+            // Filter out animated elements that might cause issues
+            if (node.classList && node.classList.contains('animate-shine')) {
+              return false;
+            }
+            // Don't filter out text nodes or important elements
+            return true;
+          },
+          style: {
+            transform: 'scale(1)',
+            transformOrigin: 'top left',
+            width: '525px',
+            height: '330px',
+          },
+        });
+        
+        // Restore container position
+        tempContainer.style.position = 'absolute';
+        tempContainer.style.left = originalLeft;
+        
+        // Create download link
+        const link = document.createElement('a');
+        const sanitizedName = player.name.replace(/[^a-zA-Z0-9]/g, '_');
+        const fileName = `${sanitizedName}_ID_Card_${side}_${Date.now()}.png`;
+        link.download = fileName;
+        link.href = dataUrl;
+        
+        // Trigger download
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Cleanup
+        if (document.body.contains(tempContainer)) {
+          document.body.removeChild(tempContainer);
+        }
+      } catch (error) {
+        // Restore container position even on error
+        tempContainer.style.position = 'absolute';
+        tempContainer.style.left = originalLeft;
+        console.error(`Error downloading ${side} side:`, error);
+        if (document.body.contains(tempContainer)) {
+          document.body.removeChild(tempContainer);
+        }
+        throw error;
       }
     } catch (error) {
       console.error(`Error downloading ${side} side:`, error);
