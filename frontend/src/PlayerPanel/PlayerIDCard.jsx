@@ -83,16 +83,8 @@ const PlayerIDCard = ({ player }) => {
         // Get computed styles from original (already RGB)
         const style = window.getComputedStyle(originalEl);
         
-        // Only remove color-related classes, keep layout classes
-        const classesToRemove = [];
-        Array.from(clonedEl.classList || []).forEach(cls => {
-          if (cls.startsWith('bg-') || cls.startsWith('text-') || cls.startsWith('border-') ||
-              cls.startsWith('from-') || cls.startsWith('via-') || cls.startsWith('to-') ||
-              cls.includes('gradient')) {
-            classesToRemove.push(cls);
-          }
-        });
-        classesToRemove.forEach(cls => clonedEl.classList.remove(cls));
+        // Remove ALL classes to prevent html2canvas from reading stylesheets with oklab
+        clonedEl.className = '';
         
         // Apply ALL computed styles as inline styles to preserve everything
         // Colors - ensure they're RGB/hex format
@@ -195,57 +187,90 @@ const PlayerIDCard = ({ player }) => {
       // Wait for images to load and styles to apply
       await new Promise(resolve => setTimeout(resolve, 800));
 
-      const canvas = await html2canvas(tempContainer, {
-        backgroundColor: '#1e3a8a',
-        scale: 3,
-        logging: false,
-        useCORS: true,
-        allowTaint: false,
-        width: 525,
-        height: 330,
-        windowWidth: 525,
-        windowHeight: 330,
-        ignoreElements: (element) => {
-          // Ignore elements that might cause issues
-          return element.classList && element.classList.contains('animate-shine');
-        },
-        onclone: (clonedDoc) => {
-          // Remove only color-related classes, preserve layout
-          const allElements = clonedDoc.querySelectorAll('*');
-          allElements.forEach(el => {
-            try {
-              // Only remove color classes that might generate oklch/oklab
-              const classesToRemove = [];
-              Array.from(el.classList || []).forEach(cls => {
-                if (cls.startsWith('bg-') || cls.startsWith('text-') || cls.startsWith('border-') ||
-                    cls.startsWith('from-') || cls.startsWith('via-') || cls.startsWith('to-') ||
-                    cls.includes('gradient')) {
-                  classesToRemove.push(cls);
-                }
-              });
-              classesToRemove.forEach(cls => el.classList.remove(cls));
-              
-              // Ensure element is visible
-              el.style.visibility = 'visible';
-              el.style.opacity = '1';
-            } catch (e) {
-              // Ignore errors
-            }
-          });
-        },
+      // Before html2canvas, remove all style/link tags that might contain oklab
+      const styleSheets = Array.from(document.styleSheets);
+      const originalDisabled = [];
+      styleSheets.forEach((sheet, idx) => {
+        try {
+          if (sheet.ownerNode) {
+            originalDisabled[idx] = sheet.disabled;
+            sheet.disabled = true; // Temporarily disable all stylesheets
+          }
+        } catch (e) {
+          // Cross-origin stylesheets can't be disabled
+        }
       });
 
-      const link = document.createElement('a');
-      const sanitizedName = player.name.replace(/[^a-zA-Z0-9]/g, '_');
-      const fileName = `${sanitizedName}_ID_Card_${side}_${Date.now()}.png`;
-      link.download = fileName;
-      // Use maximum quality for PNG
-      link.href = canvas.toDataURL('image/png', 1.0);
-      
-      // Trigger download
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      try {
+        const canvas = await html2canvas(tempContainer, {
+          backgroundColor: '#1e3a8a',
+          scale: 3,
+          logging: false,
+          useCORS: true,
+          allowTaint: false,
+          width: 525,
+          height: 330,
+          windowWidth: 525,
+          windowHeight: 330,
+          ignoreElements: (element) => {
+            return element.classList && element.classList.contains('animate-shine');
+          },
+          onclone: (clonedDoc) => {
+            // Remove ALL classes and attributes that might reference stylesheets
+            const allElements = clonedDoc.querySelectorAll('*');
+            allElements.forEach(el => {
+              try {
+                // Remove all classes and class attribute
+                el.className = '';
+                el.removeAttribute('class');
+                
+                // Ensure element is visible with inline styles
+                el.style.visibility = 'visible';
+                el.style.opacity = '1';
+                if (!el.style.display || el.style.display === 'none') {
+                  el.style.display = 'block';
+                }
+              } catch (e) {
+                // Ignore errors
+              }
+            });
+          },
+        });
+        
+        // Re-enable stylesheets
+        styleSheets.forEach((sheet, idx) => {
+          try {
+            if (sheet.ownerNode && originalDisabled[idx] !== undefined) {
+              sheet.disabled = originalDisabled[idx];
+            }
+          } catch (e) {
+            // Ignore
+          }
+        });
+
+        const link = document.createElement('a');
+        const sanitizedName = player.name.replace(/[^a-zA-Z0-9]/g, '_');
+        const fileName = `${sanitizedName}_ID_Card_${side}_${Date.now()}.png`;
+        link.download = fileName;
+        link.href = canvas.toDataURL('image/png', 1.0);
+        
+        // Trigger download
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (canvasError) {
+        // Re-enable stylesheets even on error
+        styleSheets.forEach((sheet, idx) => {
+          try {
+            if (sheet.ownerNode && originalDisabled[idx] !== undefined) {
+              sheet.disabled = originalDisabled[idx];
+            }
+          } catch (e) {
+            // Ignore
+          }
+        });
+        throw canvasError;
+      }
 
       // Cleanup
       if (document.body.contains(tempContainer)) {
