@@ -79,6 +79,23 @@ const PlayerIDCard = ({ player }) => {
       innerCard.style.transform = 'none';
       innerCard.style.position = 'relative';
       
+      // Helper function to safely get and convert color values
+      const safeGetColor = (colorValue, defaultColor = '#1e3a8a') => {
+        if (!colorValue || colorValue === 'transparent' || colorValue === 'rgba(0, 0, 0, 0)') {
+          return 'transparent';
+        }
+        // If it's already hex or rgb, return as is
+        if (colorValue.startsWith('#') || colorValue.startsWith('rgb')) {
+          return colorValue;
+        }
+        // If it contains oklch or oklab (modern CSS color functions), convert to hex
+        if (colorValue.includes('oklch') || colorValue.includes('oklab')) {
+          return defaultColor;
+        }
+        // For any other format, return default
+        return defaultColor;
+      };
+      
       // Helper function to convert any color to RGB/hex
       const convertColorToHex = (colorValue) => {
         if (!colorValue || colorValue === 'transparent' || colorValue === 'rgba(0, 0, 0, 0)') {
@@ -88,8 +105,8 @@ const PlayerIDCard = ({ player }) => {
         if (colorValue.startsWith('#') || colorValue.startsWith('rgb')) {
           return colorValue;
         }
-        // If it contains oklch, convert to a safe default
-        if (colorValue.includes('oklch')) {
+        // If it contains oklch or oklab (modern CSS color functions), convert to hex
+        if (colorValue.includes('oklch') || colorValue.includes('oklab')) {
           // Try to extract approximate color from context
           if (colorValue.includes('blue') || colorValue.includes('indigo')) {
             return '#1e3a8a';
@@ -106,7 +123,7 @@ const PlayerIDCard = ({ player }) => {
       };
       
       // Replace all computed styles with explicit hex/rgb colors
-      // Process all elements and set explicit styles to avoid oklch parsing
+      // Process all elements and set explicit styles to avoid oklch/oklab parsing
       const allElements = innerCard.querySelectorAll('*');
       allElements.forEach(el => {
         try {
@@ -117,49 +134,85 @@ const PlayerIDCard = ({ player }) => {
             (el.className ? `.${el.className.split(' ').join('.')}` : '')
           ) || el;
           
-          const computedStyle = window.getComputedStyle(originalEl);
+          let computedStyle;
+          try {
+            computedStyle = window.getComputedStyle(originalEl);
+          } catch (e) {
+            // If we can't get computed style, skip this element
+            return;
+          }
           
-          // Set explicit background color
-          const bgColor = computedStyle.backgroundColor;
-          if (bgColor) {
-            if (bgColor.includes('oklch')) {
-              // Convert oklch to hex based on context
-              if (bgColor.includes('blue') || bgColor.includes('indigo') || bgColor.includes('rgb(30, 58, 138)')) {
+          // Set explicit background color - convert ALL colors to hex/rgb to avoid oklch/oklab
+          let bgColor;
+          try {
+            bgColor = computedStyle.backgroundColor;
+            // Check if it contains unsupported color functions
+            if (bgColor && (bgColor.includes('oklch') || bgColor.includes('oklab'))) {
+              // Convert modern color functions to hex based on context
+              if (bgColor.includes('blue') || bgColor.includes('indigo')) {
                 el.style.backgroundColor = '#1e3a8a';
-              } else if (bgColor.includes('white') || bgColor.includes('rgb(255, 255, 255)')) {
+              } else if (bgColor.includes('white')) {
                 el.style.backgroundColor = '#ffffff';
-              } else if (bgColor.includes('orange') || bgColor.includes('rgb(251, 146, 60)')) {
+              } else if (bgColor.includes('orange')) {
                 el.style.backgroundColor = '#fb923c';
               } else {
                 el.style.backgroundColor = '#1e3a8a';
               }
-            } else if (bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
-              el.style.backgroundColor = bgColor;
+            } else if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
+              // Only set if it's a valid hex/rgb color
+              if (bgColor.startsWith('#') || bgColor.startsWith('rgb')) {
+                el.style.backgroundColor = bgColor;
+              } else {
+                // Unknown format, use safe default
+                el.style.backgroundColor = '#1e3a8a';
+              }
             }
+          } catch (e) {
+            // If reading backgroundColor fails (due to oklab), set safe default
+            el.style.backgroundColor = '#1e3a8a';
           }
           
-          // Set explicit text color
-          const textColor = computedStyle.color;
-          if (textColor) {
-            if (textColor.includes('oklch')) {
-              if (textColor.includes('white') || textColor.includes('rgb(255, 255, 255)')) {
+          // Set explicit text color - convert ALL colors to hex/rgb
+          let textColor;
+          try {
+            textColor = computedStyle.color;
+            if (textColor && (textColor.includes('oklch') || textColor.includes('oklab'))) {
+              if (textColor.includes('white')) {
                 el.style.color = '#ffffff';
-              } else if (textColor.includes('orange') || textColor.includes('rgb(251, 146, 60)')) {
+              } else if (textColor.includes('orange')) {
                 el.style.color = '#fb923c';
               } else {
                 el.style.color = '#ffffff';
               }
-            } else {
-              el.style.color = textColor;
+            } else if (textColor) {
+              if (textColor.startsWith('#') || textColor.startsWith('rgb')) {
+                el.style.color = textColor;
+              } else {
+                // Unknown format, use safe default
+                el.style.color = '#ffffff';
+              }
             }
+          } catch (e) {
+            // If reading color fails (due to oklab), set safe default
+            el.style.color = '#ffffff';
           }
           
           // Set explicit border color
-          const borderColor = computedStyle.borderColor;
-          if (borderColor && borderColor.includes('oklch')) {
+          let borderColor;
+          try {
+            borderColor = computedStyle.borderColor;
+            if (borderColor && (borderColor.includes('oklch') || borderColor.includes('oklab'))) {
+              el.style.borderColor = '#ffffff';
+            } else if (borderColor && borderColor !== 'rgba(0, 0, 0, 0)' && borderColor !== 'transparent') {
+              if (borderColor.startsWith('#') || borderColor.startsWith('rgb')) {
+                el.style.borderColor = borderColor;
+              } else {
+                el.style.borderColor = '#ffffff';
+              }
+            }
+          } catch (e) {
+            // If reading borderColor fails, set safe default
             el.style.borderColor = '#ffffff';
-          } else if (borderColor && borderColor !== 'rgba(0, 0, 0, 0)') {
-            el.style.borderColor = borderColor;
           }
         } catch (e) {
           // Ignore errors for individual elements
@@ -188,15 +241,15 @@ const PlayerIDCard = ({ player }) => {
           return element.classList && element.classList.contains('animate-shine');
         },
         onclone: (clonedDoc) => {
-          // Convert all oklch colors to hex/rgb in the cloned document
+          // Convert all oklch/oklab colors to hex/rgb in the cloned document
           const allElements = clonedDoc.querySelectorAll('*');
           allElements.forEach(el => {
             try {
               const style = window.getComputedStyle(el);
               
-              // Convert background colors
+              // Convert background colors - handle both oklch and oklab
               let bgColor = style.backgroundColor;
-              if (bgColor && bgColor.includes('oklch')) {
+              if (bgColor && (bgColor.includes('oklch') || bgColor.includes('oklab'))) {
                 // Replace with hex equivalent
                 if (bgColor.includes('blue') || bgColor.includes('indigo')) {
                   el.style.backgroundColor = '#1e3a8a';
@@ -207,11 +260,14 @@ const PlayerIDCard = ({ player }) => {
                 } else {
                   el.style.backgroundColor = '#1e3a8a';
                 }
+              } else if (bgColor && !bgColor.startsWith('#') && !bgColor.startsWith('rgb') && bgColor !== 'transparent' && bgColor !== 'rgba(0, 0, 0, 0)') {
+                // Convert any other non-standard color format to safe default
+                el.style.backgroundColor = '#1e3a8a';
               }
               
-              // Convert text colors
+              // Convert text colors - handle both oklch and oklab
               let textColor = style.color;
-              if (textColor && textColor.includes('oklch')) {
+              if (textColor && (textColor.includes('oklch') || textColor.includes('oklab'))) {
                 if (textColor.includes('white')) {
                   el.style.color = '#ffffff';
                 } else if (textColor.includes('orange')) {
@@ -219,15 +275,26 @@ const PlayerIDCard = ({ player }) => {
                 } else {
                   el.style.color = '#ffffff';
                 }
+              } else if (textColor && !textColor.startsWith('#') && !textColor.startsWith('rgb')) {
+                // Convert any other non-standard color format to safe default
+                el.style.color = '#ffffff';
               }
               
-              // Convert border colors
+              // Convert border colors - handle both oklch and oklab
               let borderColor = style.borderColor;
-              if (borderColor && borderColor.includes('oklch')) {
+              if (borderColor && (borderColor.includes('oklch') || borderColor.includes('oklab'))) {
+                el.style.borderColor = '#ffffff';
+              } else if (borderColor && !borderColor.startsWith('#') && !borderColor.startsWith('rgb') && borderColor !== 'transparent' && borderColor !== 'rgba(0, 0, 0, 0)') {
                 el.style.borderColor = '#ffffff';
               }
             } catch (e) {
-              // Ignore errors
+              // Ignore errors - set safe defaults
+              try {
+                el.style.backgroundColor = el.style.backgroundColor || '#1e3a8a';
+                el.style.color = el.style.color || '#ffffff';
+              } catch (e2) {
+                // Final fallback - ignore
+              }
             }
           });
         },
