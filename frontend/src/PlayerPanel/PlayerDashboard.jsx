@@ -47,6 +47,19 @@ const PlayerDashboard = () => {
   const [loadingNews, setLoadingNews] = useState(false);
   const [selectedNews, setSelectedNews] = useState(null);
 
+  // Helper function to get image URL (defined early so it can be used in useEffect)
+  const getImageUrl = (image) => {
+    if (!image) return null;
+    // If it's already a full URL (Cloudinary or data URI), return as is
+    if (/^(https?|data):/i.test(image)) return image;
+    // If it's a Cloudinary URL without protocol (shouldn't happen, but just in case)
+    if (image.includes('cloudinary.com')) return `https:${image}`;
+    // Handle legacy uploads/ paths
+    if (image.startsWith('uploads/')) return `${API_BASE_URL}/${image}`;
+    const cleanImage = image.replace(/^\/+/, '');
+    return `${API_BASE_URL}/uploads/${cleanImage}`;
+  };
+
   useEffect(() => {
     const playerData = localStorage.getItem("playerData");
     if (!playerData) {
@@ -66,9 +79,15 @@ const PlayerDashboard = () => {
         beltLevel: parsed.beltLevel || "",
         yearsOfExperience: parsed.yearsOfExperience || ""
       });
+      
+      // Set photo preview from localStorage data
       if (parsed.photo) {
-        setPhotoPreview(getImageUrl(parsed.photo));
+        const photoUrl = getImageUrl(parsed.photo);
+        setPhotoPreview(photoUrl);
+        console.log("Initial photo from localStorage:", photoUrl);
       }
+      
+      // Fetch fresh profile data from server
       fetchPlayerProfile(parsed._id);
     } catch (error) {
       console.error("Error parsing player data:", error);
@@ -89,8 +108,15 @@ const PlayerDashboard = () => {
         const updatedPlayer = response.data.data;
         setPlayer(updatedPlayer);
         localStorage.setItem("playerData", JSON.stringify(updatedPlayer));
+        
+        // Update photo preview
         if (updatedPlayer.photo) {
-          setPhotoPreview(getImageUrl(updatedPlayer.photo));
+          const photoUrl = getImageUrl(updatedPlayer.photo);
+          setPhotoPreview(photoUrl);
+          console.log("Player photo loaded from server:", photoUrl);
+        } else {
+          setPhotoPreview(null);
+          console.log("No photo found for player in database");
         }
       }
     } catch (error) {
@@ -114,14 +140,6 @@ const PlayerDashboard = () => {
     } finally {
       setLoadingNews(false);
     }
-  };
-
-  const getImageUrl = (image) => {
-    if (!image) return null;
-    if (/^(https?|data):/i.test(image)) return image;
-    if (image.startsWith('uploads/')) return `${API_BASE_URL}/${image}`;
-    const cleanImage = image.replace(/^\/+/, '');
-    return `${API_BASE_URL}/uploads/${cleanImage}`;
   };
 
   const handleInputChange = (e) => {
@@ -167,6 +185,22 @@ const PlayerDashboard = () => {
       if (response.data.success) {
         toast.success("Photo uploaded successfully!");
         setSelectedPhoto(null);
+        
+        // Immediately update player state with the response data
+        if (response.data.data) {
+          const updatedPlayer = response.data.data;
+          setPlayer(updatedPlayer);
+          localStorage.setItem("playerData", JSON.stringify(updatedPlayer));
+          
+          // Update photo preview with the new Cloudinary URL
+          if (response.data.photoUrl || updatedPlayer.photo) {
+            const photoUrl = response.data.photoUrl || updatedPlayer.photo;
+            setPhotoPreview(photoUrl);
+            console.log("Photo URL updated:", photoUrl);
+          }
+        }
+        
+        // Also fetch fresh data to ensure consistency
         await fetchPlayerProfile(player._id);
       } else {
         toast.error("Failed to upload photo");

@@ -542,6 +542,13 @@ exports.getPlayerProfile = async (req, res) => {
       });
     }
     
+    console.log(`Fetching player profile:`, {
+      playerId: id,
+      hasPhoto: !!player.photo,
+      photoUrl: player.photo,
+      cloudinaryPublicId: player.cloudinaryPublicId
+    });
+    
     res.status(200).json({ 
       success: true, 
       data: player 
@@ -718,16 +725,32 @@ exports.uploadPlayerPhoto = async (req, res) => {
     // Update player photo with Cloudinary URL and public ID
     player.photo = cloudinaryResult.url;
     player.cloudinaryPublicId = cloudinaryResult.public_id;
-    await player.save();
+    
+    // Save to database
+    const savedPlayer = await player.save();
+    
+    console.log(`Player photo uploaded to Cloudinary successfully:`, {
+      playerId: id,
+      photoUrl: cloudinaryResult.url,
+      cloudinaryPublicId: cloudinaryResult.public_id,
+      savedPhoto: savedPlayer.photo,
+      savedPublicId: savedPlayer.cloudinaryPublicId
+    });
 
-    console.log(`Player photo uploaded to Cloudinary successfully: ${cloudinaryResult.url}`);
+    // Verify the photo was saved
+    const verifyPlayer = await Player.findById(id);
+    console.log(`Verified player photo in database:`, {
+      playerId: id,
+      photo: verifyPlayer.photo,
+      cloudinaryPublicId: verifyPlayer.cloudinaryPublicId
+    });
 
     res.status(200).json({
       success: true,
       message: "Photo uploaded successfully to Cloudinary",
       photoUrl: cloudinaryResult.url,
       cloudinaryPublicId: cloudinaryResult.public_id,
-      data: player
+      data: savedPlayer
     });
   } catch (error) {
     console.error("Error uploading player photo to Cloudinary:", error);

@@ -222,10 +222,6 @@ const PlayerIDCard = ({ player }) => {
                         <span className="text-white text-4xl font-bold">{player.name.charAt(0).toUpperCase()}</span>
                       </div>
                     </div>
-                    {/* Photo Badge */}
-                    <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-                      {player.beltLevel || 'N/A'}
-                    </div>
                   </div>
 
                   {/* Player Info */}
@@ -252,20 +248,12 @@ const PlayerIDCard = ({ player }) => {
                 </div>
 
                 {/* Footer */}
-                <div className="flex items-center justify-between pt-3 border-t border-white/20">
+                <div className="flex items-center pt-3 border-t border-white/20">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded bg-white/20 backdrop-blur-sm flex items-center justify-center">
                       <span className="text-white text-xs font-bold">ITU</span>
                     </div>
-                    <p className="text-white/80 text-xs">Official Member</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-white/60 text-xs">Valid Until</p>
-                    <p className="text-white font-semibold text-xs">
-                      {player.approvedAt 
-                        ? new Date(new Date(player.approvedAt).setFullYear(new Date(player.approvedAt).getFullYear() + 1)).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })
-                        : 'N/A'}
-                    </p>
+                    <p className="text-white/80 text-xs">Official Player</p>
                   </div>
                 </div>
               </div>
@@ -316,11 +304,6 @@ const PlayerIDCard = ({ player }) => {
 
                 {/* Player Details Grid */}
                 <div className="flex-1 space-y-3">
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
-                    <p className="text-white/60 text-xs font-semibold uppercase tracking-wide mb-1">Player ID</p>
-                    <p className="text-white font-bold text-lg">{player.playerId || 'N/A'}</p>
-                  </div>
-
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
                       <p className="text-white/60 text-xs font-semibold uppercase tracking-wide mb-1">Date of Birth</p>
@@ -333,8 +316,13 @@ const PlayerIDCard = ({ player }) => {
                   </div>
 
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
-                    <p className="text-white/60 text-xs font-semibold uppercase tracking-wide mb-1">Experience</p>
-                    <p className="text-white font-semibold">{player.yearsOfExperience || 0} Years</p>
+                    <p className="text-white/60 text-xs font-semibold uppercase tracking-wide mb-1">Email</p>
+                    <p className="text-white font-semibold text-sm break-all">{player.email || 'N/A'}</p>
+                  </div>
+
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+                    <p className="text-white/60 text-xs font-semibold uppercase tracking-wide mb-1">Phone</p>
+                    <p className="text-white font-semibold">{player.phone || 'N/A'}</p>
                   </div>
 
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
