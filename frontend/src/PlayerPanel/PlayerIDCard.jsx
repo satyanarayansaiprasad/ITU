@@ -75,17 +75,21 @@ const PlayerIDCard = ({ player }) => {
     
     // Store original element colors before processing
     const originalElement = side === 'front' ? frontRef.current : backRef.current;
-    const colorMap = new Map();
+    const styleMap = new Map();
     
-    // First pass: collect all colors from original element (already rendered as RGB)
-    const collectOriginalColors = (originalEl, clonedEl) => {
+    // First pass: collect ALL computed styles from original element (already rendered as RGB)
+    // Use a more reliable matching strategy based on element structure
+    const collectOriginalStyles = (originalEl, clonedEl, path = '') => {
       if (!originalEl || !clonedEl || originalEl.nodeType !== 1 || clonedEl.nodeType !== 1) return;
       
       try {
         const style = window.getComputedStyle(originalEl);
-        const key = clonedEl;
         
-        colorMap.set(key, {
+        // Create a unique key based on element structure
+        const key = `${path}-${clonedEl.tagName}-${clonedEl.className}`;
+        
+        // Store ALL relevant styles
+        styleMap.set(clonedEl, {
           backgroundColor: style.backgroundColor,
           color: style.color,
           borderColor: style.borderColor,
@@ -98,14 +102,29 @@ const PlayerIDCard = ({ player }) => {
           borderRadius: style.borderRadius,
           lineHeight: style.lineHeight,
           textAlign: style.textAlign,
+          letterSpacing: style.letterSpacing,
+          textTransform: style.textTransform,
+          opacity: style.opacity,
+          textShadow: style.textShadow,
+          boxShadow: style.boxShadow,
+          border: style.border,
+          borderWidth: style.borderWidth,
+          borderStyle: style.borderStyle,
+          width: style.width,
+          height: style.height,
+          display: style.display,
+          flexDirection: style.flexDirection,
+          alignItems: style.alignItems,
+          justifyContent: style.justifyContent,
+          gap: style.gap,
         });
         
-        // Process children
+        // Process children with path tracking
         const originalChildren = Array.from(originalEl.children);
         const clonedChildren = Array.from(clonedEl.children);
         originalChildren.forEach((origChild, idx) => {
           if (clonedChildren[idx]) {
-            collectOriginalColors(origChild, clonedChildren[idx]);
+            collectOriginalStyles(origChild, clonedChildren[idx], `${path}-${idx}`);
           }
         });
       } catch (e) {
@@ -114,14 +133,14 @@ const PlayerIDCard = ({ player }) => {
         const clonedChildren = Array.from(clonedEl.children);
         originalChildren.forEach((origChild, idx) => {
           if (clonedChildren[idx]) {
-            collectOriginalColors(origChild, clonedChildren[idx]);
+            collectOriginalStyles(origChild, clonedChildren[idx], `${path}-${idx}`);
           }
         });
       }
     };
     
-    // Collect colors from original element
-    collectOriginalColors(originalElement, clonedElement);
+    // Collect ALL styles from original element
+    collectOriginalStyles(originalElement, clonedElement);
     
     // Comprehensive function to recursively process all elements and set explicit hex colors
     const processElementColors = (el) => {
@@ -139,47 +158,72 @@ const PlayerIDCard = ({ player }) => {
           return; // Skip if we can't get computed style
         }
         
-        // Use original colors if available (these are already RGB from browser rendering)
-        // This preserves the exact colors as displayed on screen
-        if (originalColors) {
-          // Apply original rendered colors directly
-          if (originalColors.backgroundColor && 
-              (originalColors.backgroundColor.startsWith('#') || originalColors.backgroundColor.startsWith('rgb'))) {
-            el.style.backgroundColor = originalColors.backgroundColor;
+        // Use original styles if available (these are already RGB from browser rendering)
+        // This preserves the EXACT appearance as displayed on screen
+        const originalStyles = styleMap.get(el);
+        
+        if (originalStyles) {
+          // Apply ALL original rendered styles directly - this ensures pixel-perfect match
+          
+          // Colors - preserve exactly as rendered (already RGB)
+          if (originalStyles.backgroundColor) {
+            el.style.backgroundColor = originalStyles.backgroundColor;
           }
           
-          if (originalColors.backgroundImage && originalColors.backgroundImage !== 'none' &&
-              !originalColors.backgroundImage.includes('oklch') && !originalColors.backgroundImage.includes('oklab')) {
-            el.style.backgroundImage = originalColors.backgroundImage;
+          if (originalStyles.backgroundImage && originalStyles.backgroundImage !== 'none' &&
+              !originalStyles.backgroundImage.includes('oklch') && !originalStyles.backgroundImage.includes('oklab')) {
+            el.style.backgroundImage = originalStyles.backgroundImage;
           }
           
-          if (originalColors.color && 
-              (originalColors.color.startsWith('#') || originalColors.color.startsWith('rgb'))) {
-            el.style.color = originalColors.color;
+          // TEXT COLOR - preserve exactly as displayed (critical for premium look)
+          if (originalStyles.color) {
+            el.style.color = originalStyles.color;
           }
           
-          if (originalColors.borderColor && originalColors.borderColor !== 'rgba(0, 0, 0, 0)' &&
-              (originalColors.borderColor.startsWith('#') || originalColors.borderColor.startsWith('rgb'))) {
-            el.style.borderColor = originalColors.borderColor;
+          if (originalStyles.borderColor && originalStyles.borderColor !== 'rgba(0, 0, 0, 0)') {
+            el.style.borderColor = originalStyles.borderColor;
           }
           
-          // Preserve other styling
-          if (originalColors.fontSize) el.style.fontSize = originalColors.fontSize;
-          if (originalColors.fontWeight) el.style.fontWeight = originalColors.fontWeight;
-          if (originalColors.fontFamily) el.style.fontFamily = originalColors.fontFamily;
-          if (originalColors.padding) el.style.padding = originalColors.padding;
-          if (originalColors.margin) el.style.margin = originalColors.margin;
-          if (originalColors.borderRadius) el.style.borderRadius = originalColors.borderRadius;
-          if (originalColors.lineHeight) el.style.lineHeight = originalColors.lineHeight;
-          if (originalColors.textAlign) el.style.textAlign = originalColors.textAlign;
+          // Typography - preserve all text styling
+          if (originalStyles.fontSize) el.style.fontSize = originalStyles.fontSize;
+          if (originalStyles.fontWeight) el.style.fontWeight = originalStyles.fontWeight;
+          if (originalStyles.fontFamily) el.style.fontFamily = originalStyles.fontFamily;
+          if (originalStyles.lineHeight) el.style.lineHeight = originalStyles.lineHeight;
+          if (originalStyles.letterSpacing) el.style.letterSpacing = originalStyles.letterSpacing;
+          if (originalStyles.textTransform) el.style.textTransform = originalStyles.textTransform;
+          if (originalStyles.textAlign) el.style.textAlign = originalStyles.textAlign;
+          if (originalStyles.textShadow) el.style.textShadow = originalStyles.textShadow;
+          
+          // Layout and spacing
+          if (originalStyles.padding) el.style.padding = originalStyles.padding;
+          if (originalStyles.margin) el.style.margin = originalStyles.margin;
+          if (originalStyles.borderRadius) el.style.borderRadius = originalStyles.borderRadius;
+          if (originalStyles.opacity) el.style.opacity = originalStyles.opacity;
+          if (originalStyles.boxShadow) el.style.boxShadow = originalStyles.boxShadow;
+          
+          // Borders
+          if (originalStyles.border) el.style.border = originalStyles.border;
+          if (originalStyles.borderWidth) el.style.borderWidth = originalStyles.borderWidth;
+          if (originalStyles.borderStyle) el.style.borderStyle = originalStyles.borderStyle;
+          
+          // Layout properties
+          if (originalStyles.width) el.style.width = originalStyles.width;
+          if (originalStyles.height) el.style.height = originalStyles.height;
+          if (originalStyles.display) el.style.display = originalStyles.display;
+          if (originalStyles.flexDirection) el.style.flexDirection = originalStyles.flexDirection;
+          if (originalStyles.alignItems) el.style.alignItems = originalStyles.alignItems;
+          if (originalStyles.justifyContent) el.style.justifyContent = originalStyles.justifyContent;
+          if (originalStyles.gap) el.style.gap = originalStyles.gap;
         } else {
-          // Fallback to computed style if original not available
+          // Fallback: use computed style if original not available
           try {
+            // Apply colors
             const bgColor = computedStyle.backgroundColor;
             if (bgColor && (bgColor.startsWith('#') || bgColor.startsWith('rgb'))) {
               el.style.backgroundColor = bgColor;
             }
             
+            // TEXT COLOR - critical to preserve
             const textColor = computedStyle.color;
             if (textColor && (textColor.startsWith('#') || textColor.startsWith('rgb'))) {
               el.style.color = textColor;
@@ -190,9 +234,14 @@ const PlayerIDCard = ({ player }) => {
                 (borderColor.startsWith('#') || borderColor.startsWith('rgb'))) {
               el.style.borderColor = borderColor;
             }
+            
+            // Preserve typography
+            el.style.fontSize = computedStyle.fontSize;
+            el.style.fontWeight = computedStyle.fontWeight;
+            el.style.fontFamily = computedStyle.fontFamily;
+            el.style.lineHeight = computedStyle.lineHeight;
           } catch (e) {
-            // Use safe defaults
-            el.style.backgroundColor = '#1e3a8a';
+            // Minimal fallback
             el.style.color = '#ffffff';
           }
         }
@@ -375,134 +424,73 @@ const PlayerIDCard = ({ player }) => {
     };
     
     // Process the entire cloned element tree again after it's in the DOM
-    // This preserves actual colors while avoiding oklch parsing errors
+    // Use the collected original styles to ensure exact match
     const finalProcessColors = (el) => {
       if (!el || el.nodeType !== 1) return;
       
       try {
-        // Get computed style first to capture actual rendered colors
-        let style;
-        try {
-          style = window.getComputedStyle(el);
-        } catch (e) {
-          // If we can't get style, skip this element
-          Array.from(el.children).forEach(child => finalProcessColors(child));
-          return;
-        }
+        // Use the original styles we collected - these are the EXACT rendered values
+        const originalStyles = styleMap.get(el);
         
-        // Preserve background - check for gradients first
-        try {
-          const bgImage = style.backgroundImage;
-          const bgColor = style.backgroundColor;
+        if (originalStyles) {
+          // Apply ALL original styles directly - ensures pixel-perfect match
           
-          // If there's a gradient, preserve it by converting to inline style
-          if (bgImage && bgImage !== 'none' && !bgImage.includes('oklch') && !bgImage.includes('oklab')) {
-            // Keep the gradient as is if it doesn't contain oklch
-            el.style.backgroundImage = bgImage;
-            // Also set background color as fallback
-            if (bgColor && (bgColor.startsWith('#') || bgColor.startsWith('rgb'))) {
-              el.style.backgroundColor = bgColor;
-            }
-          } else if (bgColor) {
-            // Handle solid background colors
-            if (bgColor.includes('oklch') || bgColor.includes('oklab')) {
-              // For oklch/oklab, try to get RGB from a temporary element
-              const tempEl = document.createElement('div');
-              tempEl.style.backgroundColor = bgColor;
-              document.body.appendChild(tempEl);
-              const computed = window.getComputedStyle(tempEl).backgroundColor;
-              document.body.removeChild(tempEl);
-              if (computed && (computed.startsWith('#') || computed.startsWith('rgb'))) {
-                el.style.backgroundColor = computed;
-              } else {
-                // Fallback based on context
-                const classes = Array.from(el.classList || []);
-                if (classes.some(c => c.includes('blue') || c.includes('indigo'))) {
-                  el.style.backgroundColor = '#1e3a8a';
-                } else if (classes.some(c => c.includes('white'))) {
-                  el.style.backgroundColor = '#ffffff';
-                } else if (classes.some(c => c.includes('orange'))) {
-                  el.style.backgroundColor = '#fb923c';
-                } else {
-                  el.style.backgroundColor = '#1e3a8a';
-                }
-              }
-            } else if (bgColor.startsWith('#') || bgColor.startsWith('rgb')) {
-              el.style.backgroundColor = bgColor;
-            }
+          // Colors - exact match from original rendering
+          if (originalStyles.backgroundColor) {
+            el.style.setProperty('background-color', originalStyles.backgroundColor, 'important');
           }
-        } catch (e) {
-          // Set safe default
-          el.style.backgroundColor = '#1e3a8a';
-        }
-        
-        // Preserve text color
-        try {
-          const textColor = style.color;
-          if (textColor) {
-            if (textColor.includes('oklch') || textColor.includes('oklab')) {
-              // Try to get RGB from temporary element
-              const tempEl = document.createElement('div');
-              tempEl.style.color = textColor;
-              document.body.appendChild(tempEl);
-              const computed = window.getComputedStyle(tempEl).color;
-              document.body.removeChild(tempEl);
-              if (computed && (computed.startsWith('#') || computed.startsWith('rgb'))) {
-                el.style.color = computed;
-              } else {
-                // Fallback
-                const classes = Array.from(el.classList || []);
-                if (classes.some(c => c.includes('white'))) {
-                  el.style.color = '#ffffff';
-                } else if (classes.some(c => c.includes('orange'))) {
-                  el.style.color = '#fb923c';
-                } else {
-                  el.style.color = '#ffffff';
-                }
-              }
-            } else if (textColor.startsWith('#') || textColor.startsWith('rgb')) {
-              el.style.color = textColor;
-            }
+          
+          if (originalStyles.backgroundImage && originalStyles.backgroundImage !== 'none' &&
+              !originalStyles.backgroundImage.includes('oklch') && !originalStyles.backgroundImage.includes('oklab')) {
+            el.style.setProperty('background-image', originalStyles.backgroundImage, 'important');
           }
-        } catch (e) {
-          el.style.color = '#ffffff';
-        }
-        
-        // Preserve border color
-        try {
-          const borderColor = style.borderColor;
-          if (borderColor && borderColor !== 'rgba(0, 0, 0, 0)' && borderColor !== 'transparent') {
-            if (borderColor.includes('oklch') || borderColor.includes('oklab')) {
-              const tempEl = document.createElement('div');
-              tempEl.style.borderColor = borderColor;
-              document.body.appendChild(tempEl);
-              const computed = window.getComputedStyle(tempEl).borderColor;
-              document.body.removeChild(tempEl);
-              if (computed && (computed.startsWith('#') || computed.startsWith('rgb'))) {
-                el.style.borderColor = computed;
-              } else {
-                el.style.borderColor = '#ffffff';
-              }
-            } else if (borderColor.startsWith('#') || borderColor.startsWith('rgb')) {
-              el.style.borderColor = borderColor;
-            }
+          
+          // TEXT COLOR - CRITICAL: preserve exact color as displayed
+          if (originalStyles.color) {
+            el.style.setProperty('color', originalStyles.color, 'important');
           }
-        } catch (e) {
-          // Ignore border errors
-        }
-        
-        // Preserve other important styles
-        try {
-          el.style.borderRadius = style.borderRadius;
-          el.style.padding = style.padding;
-          el.style.margin = style.margin;
-          el.style.fontSize = style.fontSize;
-          el.style.fontWeight = style.fontWeight;
-          el.style.fontFamily = style.fontFamily;
-          el.style.lineHeight = style.lineHeight;
-          el.style.textAlign = style.textAlign;
-        } catch (e) {
-          // Ignore
+          
+          if (originalStyles.borderColor && originalStyles.borderColor !== 'rgba(0, 0, 0, 0)') {
+            el.style.setProperty('border-color', originalStyles.borderColor, 'important');
+          }
+          
+          // Typography - all text styling preserved
+          if (originalStyles.fontSize) el.style.setProperty('font-size', originalStyles.fontSize, 'important');
+          if (originalStyles.fontWeight) el.style.setProperty('font-weight', originalStyles.fontWeight, 'important');
+          if (originalStyles.fontFamily) el.style.setProperty('font-family', originalStyles.fontFamily, 'important');
+          if (originalStyles.lineHeight) el.style.setProperty('line-height', originalStyles.lineHeight, 'important');
+          if (originalStyles.letterSpacing) el.style.setProperty('letter-spacing', originalStyles.letterSpacing, 'important');
+          if (originalStyles.textTransform) el.style.setProperty('text-transform', originalStyles.textTransform, 'important');
+          if (originalStyles.textAlign) el.style.setProperty('text-align', originalStyles.textAlign, 'important');
+          if (originalStyles.textShadow) el.style.setProperty('text-shadow', originalStyles.textShadow, 'important');
+          
+          // Layout and spacing
+          if (originalStyles.padding) el.style.setProperty('padding', originalStyles.padding, 'important');
+          if (originalStyles.margin) el.style.setProperty('margin', originalStyles.margin, 'important');
+          if (originalStyles.borderRadius) el.style.setProperty('border-radius', originalStyles.borderRadius, 'important');
+          if (originalStyles.opacity) el.style.setProperty('opacity', originalStyles.opacity, 'important');
+          if (originalStyles.boxShadow) el.style.setProperty('box-shadow', originalStyles.boxShadow, 'important');
+          
+          // Borders
+          if (originalStyles.border) el.style.setProperty('border', originalStyles.border, 'important');
+          if (originalStyles.borderWidth) el.style.setProperty('border-width', originalStyles.borderWidth, 'important');
+          if (originalStyles.borderStyle) el.style.setProperty('border-style', originalStyles.borderStyle, 'important');
+        } else {
+          // Fallback: get from computed style
+          try {
+            const style = window.getComputedStyle(el);
+            
+            // Preserve text color - most important
+            if (style.color && (style.color.startsWith('#') || style.color.startsWith('rgb'))) {
+              el.style.setProperty('color', style.color, 'important');
+            }
+            
+            if (style.backgroundColor && (style.backgroundColor.startsWith('#') || style.backgroundColor.startsWith('rgb'))) {
+              el.style.setProperty('background-color', style.backgroundColor, 'important');
+            }
+          } catch (e) {
+            // Minimal fallback
+          }
         }
         
         // Process children
@@ -573,9 +561,12 @@ const PlayerIDCard = ({ player }) => {
                   // The browser should have already converted it, but if not, skip
                 }
                 
-                // Preserve text color
-                if (style.color && (style.color.startsWith('#') || style.color.startsWith('rgb'))) {
-                  el.style.color = style.color;
+                // Preserve text color - CRITICAL for premium look
+                // Use original styles if available, otherwise use computed
+                const originalStyles = styleMap.get(el);
+                const textColor = originalStyles?.color || style.color;
+                if (textColor && (textColor.startsWith('#') || textColor.startsWith('rgb'))) {
+                  el.style.setProperty('color', textColor, 'important');
                 }
                 
                 // Preserve border color
