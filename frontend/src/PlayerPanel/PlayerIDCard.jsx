@@ -73,11 +73,64 @@ const PlayerIDCard = ({ player }) => {
     clonedElement.style.opacity = '1';
     clonedElement.style.visibility = 'visible';
     
+    // Store original element colors before processing
+    const originalElement = side === 'front' ? frontRef.current : backRef.current;
+    const colorMap = new Map();
+    
+    // First pass: collect all colors from original element (already rendered as RGB)
+    const collectOriginalColors = (originalEl, clonedEl) => {
+      if (!originalEl || !clonedEl || originalEl.nodeType !== 1 || clonedEl.nodeType !== 1) return;
+      
+      try {
+        const style = window.getComputedStyle(originalEl);
+        const key = clonedEl;
+        
+        colorMap.set(key, {
+          backgroundColor: style.backgroundColor,
+          color: style.color,
+          borderColor: style.borderColor,
+          backgroundImage: style.backgroundImage,
+          fontSize: style.fontSize,
+          fontWeight: style.fontWeight,
+          fontFamily: style.fontFamily,
+          padding: style.padding,
+          margin: style.margin,
+          borderRadius: style.borderRadius,
+          lineHeight: style.lineHeight,
+          textAlign: style.textAlign,
+        });
+        
+        // Process children
+        const originalChildren = Array.from(originalEl.children);
+        const clonedChildren = Array.from(clonedEl.children);
+        originalChildren.forEach((origChild, idx) => {
+          if (clonedChildren[idx]) {
+            collectOriginalColors(origChild, clonedChildren[idx]);
+          }
+        });
+      } catch (e) {
+        // Continue with children
+        const originalChildren = Array.from(originalEl.children);
+        const clonedChildren = Array.from(clonedEl.children);
+        originalChildren.forEach((origChild, idx) => {
+          if (clonedChildren[idx]) {
+            collectOriginalColors(origChild, clonedChildren[idx]);
+          }
+        });
+      }
+    };
+    
+    // Collect colors from original element
+    collectOriginalColors(originalElement, clonedElement);
+    
     // Comprehensive function to recursively process all elements and set explicit hex colors
     const processElementColors = (el) => {
       if (!el || el.nodeType !== 1) return; // Skip non-element nodes
       
       try {
+        // Get colors from our map (original rendered colors)
+        const originalColors = colorMap.get(el);
+        
         // Get computed styles safely
         let computedStyle;
         try {
@@ -86,64 +139,62 @@ const PlayerIDCard = ({ player }) => {
           return; // Skip if we can't get computed style
         }
         
-        // Process background color
-        try {
-          const bgColor = computedStyle.backgroundColor;
-          if (bgColor) {
-            if (bgColor.includes('oklch') || bgColor.includes('oklab') || 
-                (!bgColor.startsWith('#') && !bgColor.startsWith('rgb') && bgColor !== 'transparent' && bgColor !== 'rgba(0, 0, 0, 0)')) {
-              // Determine color based on element context
-              const classList = Array.from(el.classList || []);
-              if (classList.some(c => c.includes('blue') || c.includes('indigo'))) {
-                el.style.backgroundColor = '#1e3a8a';
-              } else if (classList.some(c => c.includes('white'))) {
-                el.style.backgroundColor = '#ffffff';
-              } else if (classList.some(c => c.includes('orange'))) {
-                el.style.backgroundColor = '#fb923c';
-              } else {
-                el.style.backgroundColor = '#1e3a8a';
-              }
-            } else if (bgColor.startsWith('#') || bgColor.startsWith('rgb')) {
+        // Use original colors if available (these are already RGB from browser rendering)
+        // This preserves the exact colors as displayed on screen
+        if (originalColors) {
+          // Apply original rendered colors directly
+          if (originalColors.backgroundColor && 
+              (originalColors.backgroundColor.startsWith('#') || originalColors.backgroundColor.startsWith('rgb'))) {
+            el.style.backgroundColor = originalColors.backgroundColor;
+          }
+          
+          if (originalColors.backgroundImage && originalColors.backgroundImage !== 'none' &&
+              !originalColors.backgroundImage.includes('oklch') && !originalColors.backgroundImage.includes('oklab')) {
+            el.style.backgroundImage = originalColors.backgroundImage;
+          }
+          
+          if (originalColors.color && 
+              (originalColors.color.startsWith('#') || originalColors.color.startsWith('rgb'))) {
+            el.style.color = originalColors.color;
+          }
+          
+          if (originalColors.borderColor && originalColors.borderColor !== 'rgba(0, 0, 0, 0)' &&
+              (originalColors.borderColor.startsWith('#') || originalColors.borderColor.startsWith('rgb'))) {
+            el.style.borderColor = originalColors.borderColor;
+          }
+          
+          // Preserve other styling
+          if (originalColors.fontSize) el.style.fontSize = originalColors.fontSize;
+          if (originalColors.fontWeight) el.style.fontWeight = originalColors.fontWeight;
+          if (originalColors.fontFamily) el.style.fontFamily = originalColors.fontFamily;
+          if (originalColors.padding) el.style.padding = originalColors.padding;
+          if (originalColors.margin) el.style.margin = originalColors.margin;
+          if (originalColors.borderRadius) el.style.borderRadius = originalColors.borderRadius;
+          if (originalColors.lineHeight) el.style.lineHeight = originalColors.lineHeight;
+          if (originalColors.textAlign) el.style.textAlign = originalColors.textAlign;
+        } else {
+          // Fallback to computed style if original not available
+          try {
+            const bgColor = computedStyle.backgroundColor;
+            if (bgColor && (bgColor.startsWith('#') || bgColor.startsWith('rgb'))) {
               el.style.backgroundColor = bgColor;
             }
-          }
-        } catch (e) {
-          el.style.backgroundColor = '#1e3a8a';
-        }
-        
-        // Process text color
-        try {
-          const textColor = computedStyle.color;
-          if (textColor) {
-            if (textColor.includes('oklch') || textColor.includes('oklab') || 
-                (!textColor.startsWith('#') && !textColor.startsWith('rgb'))) {
-              const classList = Array.from(el.classList || []);
-              if (classList.some(c => c.includes('white'))) {
-                el.style.color = '#ffffff';
-              } else if (classList.some(c => c.includes('orange'))) {
-                el.style.color = '#fb923c';
-              } else {
-                el.style.color = '#ffffff';
-              }
-            } else if (textColor.startsWith('#') || textColor.startsWith('rgb')) {
+            
+            const textColor = computedStyle.color;
+            if (textColor && (textColor.startsWith('#') || textColor.startsWith('rgb'))) {
               el.style.color = textColor;
             }
+            
+            const borderColor = computedStyle.borderColor;
+            if (borderColor && borderColor !== 'rgba(0, 0, 0, 0)' &&
+                (borderColor.startsWith('#') || borderColor.startsWith('rgb'))) {
+              el.style.borderColor = borderColor;
+            }
+          } catch (e) {
+            // Use safe defaults
+            el.style.backgroundColor = '#1e3a8a';
+            el.style.color = '#ffffff';
           }
-        } catch (e) {
-          el.style.color = '#ffffff';
-        }
-        
-        // Process border color
-        try {
-          const borderColor = computedStyle.borderColor;
-          if (borderColor && (borderColor.includes('oklch') || borderColor.includes('oklab') || 
-              (!borderColor.startsWith('#') && !borderColor.startsWith('rgb') && borderColor !== 'transparent' && borderColor !== 'rgba(0, 0, 0, 0)'))) {
-            el.style.borderColor = '#ffffff';
-          } else if (borderColor && (borderColor.startsWith('#') || borderColor.startsWith('rgb'))) {
-            el.style.borderColor = borderColor;
-          }
-        } catch (e) {
-          // Ignore border color errors
         }
         
         // Process all children recursively
@@ -306,71 +357,152 @@ const PlayerIDCard = ({ player }) => {
     
     tempContainer.appendChild(clonedElement);
     
+    // Helper function to convert any color format to RGB
+    const colorToRgb = (colorValue) => {
+      if (!colorValue || colorValue === 'transparent' || colorValue === 'rgba(0, 0, 0, 0)') {
+        return null;
+      }
+      // If already RGB/RGBA, return as is
+      if (colorValue.startsWith('rgb')) {
+        return colorValue;
+      }
+      // If hex, return as is
+      if (colorValue.startsWith('#')) {
+        return colorValue;
+      }
+      // For oklch/oklab, we'll need to get the computed RGB value
+      return null;
+    };
+    
     // Process the entire cloned element tree again after it's in the DOM
-    // This ensures all computed styles are converted to explicit hex colors
+    // This preserves actual colors while avoiding oklch parsing errors
     const finalProcessColors = (el) => {
       if (!el || el.nodeType !== 1) return;
       
       try {
-        // Remove any Tailwind classes that might generate oklch colors
-        // Keep only essential classes
-        const classesToKeep = ['rounded', 'overflow', 'flex', 'grid', 'absolute', 'relative'];
-        const currentClasses = Array.from(el.classList || []);
-        currentClasses.forEach(cls => {
-          // Remove color-related classes that might generate oklch
-          if (cls.includes('bg-') || cls.includes('text-') || cls.includes('border-') || 
-              cls.includes('from-') || cls.includes('via-') || cls.includes('to-') ||
-              cls.includes('gradient')) {
-            el.classList.remove(cls);
-          }
-        });
-        
-        // Get computed style and set explicit hex colors
+        // Get computed style first to capture actual rendered colors
+        let style;
         try {
-          const style = window.getComputedStyle(el);
+          style = window.getComputedStyle(el);
+        } catch (e) {
+          // If we can't get style, skip this element
+          Array.from(el.children).forEach(child => finalProcessColors(child));
+          return;
+        }
+        
+        // Preserve background - check for gradients first
+        try {
+          const bgImage = style.backgroundImage;
+          const bgColor = style.backgroundColor;
           
-          // Force set background color as hex
-          try {
-            const bg = style.backgroundColor;
-            if (bg && (bg.includes('oklch') || bg.includes('oklab') || 
-                (!bg.startsWith('#') && !bg.startsWith('rgb') && bg !== 'transparent' && bg !== 'rgba(0, 0, 0, 0)'))) {
-              el.style.setProperty('background-color', '#1e3a8a', 'important');
-            } else if (bg && (bg.startsWith('#') || bg.startsWith('rgb'))) {
-              el.style.setProperty('background-color', bg, 'important');
+          // If there's a gradient, preserve it by converting to inline style
+          if (bgImage && bgImage !== 'none' && !bgImage.includes('oklch') && !bgImage.includes('oklab')) {
+            // Keep the gradient as is if it doesn't contain oklch
+            el.style.backgroundImage = bgImage;
+            // Also set background color as fallback
+            if (bgColor && (bgColor.startsWith('#') || bgColor.startsWith('rgb'))) {
+              el.style.backgroundColor = bgColor;
             }
-          } catch (e) {
-            el.style.setProperty('background-color', '#1e3a8a', 'important');
-          }
-          
-          // Force set text color as hex
-          try {
-            const color = style.color;
-            if (color && (color.includes('oklch') || color.includes('oklab') || 
-                (!color.startsWith('#') && !color.startsWith('rgb')))) {
-              el.style.setProperty('color', '#ffffff', 'important');
-            } else if (color && (color.startsWith('#') || color.startsWith('rgb'))) {
-              el.style.setProperty('color', color, 'important');
+          } else if (bgColor) {
+            // Handle solid background colors
+            if (bgColor.includes('oklch') || bgColor.includes('oklab')) {
+              // For oklch/oklab, try to get RGB from a temporary element
+              const tempEl = document.createElement('div');
+              tempEl.style.backgroundColor = bgColor;
+              document.body.appendChild(tempEl);
+              const computed = window.getComputedStyle(tempEl).backgroundColor;
+              document.body.removeChild(tempEl);
+              if (computed && (computed.startsWith('#') || computed.startsWith('rgb'))) {
+                el.style.backgroundColor = computed;
+              } else {
+                // Fallback based on context
+                const classes = Array.from(el.classList || []);
+                if (classes.some(c => c.includes('blue') || c.includes('indigo'))) {
+                  el.style.backgroundColor = '#1e3a8a';
+                } else if (classes.some(c => c.includes('white'))) {
+                  el.style.backgroundColor = '#ffffff';
+                } else if (classes.some(c => c.includes('orange'))) {
+                  el.style.backgroundColor = '#fb923c';
+                } else {
+                  el.style.backgroundColor = '#1e3a8a';
+                }
+              }
+            } else if (bgColor.startsWith('#') || bgColor.startsWith('rgb')) {
+              el.style.backgroundColor = bgColor;
             }
-          } catch (e) {
-            el.style.setProperty('color', '#ffffff', 'important');
-          }
-          
-          // Force set border color as hex
-          try {
-            const border = style.borderColor;
-            if (border && (border.includes('oklch') || border.includes('oklab') || 
-                (!border.startsWith('#') && !border.startsWith('rgb') && border !== 'transparent' && border !== 'rgba(0, 0, 0, 0)'))) {
-              el.style.setProperty('border-color', '#ffffff', 'important');
-            } else if (border && (border.startsWith('#') || border.startsWith('rgb'))) {
-              el.style.setProperty('border-color', border, 'important');
-            }
-          } catch (e) {
-            // Ignore border errors
           }
         } catch (e) {
-          // Set safe defaults
-          el.style.setProperty('background-color', '#1e3a8a', 'important');
-          el.style.setProperty('color', '#ffffff', 'important');
+          // Set safe default
+          el.style.backgroundColor = '#1e3a8a';
+        }
+        
+        // Preserve text color
+        try {
+          const textColor = style.color;
+          if (textColor) {
+            if (textColor.includes('oklch') || textColor.includes('oklab')) {
+              // Try to get RGB from temporary element
+              const tempEl = document.createElement('div');
+              tempEl.style.color = textColor;
+              document.body.appendChild(tempEl);
+              const computed = window.getComputedStyle(tempEl).color;
+              document.body.removeChild(tempEl);
+              if (computed && (computed.startsWith('#') || computed.startsWith('rgb'))) {
+                el.style.color = computed;
+              } else {
+                // Fallback
+                const classes = Array.from(el.classList || []);
+                if (classes.some(c => c.includes('white'))) {
+                  el.style.color = '#ffffff';
+                } else if (classes.some(c => c.includes('orange'))) {
+                  el.style.color = '#fb923c';
+                } else {
+                  el.style.color = '#ffffff';
+                }
+              }
+            } else if (textColor.startsWith('#') || textColor.startsWith('rgb')) {
+              el.style.color = textColor;
+            }
+          }
+        } catch (e) {
+          el.style.color = '#ffffff';
+        }
+        
+        // Preserve border color
+        try {
+          const borderColor = style.borderColor;
+          if (borderColor && borderColor !== 'rgba(0, 0, 0, 0)' && borderColor !== 'transparent') {
+            if (borderColor.includes('oklch') || borderColor.includes('oklab')) {
+              const tempEl = document.createElement('div');
+              tempEl.style.borderColor = borderColor;
+              document.body.appendChild(tempEl);
+              const computed = window.getComputedStyle(tempEl).borderColor;
+              document.body.removeChild(tempEl);
+              if (computed && (computed.startsWith('#') || computed.startsWith('rgb'))) {
+                el.style.borderColor = computed;
+              } else {
+                el.style.borderColor = '#ffffff';
+              }
+            } else if (borderColor.startsWith('#') || borderColor.startsWith('rgb')) {
+              el.style.borderColor = borderColor;
+            }
+          }
+        } catch (e) {
+          // Ignore border errors
+        }
+        
+        // Preserve other important styles
+        try {
+          el.style.borderRadius = style.borderRadius;
+          el.style.padding = style.padding;
+          el.style.margin = style.margin;
+          el.style.fontSize = style.fontSize;
+          el.style.fontWeight = style.fontWeight;
+          el.style.fontFamily = style.fontFamily;
+          el.style.lineHeight = style.lineHeight;
+          el.style.textAlign = style.textAlign;
+        } catch (e) {
+          // Ignore
         }
         
         // Process children
@@ -390,7 +522,7 @@ const PlayerIDCard = ({ player }) => {
 
       const canvas = await html2canvas(tempContainer, {
         backgroundColor: '#1e3a8a', // Use hex color
-        scale: 3,
+        scale: 4, // Increased scale for better quality
         logging: false,
         useCORS: true,
         allowTaint: false,
@@ -398,78 +530,64 @@ const PlayerIDCard = ({ player }) => {
         height: 330,
         windowWidth: 525,
         windowHeight: 330,
+        pixelRatio: 2, // Higher pixel ratio for better quality
         ignoreElements: (element) => {
           // Ignore elements that might cause issues
           return element.classList && element.classList.contains('animate-shine');
         },
         onclone: (clonedDoc) => {
-          // Final pass: remove CSS classes and convert all oklch/oklab colors to hex/rgb
+          // Final pass: preserve actual colors while avoiding oklch parsing
           const allElements = clonedDoc.querySelectorAll('*');
           allElements.forEach(el => {
             try {
-              // Remove all CSS classes that might generate oklch colors
-              // This prevents html2canvas from reading stylesheets with oklch
+              // Only remove color-related classes that might cause oklch issues
+              // Keep layout and other styling classes
               const classesToRemove = Array.from(el.classList || []);
               classesToRemove.forEach(cls => {
-                if (cls.includes('bg-') || cls.includes('text-') || cls.includes('border-') || 
-                    cls.includes('from-') || cls.includes('via-') || cls.includes('to-') ||
-                    cls.includes('gradient') || cls.includes('blue') || cls.includes('indigo') ||
-                    cls.includes('white') || cls.includes('orange')) {
+                // Only remove classes that directly set colors and might use oklch
+                if ((cls.startsWith('bg-') && (cls.includes('blue') || cls.includes('indigo') || cls.includes('white') || cls.includes('orange'))) ||
+                    (cls.startsWith('text-') && (cls.includes('white') || cls.includes('orange'))) ||
+                    cls.startsWith('from-') || cls.startsWith('via-') || cls.startsWith('to-')) {
                   el.classList.remove(cls);
                 }
               });
               
-              // Try to get computed style, but if it fails or contains oklch, use defaults
-              let bgColor, textColor, borderColor;
+              // Get computed styles - these should already be converted to RGB by browser
               try {
                 const style = window.getComputedStyle(el);
-                bgColor = style.backgroundColor;
-                textColor = style.color;
-                borderColor = style.borderColor;
+                
+                // Preserve background (including gradients)
+                const bgImage = style.backgroundImage;
+                const bgColor = style.backgroundColor;
+                
+                if (bgImage && bgImage !== 'none' && !bgImage.includes('oklch') && !bgImage.includes('oklab')) {
+                  // Keep gradients that don't contain oklch
+                  el.style.backgroundImage = bgImage;
+                }
+                
+                // Set background color if it's valid RGB/hex
+                if (bgColor && (bgColor.startsWith('#') || bgColor.startsWith('rgb'))) {
+                  el.style.backgroundColor = bgColor;
+                } else if (bgColor && (bgColor.includes('oklch') || bgColor.includes('oklab'))) {
+                  // Skip setting if it contains oklch - let browser handle it
+                  // The browser should have already converted it, but if not, skip
+                }
+                
+                // Preserve text color
+                if (style.color && (style.color.startsWith('#') || style.color.startsWith('rgb'))) {
+                  el.style.color = style.color;
+                }
+                
+                // Preserve border color
+                if (style.borderColor && style.borderColor !== 'rgba(0, 0, 0, 0)' && 
+                    (style.borderColor.startsWith('#') || style.borderColor.startsWith('rgb'))) {
+                  el.style.borderColor = style.borderColor;
+                }
               } catch (e) {
-                // If we can't read computed style, use defaults
-                bgColor = null;
-                textColor = null;
-                borderColor = null;
-              }
-              
-              // Convert background colors - handle both oklch and oklab
-              if (bgColor && (bgColor.includes('oklch') || bgColor.includes('oklab') || 
-                  (!bgColor.startsWith('#') && !bgColor.startsWith('rgb') && bgColor !== 'transparent' && bgColor !== 'rgba(0, 0, 0, 0)'))) {
-                // Use inline style with !important to override
-                el.style.setProperty('background-color', '#1e3a8a', 'important');
-              } else if (bgColor && (bgColor.startsWith('#') || bgColor.startsWith('rgb'))) {
-                el.style.setProperty('background-color', bgColor, 'important');
-              } else {
-                // Set default if no valid color
-                el.style.setProperty('background-color', '#1e3a8a', 'important');
-              }
-              
-              // Convert text colors - handle both oklch and oklab
-              if (textColor && (textColor.includes('oklch') || textColor.includes('oklab') || 
-                  (!textColor.startsWith('#') && !textColor.startsWith('rgb')))) {
-                el.style.setProperty('color', '#ffffff', 'important');
-              } else if (textColor && (textColor.startsWith('#') || textColor.startsWith('rgb'))) {
-                el.style.setProperty('color', textColor, 'important');
-              } else {
-                el.style.setProperty('color', '#ffffff', 'important');
-              }
-              
-              // Convert border colors - handle both oklch and oklab
-              if (borderColor && (borderColor.includes('oklch') || borderColor.includes('oklab') || 
-                  (!borderColor.startsWith('#') && !borderColor.startsWith('rgb') && borderColor !== 'transparent' && borderColor !== 'rgba(0, 0, 0, 0)'))) {
-                el.style.setProperty('border-color', '#ffffff', 'important');
-              } else if (borderColor && (borderColor.startsWith('#') || borderColor.startsWith('rgb'))) {
-                el.style.setProperty('border-color', borderColor, 'important');
+                // If we can't read styles, that's okay - html2canvas will use what's there
               }
             } catch (e) {
-              // Set safe defaults on error
-              try {
-                el.style.setProperty('background-color', '#1e3a8a', 'important');
-                el.style.setProperty('color', '#ffffff', 'important');
-              } catch (e2) {
-                // Final fallback - ignore
-              }
+              // Continue processing other elements
             }
           });
         },
@@ -479,6 +597,7 @@ const PlayerIDCard = ({ player }) => {
       const sanitizedName = player.name.replace(/[^a-zA-Z0-9]/g, '_');
       const fileName = `${sanitizedName}_ID_Card_${side}_${Date.now()}.png`;
       link.download = fileName;
+      // Use maximum quality for PNG
       link.href = canvas.toDataURL('image/png', 1.0);
       
       // Trigger download
