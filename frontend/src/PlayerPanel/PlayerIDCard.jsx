@@ -58,48 +58,23 @@ const PlayerIDCard = ({ player }) => {
     tempContainer.style.top = '0';
     tempContainer.style.width = '525px';
     tempContainer.style.height = '330px';
-    tempContainer.style.backgroundColor = '#1e3a8a';
-    tempContainer.style.overflow = 'visible';
-    tempContainer.style.zIndex = '99999';
+    tempContainer.style.backgroundColor = '#1e3a8a'; // Use hex color instead of oklch
+    tempContainer.style.overflow = 'hidden';
     document.body.appendChild(tempContainer);
 
     // Clone the element and its children
     const clonedElement = element.cloneNode(true);
     
-    // Extract the inner card div which contains the actual content
-    // The ref points to a wrapper, but we need the inner div with the card content
-    let cardContent = clonedElement.querySelector('div > div');
-    
-    // If we found the inner card, use it; otherwise use the cloned element
-    if (!cardContent) {
-      cardContent = clonedElement;
-    }
-    
-    // Reset all transforms and positioning to make content visible
-    cardContent.style.transform = 'none';
-    cardContent.style.position = 'relative';
-    cardContent.style.backfaceVisibility = 'visible';
-    cardContent.style.WebkitBackfaceVisibility = 'visible';
-    cardContent.style.opacity = '1';
-    cardContent.style.visibility = 'visible';
-    cardContent.style.width = '525px';
-    cardContent.style.height = '330px';
-    cardContent.style.display = 'block';
-    
-    // If we extracted the inner card, replace clonedElement with it
-    if (cardContent !== clonedElement) {
-      // Remove the wrapper and use just the inner content
-      tempContainer.innerHTML = '';
-      tempContainer.appendChild(cardContent);
-    } else {
-      // If we're using the cloned element, append it to container
-      tempContainer.appendChild(clonedElement);
-    }
+    // Reset all transforms and positioning
+    clonedElement.style.transform = 'none';
+    clonedElement.style.position = 'relative';
+    clonedElement.style.backfaceVisibility = 'visible';
+    clonedElement.style.WebkitBackfaceVisibility = 'visible';
+    clonedElement.style.opacity = '1';
+    clonedElement.style.visibility = 'visible';
     
     // Store original element colors before processing
-    // Get the inner card content from the original element
     const originalElement = side === 'front' ? frontRef.current : backRef.current;
-    const originalCardContent = originalElement?.querySelector('div > div') || originalElement;
     const styleMap = new Map();
     
     // First pass: collect ALL computed styles from original element (already rendered as RGB)
@@ -165,9 +140,7 @@ const PlayerIDCard = ({ player }) => {
     };
     
     // Collect ALL styles from original element
-    // Use the inner card content for style collection
-    const targetClonedElement = cardContent !== clonedElement ? cardContent : clonedElement;
-    collectOriginalStyles(originalCardContent, targetClonedElement);
+    collectOriginalStyles(originalElement, clonedElement);
     
     // Comprehensive function to recursively process all elements and set explicit hex colors
     const processElementColors = (el) => {
@@ -281,9 +254,14 @@ const PlayerIDCard = ({ player }) => {
       }
     };
     
-    // Process all elements recursively to set explicit hex colors
-    // Use the card content element
-    processElementColors(targetClonedElement);
+    // Get the inner card div and fix all color references
+    const innerCard = clonedElement.querySelector('div > div');
+    if (innerCard) {
+      innerCard.style.transform = 'none';
+      innerCard.style.position = 'relative';
+      
+      // Process all elements recursively to set explicit hex colors
+      processElementColors(innerCard);
       
       // Helper function to safely get and convert color values
       const safeGetColor = (colorValue, defaultColor = '#1e3a8a') => {
@@ -426,16 +404,24 @@ const PlayerIDCard = ({ player }) => {
       });
     }
     
-    // Ensure all content is visible and properly sized
-    const allElements = targetClonedElement.querySelectorAll('*');
-    allElements.forEach(el => {
-      // Make sure all elements are visible
-      if (el.style) {
-        if (el.style.display === 'none') el.style.display = '';
-        if (el.style.visibility === 'hidden') el.style.visibility = 'visible';
-        if (el.style.opacity === '0') el.style.opacity = '1';
+    tempContainer.appendChild(clonedElement);
+    
+    // Helper function to convert any color format to RGB
+    const colorToRgb = (colorValue) => {
+      if (!colorValue || colorValue === 'transparent' || colorValue === 'rgba(0, 0, 0, 0)') {
+        return null;
       }
-    });
+      // If already RGB/RGBA, return as is
+      if (colorValue.startsWith('rgb')) {
+        return colorValue;
+      }
+      // If hex, return as is
+      if (colorValue.startsWith('#')) {
+        return colorValue;
+      }
+      // For oklch/oklab, we'll need to get the computed RGB value
+      return null;
+    };
     
     // Process the entire cloned element tree again after it's in the DOM
     // Use the collected original styles to ensure exact match
@@ -516,72 +502,15 @@ const PlayerIDCard = ({ player }) => {
     };
     
     // Process the entire tree after it's in the DOM
-    finalProcessColors(targetClonedElement);
+    finalProcessColors(clonedElement);
 
     try {
       // Wait for images to load and styles to be applied
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Ensure images are loaded
-      const images = tempContainer.querySelectorAll('img');
-      await Promise.all(Array.from(images).map(img => {
-        if (img.complete && img.naturalWidth > 0) return Promise.resolve();
-        return new Promise((resolve) => {
-          img.onload = () => resolve();
-          img.onerror = () => resolve(); // Continue even if image fails
-          setTimeout(() => resolve(), 2000); // Timeout after 2s
-        });
-      }));
-      
-      // Additional wait to ensure all styles are applied
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Target the element that's actually in the DOM (in tempContainer)
-      const elementToCapture = tempContainer.firstElementChild || targetClonedElement;
-      
-      // Verify element has content
-      if (!elementToCapture || !elementToCapture.textContent) {
-        throw new Error('Element has no content to capture');
-      }
-      
-      // Ensure element is visible and properly sized
-      elementToCapture.style.display = 'block';
-      elementToCapture.style.visibility = 'visible';
-      elementToCapture.style.opacity = '1';
-      elementToCapture.style.width = '525px';
-      elementToCapture.style.height = '330px';
-      elementToCapture.style.position = 'relative';
-      
-      // Remove ALL CSS classes that might generate oklab/oklch colors
-      const removeProblematicClasses = (el) => {
-        if (!el || el.nodeType !== 1) return;
-        
-        // Remove all Tailwind classes that might use modern color functions
-        const classesToRemove = [];
-        if (el.classList) {
-          Array.from(el.classList).forEach(cls => {
-            // Remove any class that might generate colors
-            if (cls.includes('bg-') || cls.includes('text-') || cls.includes('border-') ||
-                cls.includes('from-') || cls.includes('via-') || cls.includes('to-') ||
-                cls.includes('gradient') || cls.includes('blue') || cls.includes('indigo') ||
-                cls.includes('white') || cls.includes('orange') || cls.includes('gray')) {
-              classesToRemove.push(cls);
-            }
-          });
-          classesToRemove.forEach(cls => el.classList.remove(cls));
-        }
-        
-        // Process children
-        Array.from(el.children).forEach(child => removeProblematicClasses(child));
-      };
-      
-      // Remove all problematic classes before capture
-      removeProblematicClasses(elementToCapture);
-      
-      // Use html2canvas with aggressive color conversion
-      const canvas = await html2canvas(elementToCapture, {
-        backgroundColor: '#1e3a8a',
-        scale: 4,
+      const canvas = await html2canvas(tempContainer, {
+        backgroundColor: '#1e3a8a', // Use hex color
+        scale: 4, // Increased scale for better quality
         logging: false,
         useCORS: true,
         allowTaint: false,
@@ -589,85 +518,84 @@ const PlayerIDCard = ({ player }) => {
         height: 330,
         windowWidth: 525,
         windowHeight: 330,
-        pixelRatio: 2,
+        pixelRatio: 2, // Higher pixel ratio for better quality
         ignoreElements: (element) => {
+          // Ignore elements that might cause issues
           return element.classList && element.classList.contains('animate-shine');
         },
         onclone: (clonedDoc) => {
-          // Final aggressive pass: remove ALL classes and set explicit styles from original
+          // Final pass: preserve actual colors while avoiding oklch parsing
           const allElements = clonedDoc.querySelectorAll('*');
           allElements.forEach(el => {
             try {
-              // Remove ALL classes to prevent oklab/oklch generation
-              el.className = '';
+              // Only remove color-related classes that might cause oklch issues
+              // Keep layout and other styling classes
+              const classesToRemove = Array.from(el.classList || []);
+              classesToRemove.forEach(cls => {
+                // Only remove classes that directly set colors and might use oklch
+                if ((cls.startsWith('bg-') && (cls.includes('blue') || cls.includes('indigo') || cls.includes('white') || cls.includes('orange'))) ||
+                    (cls.startsWith('text-') && (cls.includes('white') || cls.includes('orange'))) ||
+                    cls.startsWith('from-') || cls.startsWith('via-') || cls.startsWith('to-')) {
+                  el.classList.remove(cls);
+                }
+              });
               
-              // Use original styles we collected (already RGB from browser)
-              const originalStyles = styleMap.get(el);
-              
-              if (originalStyles) {
-                // Apply original rendered colors (already RGB)
-                if (originalStyles.backgroundColor) {
-                  el.style.setProperty('background-color', originalStyles.backgroundColor, 'important');
+              // Get computed styles - these should already be converted to RGB by browser
+              try {
+                const style = window.getComputedStyle(el);
+                
+                // Preserve background (including gradients)
+                const bgImage = style.backgroundImage;
+                const bgColor = style.backgroundColor;
+                
+                if (bgImage && bgImage !== 'none' && !bgImage.includes('oklch') && !bgImage.includes('oklab')) {
+                  // Keep gradients that don't contain oklch
+                  el.style.backgroundImage = bgImage;
                 }
                 
-                if (originalStyles.backgroundImage && originalStyles.backgroundImage !== 'none' &&
-                    !originalStyles.backgroundImage.includes('oklch') && !originalStyles.backgroundImage.includes('oklab')) {
-                  el.style.setProperty('background-image', originalStyles.backgroundImage, 'important');
+                // Set background color if it's valid RGB/hex
+                if (bgColor && (bgColor.startsWith('#') || bgColor.startsWith('rgb'))) {
+                  el.style.backgroundColor = bgColor;
+                } else if (bgColor && (bgColor.includes('oklch') || bgColor.includes('oklab'))) {
+                  // Skip setting if it contains oklch - let browser handle it
+                  // The browser should have already converted it, but if not, skip
                 }
                 
-                // TEXT COLOR - preserve exact color as displayed
-                if (originalStyles.color) {
-                  el.style.setProperty('color', originalStyles.color, 'important');
+                // Preserve text color - CRITICAL for premium look
+                // Use original styles if available, otherwise use computed
+                const originalStyles = styleMap.get(el);
+                const textColor = originalStyles?.color || style.color;
+                if (textColor && (textColor.startsWith('#') || textColor.startsWith('rgb'))) {
+                  el.style.setProperty('color', textColor, 'important');
                 }
                 
-                if (originalStyles.borderColor && originalStyles.borderColor !== 'rgba(0, 0, 0, 0)') {
-                  el.style.setProperty('border-color', originalStyles.borderColor, 'important');
+                // Preserve border color
+                if (style.borderColor && style.borderColor !== 'rgba(0, 0, 0, 0)' && 
+                    (style.borderColor.startsWith('#') || style.borderColor.startsWith('rgb'))) {
+                  el.style.borderColor = style.borderColor;
                 }
-                
-                // Preserve typography
-                if (originalStyles.fontSize) el.style.setProperty('font-size', originalStyles.fontSize, 'important');
-                if (originalStyles.fontWeight) el.style.setProperty('font-weight', originalStyles.fontWeight, 'important');
-                if (originalStyles.fontFamily) el.style.setProperty('font-family', originalStyles.fontFamily, 'important');
-                if (originalStyles.lineHeight) el.style.setProperty('line-height', originalStyles.lineHeight, 'important');
-              } else {
-                // Fallback: get from computed style
-                try {
-                  const style = window.getComputedStyle(el);
-                  
-                  const bg = style.backgroundColor;
-                  if (bg && (bg.startsWith('#') || bg.startsWith('rgb'))) {
-                    el.style.setProperty('background-color', bg, 'important');
-                  }
-                  
-                  const color = style.color;
-                  if (color && (color.startsWith('#') || color.startsWith('rgb'))) {
-                    el.style.setProperty('color', color, 'important');
-                  }
-                } catch (e) {
-                  // Use safe defaults
-                  el.style.setProperty('background-color', '#1e3a8a', 'important');
-                  el.style.setProperty('color', '#ffffff', 'important');
-                }
+              } catch (e) {
+                // If we can't read styles, that's okay - html2canvas will use what's there
               }
             } catch (e) {
-              // Ignore errors
+              // Continue processing other elements
             }
           });
         },
       });
-      
-      // Create download link
+
       const link = document.createElement('a');
       const sanitizedName = player.name.replace(/[^a-zA-Z0-9]/g, '_');
       const fileName = `${sanitizedName}_ID_Card_${side}_${Date.now()}.png`;
       link.download = fileName;
+      // Use maximum quality for PNG
       link.href = canvas.toDataURL('image/png', 1.0);
       
       // Trigger download
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       // Cleanup
       if (document.body.contains(tempContainer)) {
         document.body.removeChild(tempContainer);
