@@ -90,15 +90,16 @@ const PlayerIDCard = ({ player }) => {
       throw new Error(`${side} side element not found`);
     }
 
-    // Create a temporary container
+    // Create a temporary container (visible but off-screen)
     const tempContainer = document.createElement('div');
-    tempContainer.style.position = 'absolute';
-    tempContainer.style.left = '-9999px';
+    tempContainer.style.position = 'fixed';
+    tempContainer.style.left = '0';
     tempContainer.style.top = '0';
     tempContainer.style.width = '525px';
     tempContainer.style.height = '330px';
     tempContainer.style.backgroundColor = '#1e3a8a';
-    tempContainer.style.overflow = 'hidden';
+    tempContainer.style.overflow = 'visible';
+    tempContainer.style.zIndex = '999999';
     document.body.appendChild(tempContainer);
 
     // Clone the element
@@ -114,97 +115,86 @@ const PlayerIDCard = ({ player }) => {
     clonedElement.style.display = 'block';
     clonedElement.style.zIndex = '1';
     
-    // Simple function to apply styles from original to cloned element
-    const applyStyles = (originalEl, clonedEl) => {
+    // Function to apply ALL computed styles as inline styles FIRST
+    // This preserves layout before we remove classes
+    const applyAllComputedStyles = (originalEl, clonedEl) => {
       if (!originalEl || !clonedEl || originalEl.nodeType !== 1 || clonedEl.nodeType !== 1) return;
       
       try {
-        // Get computed styles from original
-        const style = window.getComputedStyle(originalEl);
+        const computed = window.getComputedStyle(originalEl);
         
-        // Remove ALL classes to prevent html2canvas from reading stylesheets with oklab
-        clonedEl.className = '';
-        clonedEl.removeAttribute('class');
+        // Apply ALL important style properties as inline styles
+        // This ensures layout is preserved even after removing classes
+        const allStyleProps = [
+          'display', 'position', 'top', 'left', 'right', 'bottom',
+          'width', 'height', 'minWidth', 'minHeight', 'maxWidth', 'maxHeight',
+          'margin', 'marginTop', 'marginRight', 'marginBottom', 'marginLeft',
+          'padding', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft',
+          'border', 'borderWidth', 'borderStyle', 'borderRadius', 'borderColor',
+          'backgroundColor', 'color', 'backgroundImage', 'backgroundSize', 'backgroundPosition', 'backgroundRepeat',
+          'fontSize', 'fontWeight', 'fontFamily', 'lineHeight', 'textAlign',
+          'letterSpacing', 'textTransform', 'textShadow', 'textDecoration',
+          'flexDirection', 'alignItems', 'justifyContent', 'gap', 'flex', 'flexWrap',
+          'opacity', 'visibility', 'zIndex', 'transform', 'overflow', 'overflowX', 'overflowY',
+          'boxShadow', 'objectFit', 'objectPosition'
+        ];
         
-        // Convert and apply colors using our helper function
-        const bgColor = colorToRgb(style.backgroundColor);
-        if (bgColor) {
-          clonedEl.style.backgroundColor = bgColor;
-        }
+        allStyleProps.forEach(prop => {
+          try {
+            const value = computed.getPropertyValue(prop) || computed[prop];
+            if (value && value !== 'none' && value !== 'auto' && value !== 'normal') {
+              // Convert oklab/oklch colors to RGB
+              if ((prop === 'backgroundColor' || prop === 'color' || prop === 'borderColor') && 
+                  (value.includes('oklab') || value.includes('oklch'))) {
+                const rgb = colorToRgb(value);
+                if (rgb) {
+                  clonedEl.style.setProperty(prop, rgb, 'important');
+                }
+              } else {
+                clonedEl.style.setProperty(prop, value, 'important');
+              }
+            }
+          } catch (e) {
+            // Ignore individual property errors
+          }
+        });
         
-        const textColor = colorToRgb(style.color);
-        if (textColor) {
-          clonedEl.style.color = textColor;
-        } else {
-          clonedEl.style.color = '#ffffff'; // Fallback to white
-        }
+        // Ensure visibility
+        clonedEl.style.setProperty('opacity', '1', 'important');
+        clonedEl.style.setProperty('visibility', 'visible', 'important');
         
-        const borderColor = colorToRgb(style.borderColor);
-        if (borderColor && style.borderWidth !== '0px') {
-          clonedEl.style.borderColor = borderColor;
-        }
-        
-        // Background image - only if it doesn't contain oklab
-        if (style.backgroundImage && style.backgroundImage !== 'none' && 
-            !style.backgroundImage.includes('oklch') && !style.backgroundImage.includes('oklab')) {
-          clonedEl.style.backgroundImage = style.backgroundImage;
-        }
-        
-        // Typography - preserve all text styling
-        clonedEl.style.fontSize = style.fontSize;
-        clonedEl.style.fontWeight = style.fontWeight;
-        clonedEl.style.fontFamily = style.fontFamily;
-        clonedEl.style.lineHeight = style.lineHeight;
-        clonedEl.style.textAlign = style.textAlign;
-        clonedEl.style.letterSpacing = style.letterSpacing;
-        clonedEl.style.textTransform = style.textTransform;
-        clonedEl.style.textShadow = style.textShadow;
-        
-        // Layout and positioning
-        clonedEl.style.padding = style.padding;
-        clonedEl.style.margin = style.margin;
-        clonedEl.style.borderRadius = style.borderRadius;
-        clonedEl.style.display = style.display || 'block';
-        clonedEl.style.flexDirection = style.flexDirection;
-        clonedEl.style.alignItems = style.alignItems;
-        clonedEl.style.justifyContent = style.justifyContent;
-        clonedEl.style.gap = style.gap;
-        clonedEl.style.width = style.width;
-        clonedEl.style.height = style.height;
-        clonedEl.style.position = style.position;
-        clonedEl.style.top = style.top;
-        clonedEl.style.left = style.left;
-        clonedEl.style.right = style.right;
-        clonedEl.style.bottom = style.bottom;
-        clonedEl.style.zIndex = style.zIndex || '1';
-        clonedEl.style.opacity = style.opacity || '1';
-        clonedEl.style.visibility = style.visibility || 'visible';
-        clonedEl.style.overflow = style.overflow;
-        clonedEl.style.border = style.border;
-        clonedEl.style.borderColor = style.borderColor;
-        
-        // Process children
-        const originalChildren = Array.from(originalEl.children);
+        // Process children recursively
+        const origChildren = Array.from(originalEl.children);
         const clonedChildren = Array.from(clonedEl.children);
-        originalChildren.forEach((origChild, idx) => {
+        origChildren.forEach((origChild, idx) => {
           if (clonedChildren[idx]) {
-            applyStyles(origChild, clonedChildren[idx]);
+            applyAllComputedStyles(origChild, clonedChildren[idx]);
           }
         });
       } catch (e) {
-        // Continue with children
-        const originalChildren = Array.from(originalEl.children);
+        // Continue with children even if parent fails
+        const origChildren = Array.from(originalEl.children);
         const clonedChildren = Array.from(clonedEl.children);
-        originalChildren.forEach((origChild, idx) => {
+        origChildren.forEach((origChild, idx) => {
           if (clonedChildren[idx]) {
-            applyStyles(origChild, clonedChildren[idx]);
+            applyAllComputedStyles(origChild, clonedChildren[idx]);
           }
         });
       }
     };
     
-    // Apply styles from original to cloned
-    applyStyles(element, clonedElement);
+    // Apply ALL computed styles FIRST (this preserves layout)
+    applyAllComputedStyles(element, clonedElement);
+    
+    // NOW remove classes (styles are already inline)
+    const removeAllClasses = (el) => {
+      if (el.nodeType === 1) {
+        el.className = '';
+        el.removeAttribute('class');
+        Array.from(el.children).forEach(child => removeAllClasses(child));
+      }
+    };
+    removeAllClasses(clonedElement);
     
     // Get inner card and ensure it's visible
     const innerCard = clonedElement.querySelector('div > div');
@@ -226,100 +216,47 @@ const PlayerIDCard = ({ player }) => {
 
     try {
       // Wait for images to load and styles to apply
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Before html2canvas, remove all style/link tags that might contain oklab
-      const styleSheets = Array.from(document.styleSheets);
-      const originalDisabled = [];
-      styleSheets.forEach((sheet, idx) => {
-        try {
-          if (sheet.ownerNode) {
-            originalDisabled[idx] = sheet.disabled;
-            sheet.disabled = true; // Temporarily disable all stylesheets
-          }
-        } catch (e) {
-          // Cross-origin stylesheets can't be disabled
-        }
+      const canvas = await html2canvas(tempContainer, {
+        backgroundColor: '#1e3a8a',
+        scale: 4,
+        logging: false,
+        useCORS: true,
+        allowTaint: false,
+        width: 525,
+        height: 330,
+        windowWidth: 525,
+        windowHeight: 330,
+        foreignObjectRendering: false, // Disable to avoid issues
+        ignoreElements: (element) => {
+          return element.classList && element.classList.contains('animate-shine');
+        },
+        onclone: (clonedDoc) => {
+          // Remove style/link tags from cloned document to prevent oklab parsing
+          clonedDoc.querySelectorAll('style').forEach(s => s.remove());
+          clonedDoc.querySelectorAll('link[rel="stylesheet"]').forEach(l => l.remove());
+          
+          // Ensure all elements are visible (styles are already inline)
+          clonedDoc.querySelectorAll('*').forEach(el => {
+            if (el.style) {
+              el.style.setProperty('opacity', '1', 'important');
+              el.style.setProperty('visibility', 'visible', 'important');
+            }
+          });
+        },
       });
 
-      try {
-        const canvas = await html2canvas(tempContainer, {
-          backgroundColor: '#1e3a8a',
-          scale: 3,
-          logging: false,
-          useCORS: true,
-          allowTaint: false,
-          width: 525,
-          height: 330,
-          windowWidth: 525,
-          windowHeight: 330,
-          foreignObjectRendering: true, // Use foreignObject to avoid stylesheet parsing
-          ignoreElements: (element) => {
-            return element.classList && element.classList.contains('animate-shine');
-          },
-          onclone: (clonedDoc) => {
-            // Remove ALL style and link tags that might contain oklab
-            const styleTags = clonedDoc.querySelectorAll('style');
-            styleTags.forEach(style => style.remove());
-            
-            const linkTags = clonedDoc.querySelectorAll('link[rel="stylesheet"]');
-            linkTags.forEach(link => link.remove());
-            
-            // Remove ALL classes and attributes that might reference stylesheets
-            const allElements = clonedDoc.querySelectorAll('*');
-            allElements.forEach(el => {
-              try {
-                // Remove all classes and class attribute
-                el.className = '';
-                el.removeAttribute('class');
-                
-                // Ensure element is visible with inline styles
-                el.style.visibility = 'visible';
-                el.style.opacity = '1';
-                if (!el.style.display || el.style.display === 'none') {
-                  el.style.display = 'block';
-                }
-              } catch (e) {
-                // Ignore errors
-              }
-            });
-          },
-        });
-        
-        // Re-enable stylesheets
-        styleSheets.forEach((sheet, idx) => {
-          try {
-            if (sheet.ownerNode && originalDisabled[idx] !== undefined) {
-              sheet.disabled = originalDisabled[idx];
-            }
-          } catch (e) {
-            // Ignore
-          }
-        });
-
-        const link = document.createElement('a');
-        const sanitizedName = player.name.replace(/[^a-zA-Z0-9]/g, '_');
-        const fileName = `${sanitizedName}_ID_Card_${side}_${Date.now()}.png`;
-        link.download = fileName;
-        link.href = canvas.toDataURL('image/png', 1.0);
-        
-        // Trigger download
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } catch (canvasError) {
-        // Re-enable stylesheets even on error
-        styleSheets.forEach((sheet, idx) => {
-          try {
-            if (sheet.ownerNode && originalDisabled[idx] !== undefined) {
-              sheet.disabled = originalDisabled[idx];
-            }
-          } catch (e) {
-            // Ignore
-          }
-        });
-        throw canvasError;
-      }
+      const link = document.createElement('a');
+      const sanitizedName = player.name.replace(/[^a-zA-Z0-9]/g, '_');
+      const fileName = `${sanitizedName}_ID_Card_${side}_${Date.now()}.png`;
+      link.download = fileName;
+      link.href = canvas.toDataURL('image/png', 1.0);
+      
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
 
       // Cleanup
       if (document.body.contains(tempContainer)) {
