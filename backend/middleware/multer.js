@@ -11,7 +11,7 @@ const secretaryImagesDir = path.join(__dirname, "../uploads/secretary-images");
 [uploadDir, logosDir, secretaryImagesDir].forEach(dir => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
-  }
+}
 });
 
 // Memory storage for Cloudinary uploads (uploads directly from buffer)

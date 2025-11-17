@@ -114,29 +114,29 @@ const ModernSliderManager = () => {
     const newPreviews = [];
 
     files.forEach((file, index) => {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
         showNotification(`File ${file.name} is not a valid image file`, 'error');
-        return;
-      }
+      return;
+    }
 
       // Validate file size (10MB limit for Cloudinary)
       if (file.size > 10 * 1024 * 1024) {
         showNotification(`Image ${file.name} size must be less than 10MB`, 'error');
-        return;
-      }
+      return;
+    }
 
       validFiles.push(file);
       
       // Create preview
-      const reader = new FileReader();
+    const reader = new FileReader();
       reader.onload = (event) => {
         newPreviews.push(event.target.result);
         if (newPreviews.length === validFiles.length) {
           setPreviews([...previews, ...newPreviews]);
         }
       };
-      reader.readAsDataURL(file);
+    reader.readAsDataURL(file);
     });
 
     if (validFiles.length > 0) {
@@ -161,7 +161,7 @@ const ModernSliderManager = () => {
         const formData = new FormData();
         formData.append('image', file);
         return axios.post(API_ENDPOINTS.UPLOAD_SLIDER, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
+        headers: { 'Content-Type': 'multipart/form-data' }
         });
       });
 
@@ -405,11 +405,11 @@ const ModernSliderManager = () => {
                 <div className="grid grid-cols-2 gap-3 max-h-96 overflow-y-auto">
                   {previews.map((preview, index) => (
                     <div key={index} className="relative bg-gray-100 rounded-xl overflow-hidden group">
-                      <img
-                        src={preview}
+                  <img
+                    src={preview}
                         alt={`Preview ${index + 1}`}
                         className="w-full h-32 object-cover"
-                      />
+                  />
                       <button
                         onClick={() => removePreview(index)}
                         className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
@@ -417,13 +417,13 @@ const ModernSliderManager = () => {
                         <X size={14} />
                       </button>
                       <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
-                        <button
-                          onClick={() => setShowPreview(preview)}
+                    <button
+                      onClick={() => setShowPreview(preview)}
                           className="opacity-0 group-hover:opacity-100 p-2 bg-white bg-opacity-20 rounded-full text-white hover:bg-opacity-30 transition-all"
-                        >
+                    >
                           <Eye size={16} />
-                        </button>
-                      </div>
+                    </button>
+                  </div>
                     </div>
                   ))}
                 </div>
