@@ -630,9 +630,8 @@ exports.getPlayersByUnion = async (req, res) => {
     // Get total count for pagination
     const total = await Player.countDocuments(query);
 
-    // Get players with pagination
+    // Get players with pagination (include password for approved players)
     const players = await Player.find(query)
-      .select('-password')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limitNum)

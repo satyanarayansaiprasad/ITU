@@ -16,7 +16,8 @@ import {
   CheckSquare,
   Square,
   AlertCircle,
-  Building2
+  Building2,
+  Key
 } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -399,6 +400,13 @@ const PlayerManagement = () => {
                         <Clock size={16} className="text-indigo-500" />
                         <span className="text-sm">{player.yearsOfExperience} years experience</span>
                       </div>
+                      {player.status === 'approved' && player.password && (
+                        <div className="flex items-center gap-2 text-gray-700">
+                          <Key size={16} className="text-red-500" />
+                          <span className="text-sm font-semibold">Password:</span>
+                          <span className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">{player.password}</span>
+                        </div>
+                      )}
                     </div>
 
                     {player.address && (

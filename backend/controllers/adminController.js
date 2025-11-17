@@ -809,7 +809,6 @@ exports.getPlayers = async (req, res) => {
     
     const players = await Player.find(query)
       .sort({ createdAt: -1 })
-      .select('-password')
       .populate('union', 'name email phone');
     
     res.status(200).json({

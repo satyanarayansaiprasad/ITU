@@ -520,6 +520,7 @@ const StateUnionDashboard = () => {
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Player ID</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Password</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Belt Level</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Experience</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DOB</th>
@@ -550,6 +551,15 @@ const StateUnionDashboard = () => {
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{player.playerId || 'N/A'}</td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{player.email}</td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{player.phone}</td>
+                          <td className="px-4 py-4 whitespace-nowrap">
+                            {player.password ? (
+                              <span className="text-sm font-mono bg-gray-100 px-2 py-1 rounded text-gray-700">
+                                {player.password}
+                              </span>
+                            ) : (
+                              <span className="text-sm text-gray-400">N/A</span>
+                            )}
+                          </td>
                           <td className="px-4 py-4 whitespace-nowrap">
                             <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                               {player.beltLevel}
