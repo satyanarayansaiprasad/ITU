@@ -65,13 +65,15 @@ const PlayerIDCard = ({ player }) => {
     // Clone the element
     const clonedElement = element.cloneNode(true);
     
-    // Reset transforms
+    // Reset transforms but keep visibility
     clonedElement.style.transform = 'none';
     clonedElement.style.position = 'relative';
     clonedElement.style.backfaceVisibility = 'visible';
     clonedElement.style.WebkitBackfaceVisibility = 'visible';
     clonedElement.style.opacity = '1';
     clonedElement.style.visibility = 'visible';
+    clonedElement.style.display = 'block';
+    clonedElement.style.zIndex = '1';
     
     // Simple function to apply styles from original to cloned element
     const applyStyles = (originalEl, clonedEl) => {
@@ -81,16 +83,33 @@ const PlayerIDCard = ({ player }) => {
         // Get computed styles from original (already RGB)
         const style = window.getComputedStyle(originalEl);
         
-        // Remove all Tailwind classes that might generate oklch/oklab
-        clonedEl.className = '';
+        // Only remove color-related classes, keep layout classes
+        const classesToRemove = [];
+        Array.from(clonedEl.classList || []).forEach(cls => {
+          if (cls.startsWith('bg-') || cls.startsWith('text-') || cls.startsWith('border-') ||
+              cls.startsWith('from-') || cls.startsWith('via-') || cls.startsWith('to-') ||
+              cls.includes('gradient')) {
+            classesToRemove.push(cls);
+          }
+        });
+        classesToRemove.forEach(cls => clonedEl.classList.remove(cls));
         
-        // Apply all important styles as inline styles
+        // Apply ALL computed styles as inline styles to preserve everything
+        // Colors - ensure they're RGB/hex format
         if (style.backgroundColor && (style.backgroundColor.startsWith('#') || style.backgroundColor.startsWith('rgb'))) {
+          clonedEl.style.backgroundColor = style.backgroundColor;
+        } else if (style.backgroundColor && !style.backgroundColor.includes('oklch') && !style.backgroundColor.includes('oklab')) {
           clonedEl.style.backgroundColor = style.backgroundColor;
         }
         
+        // Text color - CRITICAL - ensure it's visible
         if (style.color && (style.color.startsWith('#') || style.color.startsWith('rgb'))) {
           clonedEl.style.color = style.color;
+        } else if (style.color && !style.color.includes('oklch') && !style.color.includes('oklab')) {
+          clonedEl.style.color = style.color;
+        } else {
+          // Fallback to white if color can't be determined
+          clonedEl.style.color = '#ffffff';
         }
         
         if (style.backgroundImage && style.backgroundImage !== 'none' && 
@@ -98,25 +117,38 @@ const PlayerIDCard = ({ player }) => {
           clonedEl.style.backgroundImage = style.backgroundImage;
         }
         
-        // Apply typography
+        // Typography - preserve all text styling
         clonedEl.style.fontSize = style.fontSize;
         clonedEl.style.fontWeight = style.fontWeight;
         clonedEl.style.fontFamily = style.fontFamily;
         clonedEl.style.lineHeight = style.lineHeight;
         clonedEl.style.textAlign = style.textAlign;
         clonedEl.style.letterSpacing = style.letterSpacing;
+        clonedEl.style.textTransform = style.textTransform;
+        clonedEl.style.textShadow = style.textShadow;
         
-        // Apply layout
+        // Layout and positioning
         clonedEl.style.padding = style.padding;
         clonedEl.style.margin = style.margin;
         clonedEl.style.borderRadius = style.borderRadius;
-        clonedEl.style.display = style.display;
+        clonedEl.style.display = style.display || 'block';
         clonedEl.style.flexDirection = style.flexDirection;
         clonedEl.style.alignItems = style.alignItems;
         clonedEl.style.justifyContent = style.justifyContent;
         clonedEl.style.gap = style.gap;
         clonedEl.style.width = style.width;
         clonedEl.style.height = style.height;
+        clonedEl.style.position = style.position;
+        clonedEl.style.top = style.top;
+        clonedEl.style.left = style.left;
+        clonedEl.style.right = style.right;
+        clonedEl.style.bottom = style.bottom;
+        clonedEl.style.zIndex = style.zIndex || '1';
+        clonedEl.style.opacity = style.opacity || '1';
+        clonedEl.style.visibility = style.visibility || 'visible';
+        clonedEl.style.overflow = style.overflow;
+        clonedEl.style.border = style.border;
+        clonedEl.style.borderColor = style.borderColor;
         
         // Process children
         const originalChildren = Array.from(originalEl.children);
@@ -141,13 +173,27 @@ const PlayerIDCard = ({ player }) => {
     // Apply styles from original to cloned
     applyStyles(element, clonedElement);
     
+    // Get inner card and ensure it's visible
+    const innerCard = clonedElement.querySelector('div > div');
+    if (innerCard) {
+      innerCard.style.transform = 'none';
+      innerCard.style.position = 'relative';
+      innerCard.style.opacity = '1';
+      innerCard.style.visibility = 'visible';
+      innerCard.style.display = 'block';
+      innerCard.style.zIndex = '10';
+    }
+    
     // Add cloned element to container
     tempContainer.appendChild(clonedElement);
     
+    // Force a reflow to ensure styles are applied
+    tempContainer.offsetHeight;
+    
 
     try {
-      // Wait for images to load
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Wait for images to load and styles to apply
+      await new Promise(resolve => setTimeout(resolve, 800));
 
       const canvas = await html2canvas(tempContainer, {
         backgroundColor: '#1e3a8a',
@@ -164,12 +210,24 @@ const PlayerIDCard = ({ player }) => {
           return element.classList && element.classList.contains('animate-shine');
         },
         onclone: (clonedDoc) => {
-          // Simple: remove all classes to prevent oklch/oklab generation
+          // Remove only color-related classes, preserve layout
           const allElements = clonedDoc.querySelectorAll('*');
           allElements.forEach(el => {
             try {
-              // Remove all classes - styles are already applied as inline styles
-              el.className = '';
+              // Only remove color classes that might generate oklch/oklab
+              const classesToRemove = [];
+              Array.from(el.classList || []).forEach(cls => {
+                if (cls.startsWith('bg-') || cls.startsWith('text-') || cls.startsWith('border-') ||
+                    cls.startsWith('from-') || cls.startsWith('via-') || cls.startsWith('to-') ||
+                    cls.includes('gradient')) {
+                  classesToRemove.push(cls);
+                }
+              });
+              classesToRemove.forEach(cls => el.classList.remove(cls));
+              
+              // Ensure element is visible
+              el.style.visibility = 'visible';
+              el.style.opacity = '1';
             } catch (e) {
               // Ignore errors
             }
