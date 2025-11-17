@@ -286,27 +286,27 @@ exports.createSlider = async (req, res) => {
     );
 
     // Save Cloudinary URL to database
-    const newSlider = new Slider({
+      const newSlider = new Slider({
       filename: cloudinaryResult.url, // Store Cloudinary URL instead of filename
       cloudinaryPublicId: cloudinaryResult.public_id, // Store public_id for deletion
-      uploadedAt: new Date()
-    });
+        uploadedAt: new Date()
+      });
 
-    await newSlider.save();
+      await newSlider.save();
 
-    res.status(201).json({
-      success: true,
+      res.status(201).json({
+        success: true,
       message: "Slider uploaded successfully to Cloudinary",
-      slider: newSlider
-    });
-  } catch (error) {
+        slider: newSlider
+      });
+    } catch (error) {
     console.error("Slider upload error:", error);
-    res.status(500).json({
-      success: false,
+      res.status(500).json({
+        success: false,
       message: "Failed to upload slider",
       error: error.message
-    });
-  }
+      });
+    }
 };
 
 
@@ -431,28 +431,28 @@ exports.createGallery = async (req, res) => {
     );
 
     // Save Cloudinary URL to database
-    const newGallery = new Gallery({
+      const newGallery = new Gallery({
       filename: cloudinaryResult.url, // Store Cloudinary URL instead of filename
       cloudinaryPublicId: cloudinaryResult.public_id, // Store public_id for deletion
       title: req.body.title || null, // Optional title
-      uploadedAt: new Date()
-    });
+        uploadedAt: new Date()
+      });
 
-    await newGallery.save();
+      await newGallery.save();
 
-    res.status(201).json({
-      success: true,
+      res.status(201).json({
+        success: true,
       message: "Gallery image uploaded successfully to Cloudinary",
-      gallery: newGallery
-    });
-  } catch (error) {
+        gallery: newGallery
+      });
+    } catch (error) {
     console.error("Gallery upload error:", error);
-    res.status(500).json({
-      success: false,
+      res.status(500).json({
+        success: false,
       message: "Failed to upload gallery image",
       error: error.message
-    });
-  }
+      });
+    }
 };
 
 
@@ -1108,12 +1108,12 @@ const mailOptions = {
 };
 
     if (transporter) {
-      await transporter.sendMail(mailOptions);
-      res.status(200).json({
-        success: true,
-        message: "Form approved and email sent",
-        form: updatedForm
-      });
+    await transporter.sendMail(mailOptions);
+    res.status(200).json({
+      success: true,
+      message: "Form approved and email sent",
+      form: updatedForm
+    });
     } else {
       console.error('Email transporter not configured. Email not sent to:', email);
       res.status(200).json({

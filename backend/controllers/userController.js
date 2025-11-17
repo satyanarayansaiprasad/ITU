@@ -657,7 +657,7 @@ exports.getPlayersByUnion = async (req, res) => {
   }
 };
 
-// Upload player photo
+// Upload player photo (using Cloudinary)
 exports.uploadPlayerPhoto = async (req, res) => {
   try {
     const { id } = req.params;
@@ -667,6 +667,24 @@ exports.uploadPlayerPhoto = async (req, res) => {
       return res.status(400).json({
         success: false,
         error: "No file uploaded"
+      });
+    }
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(file.mimetype)) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid file type. Only JPEG, PNG, WEBP, and GIF are allowed."
+      });
+    }
+
+    // Validate file size (max 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      return res.status(400).json({
+        success: false,
+        error: "File size too large. Maximum size is 10MB."
       });
     }
 
@@ -683,8 +701,10 @@ exports.uploadPlayerPhoto = async (req, res) => {
     if (player.cloudinaryPublicId) {
       try {
         await deleteFromCloudinary(player.cloudinaryPublicId);
+        console.log(`Deleted old player photo from Cloudinary: ${player.cloudinaryPublicId}`);
       } catch (error) {
         console.error("Error deleting old photo from Cloudinary:", error);
+        // Continue with upload even if deletion fails
       }
     }
 
@@ -695,22 +715,26 @@ exports.uploadPlayerPhoto = async (req, res) => {
       `player-${id}-${Date.now()}`
     );
 
-    // Update player photo
+    // Update player photo with Cloudinary URL and public ID
     player.photo = cloudinaryResult.url;
     player.cloudinaryPublicId = cloudinaryResult.public_id;
     await player.save();
 
+    console.log(`Player photo uploaded to Cloudinary successfully: ${cloudinaryResult.url}`);
+
     res.status(200).json({
       success: true,
-      message: "Photo uploaded successfully",
+      message: "Photo uploaded successfully to Cloudinary",
       photoUrl: cloudinaryResult.url,
+      cloudinaryPublicId: cloudinaryResult.public_id,
       data: player
     });
   } catch (error) {
-    console.error("Error uploading player photo:", error);
+    console.error("Error uploading player photo to Cloudinary:", error);
     res.status(500).json({
       success: false,
-      error: "Internal server error"
+      error: "Internal server error",
+      details: error.message
     });
   }
 };
