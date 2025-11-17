@@ -195,7 +195,7 @@ const Form = () => {
   const renderFormFields = () => {
     // Reordered fields: name, email, phone, state, district (for affiliation), address
     const commonFields = [
-      { name: "name", label: "Full Name", type: "text" },
+      { name: "name", label: formType === 'acceleration' ? "Secretary Name" : "Full Name", type: "text" },
       { name: "email", label: "Email Address", type: "email" },
       { name: "phone", label: "Phone Number", type: "tel" },
       { name: "state", label: "State", type: "select", options: states.map(s => ({ value: s.name, label: s.name })) },

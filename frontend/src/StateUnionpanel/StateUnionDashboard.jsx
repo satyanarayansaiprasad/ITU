@@ -270,6 +270,16 @@ const StateUnionDashboard = () => {
                   </div>
                   
                   <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Secretary Name</label>
+                    <input 
+                      type="text" 
+                      name="secretaryName" 
+                      defaultValue={profileData?.secretaryName} 
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+                  
+                  <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">President Name</label>
                     <input 
                       type="text" 
@@ -406,6 +416,11 @@ const StateUnionDashboard = () => {
                   <div className="border-b pb-4">
                     <p className="text-sm font-medium text-gray-500 mb-1">Address</p>
                     <p className="text-lg font-semibold">{profileData?.address || 'N/A'}</p>
+                  </div>
+                  
+                  <div className="border-b pb-4">
+                    <p className="text-sm font-medium text-gray-500 mb-1">Secretary Name</p>
+                    <p className="text-lg font-semibold">{profileData?.secretaryName || 'N/A'}</p>
                   </div>
                   
                   <div className="border-b pb-4">

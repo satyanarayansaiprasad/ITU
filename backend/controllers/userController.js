@@ -48,9 +48,10 @@ exports.form = async (req, res) => {
 
     // Create and save new form entry
     // Create new form entry without password
+    // For affiliation forms, the "name" field is actually the secretary name
     const newFormEntry = new AccelerationForm({
       state,
-      name,
+      secretaryName: name, // Save name as secretaryName for affiliation forms
       email,
       phone,
       address,
