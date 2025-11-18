@@ -726,8 +726,22 @@ const ModernNewsManager = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Featured Image *
+                          Featured Image {!editId && '*'}
                         </label>
+                        {editId && newsList.find(n => n._id === editId)?.image && (
+                          <div className="mb-3">
+                            <p className="text-xs text-gray-500 mb-2">Current image:</p>
+                            <img 
+                              src={GET_UPLOAD_URL(newsList.find(n => n._id === editId).image)} 
+                              alt="Current" 
+                              className="w-full h-32 object-cover rounded-lg border border-gray-200"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                              }}
+                            />
+                            <p className="text-xs text-gray-500 mt-1">Upload a new image to replace it (optional)</p>
+                          </div>
+                        )}
                         <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-red-400 transition-colors">
                           <input
                             type="file"
@@ -739,7 +753,7 @@ const ModernNewsManager = () => {
                           <label htmlFor="image-upload" className="cursor-pointer">
                             <ImageIcon size={32} className="mx-auto text-gray-400 mb-2" />
                             <p className="text-gray-600">
-                              {fileName || "Click to upload image"}
+                              {fileName || (editId ? "Click to change image (optional)" : "Click to upload image")}
                             </p>
                             <p className="text-xs text-gray-500 mt-1">
                               JPG, PNG, WEBP up to 5MB
