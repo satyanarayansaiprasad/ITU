@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { Download, CheckCircle, XCircle, Award, Users, Calendar } from 'lucide-react';
-import { indianStatesDistricts } from '../../data/indianStatesDistricts';
+import { indianStatesAndDistricts, getDistrictsForState } from '../../data/indianStatesDistricts';
 
 const BeltPromotionManagement = () => {
   const [selectedState, setSelectedState] = useState('');
@@ -16,11 +16,12 @@ const BeltPromotionManagement = () => {
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
     (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-r1qa.onrender.com');
 
-  const states = Object.keys(indianStatesDistricts);
+  const states = Object.keys(indianStatesAndDistricts);
 
   useEffect(() => {
     if (selectedState) {
-      setDistricts(indianStatesDistricts[selectedState] || []);
+      const districtsList = getDistrictsForState(selectedState) || [];
+      setDistricts(districtsList);
       setSelectedDistrict('');
       setSelectedUnion('');
       setUnions([]);
