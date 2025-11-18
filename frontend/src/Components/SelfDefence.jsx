@@ -1,19 +1,72 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Zap, Target, Users, Award, Clock, Phone, CheckCircle } from 'lucide-react';
+import axios from 'axios';
+import { API_ENDPOINTS } from '../config/api';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
 const SelfDefence = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [sliderImages, setSliderImages] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const sliderImages = [
-    '/kick1.jpg',
-    '/c1.webp',
-    '/c2.webp',
-    '/c3.webp'
-  ];
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
+    (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-r1qa.onrender.com');
+
+  useEffect(() => {
+    fetchSliderImages();
+  }, []);
+
+  const fetchSliderImages = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(API_ENDPOINTS.GET_SELF_DEFENCE_SLIDER);
+      
+      if (response.data && Array.isArray(response.data)) {
+        // Extract image URLs from the response
+        const images = response.data.map(item => {
+          // Handle both Cloudinary URLs and legacy filenames
+          if (item.filename) {
+            // If it's already a full URL (Cloudinary), return as is
+            if (/^(https?|data):/i.test(item.filename)) {
+              return item.filename;
+            }
+            // Otherwise construct the URL
+            return `${API_BASE_URL}/uploads/${item.filename}`;
+          }
+          return null;
+        }).filter(Boolean); // Remove null values
+        
+        setSliderImages(images.length > 0 ? images : [
+          '/kick1.jpg',
+          '/c1.webp',
+          '/c2.webp',
+          '/c3.webp'
+        ]); // Fallback to default images if no images found
+      } else {
+        // Fallback to default images if API returns unexpected format
+        setSliderImages([
+          '/kick1.jpg',
+          '/c1.webp',
+          '/c2.webp',
+          '/c3.webp'
+        ]);
+      }
+    } catch (error) {
+      console.error('Error fetching self defence slider images:', error);
+      // Fallback to default images on error
+      setSliderImages([
+        '/kick1.jpg',
+        '/c1.webp',
+        '/c2.webp',
+        '/c3.webp'
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const sliderSettings = {
     dots: true,
@@ -36,14 +89,26 @@ const SelfDefence = () => {
       <div className="relative mb-24 overflow-hidden">
         <div className="container-responsive">
           <div className="relative h-[600px] rounded-t-3xl overflow-hidden shadow-2xl">
-            <Slider {...sliderSettings}>
-              {sliderImages.map((image, index) => (
-                <div key={index} className="relative h-[600px]">
-                  <img 
-                    src={image} 
-                    alt={`Self Defence Training ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
+            {loading ? (
+              <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500 mx-auto mb-4"></div>
+                  <p className="text-gray-600">Loading slider images...</p>
+                </div>
+              </div>
+            ) : sliderImages.length > 0 ? (
+              <Slider {...sliderSettings}>
+                {sliderImages.map((image, index) => (
+                  <div key={index} className="relative h-[600px]">
+                    <img 
+                      src={image} 
+                      alt={`Self Defence Training ${index + 1}`}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.error('Failed to load image:', image);
+                        e.target.style.display = 'none';
+                      }}
+                    />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10">
                     <div className="absolute bottom-0 left-0 right-0 p-8 sm:p-12">
                       <div className="max-w-4xl">
@@ -81,7 +146,12 @@ const SelfDefence = () => {
                   </div>
                 </div>
               ))}
-            </Slider>
+              </Slider>
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                <p className="text-gray-600">No slider images available</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
