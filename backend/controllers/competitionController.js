@@ -54,6 +54,7 @@ exports.submitCompetition = async (req, res) => {
     }
 
     // Get competition details
+    const News = require('../models/News');
     const competition = await News.findById(competitionId);
     if (!competition) {
       return res.status(404).json({
@@ -170,10 +171,26 @@ exports.getCompetitionsByUnion = async (req, res) => {
   try {
     const { unionId } = req.params;
 
+    if (!unionId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Union ID is required'
+      });
+    }
+
     const competitions = await Competition.find({ unionId })
       .sort({ createdAt: -1 })
-      .populate('competitionId', 'title category content image')
-      .populate('unionId', 'name secretaryName state district');
+      .populate({
+        path: 'competitionId',
+        select: 'title category content image',
+        model: 'news'
+      })
+      .populate({
+        path: 'unionId',
+        select: 'name secretaryName state district',
+        model: 'AccelerationForm'
+      })
+      .lean(); // Use lean() to avoid issues with populate
 
     res.status(200).json({
       success: true,
@@ -181,9 +198,10 @@ exports.getCompetitionsByUnion = async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching competitions:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({
       success: false,
-      error: 'Failed to fetch competition registrations'
+      error: error.message || 'Failed to fetch competition registrations'
     });
   }
 };
@@ -225,9 +243,22 @@ exports.getCompetitionRegistrations = async (req, res) => {
 
     const registrations = await Competition.find(filter)
       .sort({ createdAt: -1 })
-      .populate('competitionId', 'title category content image')
-      .populate('unionId', 'name secretaryName state district email')
-      .populate('reviewedBy', 'email');
+      .populate({
+        path: 'competitionId',
+        select: 'title category content image',
+        model: 'news'
+      })
+      .populate({
+        path: 'unionId',
+        select: 'name secretaryName state district email',
+        model: 'AccelerationForm'
+      })
+      .populate({
+        path: 'reviewedBy',
+        select: 'email',
+        model: 'Admin'
+      })
+      .lean();
 
     res.status(200).json({
       success: true,
@@ -235,9 +266,10 @@ exports.getCompetitionRegistrations = async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching competition registrations:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({
       success: false,
-      error: 'Failed to fetch competition registrations'
+      error: error.message || 'Failed to fetch competition registrations'
     });
   }
 };

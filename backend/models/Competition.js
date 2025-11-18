@@ -20,7 +20,7 @@ const competitionSchema = new mongoose.Schema({
   },
   competitionId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'News',
+    ref: 'news',
     required: true
   },
   competitionTitle: {
