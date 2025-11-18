@@ -39,12 +39,16 @@ import SelfDefence from './Components/SelfDefence';
 const App = () => {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin') || location.pathname === '/admindashboard';
+  const isDashboardRoute = isAdminRoute || 
+                          location.pathname === '/playerdashboard' || 
+                          location.pathname === '/stateuniondashboard' ||
+                          location.pathname === '/login';
 
   return (
     <>
       <ScrollToTop />
-      {!isAdminRoute && <Mainnav />}
-      {!isAdminRoute && <TopNav />}
+      {!isDashboardRoute && <Mainnav />}
+      {!isDashboardRoute && <TopNav />}
 
       <Routes>
         <Route path="/" element={
@@ -85,7 +89,7 @@ const App = () => {
 </Route>
       </Routes>
 
-      {!isAdminRoute && <Footer />}
+      {!isDashboardRoute && <Footer />}
     </>
   );
 };
