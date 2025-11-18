@@ -31,6 +31,7 @@ import ModernStatesDistrictsManager from './AdminPanel/Pages/ModernStatesDistric
 import HeadsManagement from './AdminPanel/Pages/HeadsManagement';
 import PlayerManagement from './AdminPanel/Pages/PlayerManagement';
 import BeltPromotionManagement from './AdminPanel/Pages/BeltPromotionManagement';
+import CompetitionManagement from './AdminPanel/Pages/CompetitionManagement';
 import ScrollToTop from './Components/ScrollToTop';
 import AdminLayout from './AdminPanel/Pages/AdminLayout';
 import StateUnionDashboard from './StateUnionpanel/StateUnionDashboard';
@@ -88,6 +89,7 @@ const App = () => {
       <Route path="/admin/heads-management" element={<HeadsManagement />} />
       <Route path="/admin/player-management" element={<PlayerManagement />} />
       <Route path="/admin/belt-promotion" element={<BeltPromotionManagement />} />
+      <Route path="/admin/competition-registrations" element={<CompetitionManagement />} />
 </Route>
       </Routes>
 

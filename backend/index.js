@@ -126,6 +126,7 @@ app.get('/health', (req, res) => {
 app.use('/api/admin', adminRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/belt-promotion', require('./routes/beltPromotionRoutes'));
+app.use('/api/competition', require('./routes/competitionRoutes'));
 // Firebase routes disabled - project deleted
 // app.use('/api/firebase', firebaseRoutes);
 app.use('/api/states', statesRoutes); // States and Districts routes (uses static data)

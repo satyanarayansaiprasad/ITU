@@ -670,7 +670,7 @@ const StateUnionDashboard = () => {
 
       case 'competition':
         return (
-          <CompetitionRegistration />
+          <CompetitionRegistration unionId={userId} />
         );
 
       case 'events':
