@@ -111,6 +111,53 @@ exports.getBeltPromotionsByUnion = async (req, res) => {
   }
 };
 
+// Get belt promotions for a specific player
+exports.getBeltPromotionsByPlayer = async (req, res) => {
+  try {
+    const { playerId } = req.params;
+
+    // Find all belt promotions where this player is included
+    const promotions = await BeltPromotion.find({
+      'tests.players.playerId': playerId
+    })
+      .sort({ createdAt: -1 })
+      .populate('unionId', 'name secretaryName state district');
+
+    // Extract player-specific test data
+    const playerTests = [];
+    promotions.forEach((promotion) => {
+      promotion.tests.forEach((test) => {
+        const playerData = test.players.find(
+          (p) => p.playerId.toString() === playerId.toString()
+        );
+        if (playerData) {
+          playerTests.push({
+            _id: promotion._id,
+            submittedAt: promotion.submittedAt,
+            status: promotion.status,
+            rejectionReason: promotion.rejectionReason,
+            unionName: promotion.unionName,
+            currentBelt: playerData.currentBelt,
+            applyingBelt: test.beltLevel,
+            playerName: playerData.playerName
+          });
+        }
+      });
+    });
+
+    res.status(200).json({
+      success: true,
+      data: playerTests
+    });
+  } catch (error) {
+    console.error('Error fetching player belt promotions:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch belt promotion tests'
+    });
+  }
+};
+
 // Get belt promotions with filters (for admin)
 exports.getBeltPromotions = async (req, res) => {
   try {

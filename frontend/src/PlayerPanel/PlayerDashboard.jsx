@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { toast } from "react-toastify";
 import PlayerIDCard from "./PlayerIDCard";
+import PlayerBeltPromotionTests from "./PlayerBeltPromotionTests";
 import { clearAuthData } from "../utils/auth";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
@@ -636,16 +637,7 @@ const PlayerDashboard = () => {
         );
 
       case 'belt-promotion':
-        return (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900">Belt Promotion Results</h2>
-            <div className="bg-white rounded-xl shadow-md p-12 text-center">
-              <Trophy size={48} className="mx-auto text-gray-400 mb-4" />
-              <p className="text-gray-600">Belt promotion results will be displayed here.</p>
-              <p className="text-sm text-gray-500 mt-2">This section is coming soon.</p>
-            </div>
-          </div>
-        );
+        return <PlayerBeltPromotionTests playerId={player._id} />;
 
       case 'id-card':
         return <PlayerIDCard player={player} />;
@@ -759,7 +751,7 @@ const PlayerDashboard = () => {
               <h1 className="text-2xl font-bold text-gray-900">
                 {activeMenu === 'profile' ? 'Profile' : 
                  activeMenu === 'events' ? 'Events & News' : 
-                 activeMenu === 'belt-promotion' ? 'Belt Promotion Results' :
+                 activeMenu === 'belt-promotion' ? 'Belt Promotion Tests' :
                  activeMenu === 'id-card' ? 'Player ID Card' : 'Dashboard'}
               </h1>
               <p className="text-sm text-gray-600 mt-1">Welcome back, {player.name}</p>

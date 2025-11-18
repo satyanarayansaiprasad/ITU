@@ -7,6 +7,9 @@ const { authenticate } = require('../middleware/auth');
 router.post('/submit', beltPromotionController.submitBeltPromotion);
 router.get('/union/:unionId', beltPromotionController.getBeltPromotionsByUnion);
 
+// Player routes
+router.get('/player/:playerId', beltPromotionController.getBeltPromotionsByPlayer);
+
 // Admin routes
 router.get('/admin/list', authenticate, beltPromotionController.getBeltPromotions);
 router.get('/admin/:id/download', authenticate, beltPromotionController.downloadBeltPromotionExcel);
