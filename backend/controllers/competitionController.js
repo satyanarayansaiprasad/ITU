@@ -54,7 +54,6 @@ exports.submitCompetition = async (req, res) => {
     }
 
     // Get competition details
-    const News = require('../models/News');
     const competition = await News.findById(competitionId);
     if (!competition) {
       return res.status(404).json({
