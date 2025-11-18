@@ -714,7 +714,7 @@ const PlayerDashboard = () => {
             }`}
           >
             <Trophy size={20} />
-            {sidebarOpen && <span>Belt Promotion</span>}
+            {sidebarOpen && <span>Belt Promotion Tests</span>}
           </button>
 
           <button
