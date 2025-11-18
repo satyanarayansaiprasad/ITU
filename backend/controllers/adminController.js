@@ -104,74 +104,77 @@ const upload = multer({
 
 
 
-exports.createNews = (req, res) => {
-  upload.single("image")(req, res, async (err) => {
-      if (err) {
-          console.error("File upload error:", err);
-          return res.status(500).json({
-              success: false,
-              message: "File upload failed"
-          });
-      }
+exports.createNews = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Image is required"
+      });
+    }
 
-      const { 
-        title, 
-        content, 
-        moreContent, 
-        author, 
-        category, 
-        tags, 
-        featured, 
-        published, 
-        readTime,
-        metaDescription 
-      } = req.body;
-      const image = req.file ? `uploads/${req.file.filename}` : null;
+    const { 
+      title, 
+      content, 
+      moreContent, 
+      author, 
+      category, 
+      tags, 
+      featured, 
+      published, 
+      readTime,
+      metaDescription 
+    } = req.body;
 
-      // ✅ Correct the validation check
-      if (!title || !content || !moreContent || !image) {
-          return res.status(400).json({
-              success: false,
-              message: "All fields including the image are required"
-          });
-      }
+    if (!title || !content || !moreContent) {
+      return res.status(400).json({
+        success: false,
+        message: "Title, content, and full content are required"
+      });
+    }
 
-      try {
-          // Parse tags if it's a string
-          let parsedTags = [];
-          if (tags) {
-            parsedTags = typeof tags === 'string' ? tags.split(',').map(tag => tag.trim()) : tags;
-          }
+    // Upload image to Cloudinary
+    const cloudinaryResult = await uploadBufferToCloudinary(
+      req.file.buffer,
+      'itu/blog-posts',
+      `blog-${Date.now()}`
+    );
 
-          const news = new News({
-              title,
-              content,
-              moreContent,
-              image,
-              author: author || "ITU Admin",
-              category: category || "News",
-              tags: parsedTags,
-              featured: featured === 'true' || featured === true,
-              published: published !== 'false' && published !== false,
-              readTime: readTime ? parseInt(readTime) : 5,
-              metaDescription: metaDescription || content.substring(0, 160)
-          });
+    // Parse tags if it's a string
+    let parsedTags = [];
+    if (tags) {
+      parsedTags = typeof tags === 'string' ? tags.split(',').map(tag => tag.trim()).filter(tag => tag) : tags;
+    }
 
-          await news.save();
-          res.status(201).json({
-              success: true,
-              message: "Blog post created successfully",
-              news
-          });
-      } catch (error) {
-          console.error("Database error:", error);
-          res.status(500).json({
-              success: false,
-              message: "Failed to create blog post",
-              error: error.message
-          });
-      }
-  });
+    const news = new News({
+      title,
+      content,
+      moreContent,
+      image: cloudinaryResult.url, // Store Cloudinary URL
+      cloudinaryPublicId: cloudinaryResult.public_id, // Store public_id for deletion
+      author: author || "ITU Admin",
+      category: category || "News",
+      tags: parsedTags,
+      featured: featured === 'true' || featured === true,
+      published: published !== 'false' && published !== false,
+      readTime: readTime ? parseInt(readTime) : 5,
+      metaDescription: metaDescription || content.substring(0, 160)
+    });
+
+    await news.save();
+    res.status(201).json({
+      success: true,
+      message: "Blog post created successfully",
+      news
+    });
+  } catch (error) {
+    console.error("Create News Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to create blog post",
+      error: error.message
+    });
+  }
 };
 
 
@@ -229,29 +232,89 @@ exports.getAllNews = async (req, res) => {
 exports.editNews = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content, moreContent } = req.body;
+    const { 
+      title, 
+      content, 
+      moreContent, 
+      author, 
+      category, 
+      tags, 
+      featured, 
+      published, 
+      readTime,
+      metaDescription 
+    } = req.body;
 
     const news = await News.findById(id);
-    if (!news) return res.status(404).json({ success: false, message: "News not found" });
+    if (!news) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "News not found" 
+      });
+    }
 
-    news.title = title;
-    news.content = content;
-    news.moreContent = moreContent;
+    // Update text fields
+    if (title) news.title = title;
+    if (content) news.content = content;
+    if (moreContent) news.moreContent = moreContent;
+    if (author) news.author = author;
+    if (category) news.category = category;
+    if (readTime) news.readTime = parseInt(readTime);
+    if (metaDescription !== undefined) news.metaDescription = metaDescription;
+    
+    // Handle boolean fields
+    if (featured !== undefined) {
+      news.featured = featured === 'true' || featured === true;
+    }
+    if (published !== undefined) {
+      news.published = published !== 'false' && published !== false;
+    }
 
-    // If new image uploaded
+    // Parse and update tags
+    if (tags !== undefined) {
+      if (typeof tags === 'string') {
+        news.tags = tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+      } else if (Array.isArray(tags)) {
+        news.tags = tags;
+      }
+    }
+
+    // If new image uploaded, upload to Cloudinary
     if (req.file) {
-      // Remove old image
-      const oldImagePath = path.join("uploads/", news.image);
-      if (fs.existsSync(oldImagePath)) fs.unlinkSync(oldImagePath);
+      // Delete old image from Cloudinary if it exists
+      if (news.cloudinaryPublicId) {
+        try {
+          await deleteFromCloudinary(news.cloudinaryPublicId);
+        } catch (error) {
+          console.error("Error deleting old Cloudinary image:", error);
+          // Continue even if deletion fails
+        }
+      }
 
-      news.image = req.file.filename;
+      // Upload new image to Cloudinary
+      const cloudinaryResult = await uploadBufferToCloudinary(
+        req.file.buffer,
+        'itu/blog-posts',
+        `blog-${Date.now()}`
+      );
+
+      news.image = cloudinaryResult.url;
+      news.cloudinaryPublicId = cloudinaryResult.public_id;
     }
 
     await news.save();
-    res.status(200).json({ success: true, message: "News updated successfully", news });
+    res.status(200).json({ 
+      success: true, 
+      message: "News updated successfully", 
+      news 
+    });
   } catch (err) {
     console.error("Edit News Error:", err);
-    res.status(500).json({ success: false, message: "Update failed" });
+    res.status(500).json({ 
+      success: false, 
+      message: "Update failed",
+      error: err.message 
+    });
   }
 };
 

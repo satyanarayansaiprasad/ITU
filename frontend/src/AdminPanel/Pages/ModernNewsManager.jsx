@@ -136,6 +136,7 @@ const ModernNewsManager = () => {
       return;
     }
 
+    // Image is required only for new posts, optional for edits
     if (!editId && !image) {
       showNotification("Please select an image", "error");
       return;
@@ -190,6 +191,8 @@ const ModernNewsManager = () => {
       metaDescription: news.metaDescription || ""
     });
     setEditId(news._id);
+    setImage(null); // Reset image when editing (user can choose to keep or change)
+    setFileName(""); // Reset filename
     setShowForm(true);
   };
 

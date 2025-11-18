@@ -19,6 +19,7 @@ const Newschema = new mongoose.Schema(
     views: { type: Number, default: 0 }, // View count
     slug: { type: String, unique: true }, // URL-friendly version of title
     metaDescription: { type: String }, // SEO description
+    cloudinaryPublicId: { type: String }, // Store Cloudinary public_id for deletion
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
   },
