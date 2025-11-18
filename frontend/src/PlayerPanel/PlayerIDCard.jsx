@@ -84,23 +84,48 @@ const PlayerIDCard = ({ player }) => {
     }
 
     try {
-      // Store original styles to restore later
-      const originalStyles = new Map();
+      // Create a temporary container with fixed dimensions
+      const tempContainer = document.createElement('div');
+      tempContainer.style.position = 'fixed';
+      tempContainer.style.left = '0';
+      tempContainer.style.top = '0';
+      tempContainer.style.width = '525px';
+      tempContainer.style.height = '330px';
+      tempContainer.style.backgroundColor = '#1e3a8a';
+      tempContainer.style.overflow = 'visible';
+      tempContainer.style.zIndex = '999999';
+      document.body.appendChild(tempContainer);
+
+      // Clone the element deeply
+      const clonedElement = element.cloneNode(true);
       
-      // Reset transform for the card side
-      const originalTransform = element.style.transform;
-      element.style.transform = 'none';
-      element.style.backfaceVisibility = 'visible';
-      element.style.WebkitBackfaceVisibility = 'visible';
+      // Reset all transforms and make it visible
+      clonedElement.style.position = 'relative';
+      clonedElement.style.transform = 'none';
+      clonedElement.style.backfaceVisibility = 'visible';
+      clonedElement.style.WebkitBackfaceVisibility = 'visible';
+      clonedElement.style.opacity = '1';
+      clonedElement.style.visibility = 'visible';
+      clonedElement.style.display = 'block';
+      clonedElement.style.width = '525px';
+      clonedElement.style.height = '330px';
+      
+      // Get the inner card div and ensure it's visible
+      const innerCard = clonedElement.querySelector('div > div');
+      if (innerCard) {
+        innerCard.style.transform = 'none';
+        innerCard.style.position = 'relative';
+        innerCard.style.width = '100%';
+        innerCard.style.height = '100%';
+      }
       
       // Get all elements and convert oklch colors to RGB BEFORE html2canvas
-      const allElements = element.querySelectorAll('*');
+      const allElements = clonedElement.querySelectorAll('*');
       
       // Convert all color-related properties that might contain oklch
       allElements.forEach((el) => {
         try {
           const styles = window.getComputedStyle(el);
-          const styleMap = {};
           
           // Convert all color-related properties
           const colorProperties = [
@@ -114,7 +139,6 @@ const PlayerIDCard = ({ player }) => {
             if (value && typeof value === 'string' && (value.toLowerCase().includes('oklch') || value.toLowerCase().includes('oklab'))) {
               const converted = convertColor(value);
               if (converted !== value) {
-                styleMap[prop] = el.style[prop] || '';
                 el.style[prop] = converted;
               }
             }
@@ -125,40 +149,52 @@ const PlayerIDCard = ({ player }) => {
           if (bgImage && bgImage !== 'none' && (bgImage.toLowerCase().includes('oklch') || bgImage.toLowerCase().includes('oklab'))) {
             // Replace gradient with solid color
             const bgColor = convertColor(styles.backgroundColor);
-            styleMap.backgroundImage = el.style.backgroundImage || '';
             el.style.backgroundImage = 'none';
             if (bgColor && bgColor !== 'transparent' && bgColor !== 'rgba(0, 0, 0, 0)') {
-              styleMap.backgroundColor = el.style.backgroundColor || '';
               el.style.backgroundColor = bgColor;
             }
-          }
-          
-          if (Object.keys(styleMap).length > 0) {
-            originalStyles.set(el, styleMap);
           }
         } catch (e) {
           // Ignore errors
         }
       });
       
-      // Wait a bit for styles to apply
-      await new Promise(resolve => setTimeout(resolve, 200));
+      // Add cloned element to container
+      tempContainer.appendChild(clonedElement);
       
-      const canvas = await html2canvas(element, {
+      // Force reflow
+      tempContainer.offsetHeight;
+      
+      // Wait for images to load
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      const canvas = await html2canvas(tempContainer, {
         backgroundColor: '#1e3a8a',
         scale: 2,
         width: 525,
         height: 330,
+        windowWidth: 525,
+        windowHeight: 330,
         logging: false,
         useCORS: true,
         allowTaint: true,
         foreignObjectRendering: false,
         imageTimeout: 15000,
-        removeContainer: true,
         onclone: (clonedDoc) => {
           // Remove style/link tags from cloned document
           clonedDoc.querySelectorAll('style').forEach(s => s.remove());
           clonedDoc.querySelectorAll('link[rel="stylesheet"]').forEach(l => l.remove());
+          
+          // Ensure container has correct dimensions
+          const body = clonedDoc.body;
+          if (body) {
+            const mainDiv = body.querySelector('div');
+            if (mainDiv) {
+              mainDiv.style.width = '525px';
+              mainDiv.style.height = '330px';
+              mainDiv.style.backgroundColor = '#1e3a8a';
+            }
+          }
           
           // Convert colors in cloned document as well
           const clonedAllElements = clonedDoc.querySelectorAll('*');
@@ -196,23 +232,10 @@ const PlayerIDCard = ({ player }) => {
         },
       });
       
-      // Restore original transform
-      if (originalTransform) {
-        element.style.transform = originalTransform;
-      } else {
-        element.style.removeProperty('transform');
+      // Cleanup
+      if (document.body.contains(tempContainer)) {
+        document.body.removeChild(tempContainer);
       }
-      
-      // Restore original styles
-      originalStyles.forEach((styles, el) => {
-        Object.entries(styles).forEach(([prop, value]) => {
-          if (value) {
-            el.style[prop] = value;
-          } else {
-            el.style.removeProperty(prop);
-          }
-        });
-      });
 
       const link = document.createElement('a');
       const sanitizedName = player.name.replace(/[^a-zA-Z0-9]/g, '_');
