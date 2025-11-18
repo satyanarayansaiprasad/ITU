@@ -328,19 +328,13 @@ exports.deleteNews = async (req, res) => {
       return res.status(404).json({ success: false, message: "News not found" });
     }
 
-    // Delete image if exists
-    if (news.image) {
-      const imagePath = path.join(__dirname, '../uploads', news.image);
+    // Delete image from Cloudinary if it exists
+    if (news.cloudinaryPublicId) {
       try {
-        if (fs.existsSync(imagePath)) {
-          fs.unlinkSync(imagePath);
-          console.log(`Deleted image: ${imagePath}`);
-        } else {
-          console.log(`Image not found at: ${imagePath}, proceeding with DB deletion`);
-        }
-      } catch (fileErr) {
-        console.error("File deletion error:", fileErr);
-        // Continue with DB deletion even if file deletion fails
+        await deleteFromCloudinary(news.cloudinaryPublicId);
+      } catch (error) {
+        console.error("Error deleting from Cloudinary:", error);
+        // Continue with database deletion even if Cloudinary deletion fails
       }
     }
 
