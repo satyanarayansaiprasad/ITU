@@ -88,7 +88,9 @@ const CompetitionRegistration = ({ unionId }) => {
       }
     } catch (error) {
       console.error('Error submitting competition registration:', error);
-      toast.error(error.response?.data?.error || 'Failed to submit competition registration');
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to submit competition registration';
+      console.error('Full error response:', error.response?.data);
+      toast.error(errorMessage);
     } finally {
       setSubmitting(false);
     }

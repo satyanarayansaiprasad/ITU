@@ -14,10 +14,33 @@ exports.submitCompetition = async (req, res) => {
   try {
     const { unionId, competitionId, playerIds } = req.body;
 
-    if (!unionId || !competitionId || !playerIds || !Array.isArray(playerIds) || playerIds.length === 0) {
+    console.log('Competition submission request:', { unionId, competitionId, playerIds, body: req.body });
+
+    if (!unionId) {
       return res.status(400).json({
         success: false,
-        error: 'Union ID, Competition ID, and at least one player are required'
+        error: 'Union ID is required'
+      });
+    }
+
+    if (!competitionId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Competition ID is required'
+      });
+    }
+
+    if (!playerIds || !Array.isArray(playerIds)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Player IDs must be an array'
+      });
+    }
+
+    if (playerIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'At least one player must be selected'
       });
     }
 
@@ -53,16 +76,20 @@ exports.submitCompetition = async (req, res) => {
     const enrichedPlayers = await Promise.all(playerIds.map(async (playerId) => {
       const player = await Player.findById(playerId);
       if (!player) {
+        console.error(`Player with ID ${playerId} not found`);
         throw new Error(`Player with ID ${playerId} not found`);
       }
 
-      // Verify player belongs to this union
-      if (player.union.toString() !== unionId.toString()) {
+      // Verify player belongs to this union (check both union field and unionId field)
+      const playerUnionId = player.union?.toString() || player.unionId?.toString();
+      if (playerUnionId && playerUnionId !== unionId.toString()) {
+        console.error(`Player ${player.name} (${playerId}) belongs to union ${playerUnionId}, but registration is for union ${unionId}`);
         throw new Error(`Player ${player.name} does not belong to this union`);
       }
 
-      // Get player's union details
-      const playerUnion = await AccelerationForm.findById(player.union);
+      // Get player's union details (use player's union or the submitting union)
+      const unionToUse = player.union || unionId;
+      const playerUnion = await AccelerationForm.findById(unionToUse);
 
       return {
         playerId: player._id,
@@ -72,8 +99,8 @@ exports.submitCompetition = async (req, res) => {
         phone: player.phone,
         dob: player.dob,
         beltLevel: player.beltLevel || 'N/A',
-        unionName: playerUnion?.name || player.unionName || 'N/A',
-        unionId: player.union
+        unionName: playerUnion?.name || playerUnion?.secretaryName || player.unionName || union.name || 'N/A',
+        unionId: player.union || unionId
       };
     }));
 
@@ -113,6 +140,23 @@ exports.submitCompetition = async (req, res) => {
     });
   } catch (error) {
     console.error('Error submitting competition registration:', error);
+    console.error('Error stack:', error.stack);
+    
+    // Return more specific error messages
+    if (error.message.includes('not found')) {
+      return res.status(404).json({
+        success: false,
+        error: error.message
+      });
+    }
+    
+    if (error.message.includes('does not belong')) {
+      return res.status(400).json({
+        success: false,
+        error: error.message
+      });
+    }
+    
     res.status(500).json({
       success: false,
       error: error.message || 'Failed to submit competition registration'
