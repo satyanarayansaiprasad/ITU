@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { Trophy, Calendar, MapPin, Users, Save } from 'lucide-react';
+import { Trophy, Calendar, MapPin, Users, Save, History, CheckCircle, XCircle, Clock } from 'lucide-react';
 
 const CompetitionRegistration = ({ unionId }) => {
   const [selectedCompetition, setSelectedCompetition] = useState('');
@@ -10,6 +10,8 @@ const CompetitionRegistration = ({ unionId }) => {
   const [availablePlayers, setAvailablePlayers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [existingRegistrations, setExistingRegistrations] = useState([]);
+  const [showHistory, setShowHistory] = useState(false);
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
     (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-r1qa.onrender.com');
@@ -18,6 +20,7 @@ const CompetitionRegistration = ({ unionId }) => {
     if (unionId) {
       fetchCompetitions();
       fetchPlayers();
+      fetchExistingRegistrations();
     }
   }, [unionId]);
 
@@ -45,6 +48,17 @@ const CompetitionRegistration = ({ unionId }) => {
     } catch (error) {
       console.error('Error fetching players:', error);
       toast.error('Failed to load players');
+    }
+  };
+
+  const fetchExistingRegistrations = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/competition/union/${unionId}`);
+      if (response.data.success) {
+        setExistingRegistrations(response.data.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching existing registrations:', error);
     }
   };
 
@@ -85,6 +99,7 @@ const CompetitionRegistration = ({ unionId }) => {
         setSelectedCompetition('');
         setSelectedPlayers([]);
         fetchCompetitions(); // Refresh list
+        fetchExistingRegistrations(); // Refresh registrations
       }
     } catch (error) {
       console.error('Error submitting competition registration:', error);

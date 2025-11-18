@@ -104,7 +104,7 @@ exports.submitCompetition = async (req, res) => {
       };
     }));
 
-    // Check if registration already exists
+    // Check if registration already exists (only block if pending)
     const existingRegistration = await Competition.findOne({
       unionId,
       competitionId,
@@ -114,7 +114,8 @@ exports.submitCompetition = async (req, res) => {
     if (existingRegistration) {
       return res.status(400).json({
         success: false,
-        error: 'You have already submitted a registration for this competition. Please wait for approval.'
+        error: 'You have already submitted a registration for this competition. Please wait for approval or contact admin if you need to update it.',
+        existingRegistrationId: existingRegistration._id
       });
     }
 
