@@ -18,6 +18,8 @@ import {
   User,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
+import { clearAuthData } from "../../utils/auth";
 
 const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -39,8 +41,29 @@ const AdminLayout = () => {
     { title: "Player Management", icon: <User className="w-5 h-5" />, path: "/admin/player-management" },
   ];
 
-  const handleLogout = () => {
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      clearAuthData();
+      
+      // Call backend logout endpoint
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
+        (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-r1qa.onrender.com');
+      
+      try {
+        await axios.get(`${API_BASE_URL}/api/admin/logout`, {
+          withCredentials: true
+        });
+      } catch (err) {
+        // Ignore logout errors
+        console.log('Logout endpoint error (ignored):', err);
+      }
+      
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+      clearAuthData();
+      navigate("/login");
+    }
   };
 
   return (

@@ -2,8 +2,10 @@ const { upload } = require("../middleware/multer.js");
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/adminController');
+const { loginLimiter } = require('../middleware/rateLimiter');
+const { validateLogin, sanitizeInput } = require('../middleware/validation');
 
-router.post('/login', adminController.login);
+router.post('/login', loginLimiter, sanitizeInput, validateLogin, adminController.login);
 router.get('/logout', adminController.logout);
 router.get('/getContact',adminController.getContacts);
 router.post('/addNews',adminController.createNews);

@@ -81,17 +81,27 @@ app.use(cors({
 
 // Middleware
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); // Limit JSON payload size
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Security headers
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  next();
+});
 
 app.use(session({
   secret: process.env.SESSION_SECRET || 'yourSecretKey',
   resave: false,
   saveUninitialized: false,
+  name: 'sessionId', // Don't use default session name
   cookie: {
-    secure: false, // Set true in production with HTTPS
+    secure: process.env.NODE_ENV === 'production', // Set true in production with HTTPS
     httpOnly: true,
-    maxAge: 1000 * 60 * 60 * 24 // 1 day
+    maxAge: 1000 * 60 * 60 * 24, // 1 day
+    sameSite: 'strict' // CSRF protection
   }
 }));
 

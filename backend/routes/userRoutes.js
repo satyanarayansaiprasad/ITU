@@ -1,15 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const { upload } = require('../middleware/multer');
+const { loginLimiter } = require('../middleware/rateLimiter');
+const { validateLogin, sanitizeInput } = require('../middleware/validation');
 
 const userController = require('../controllers/userController');
-router.post('/stateunionlogin',userController.loginStateUnion)
+const authController = require('../controllers/authController');
+
+// Auth routes
+router.post('/refresh-token', authController.refreshToken);
+router.post('/stateunionlogin', loginLimiter, sanitizeInput, validateLogin, userController.loginStateUnion)
 router.post('/contactus',userController.contactUs)
 router.post('/accelarationform',userController.form)
 
 // Player routes
 router.post('/playerregistration', userController.registerPlayers);
-router.post('/player/login', userController.playerLogin);
+router.post('/player/login', loginLimiter, sanitizeInput, validateLogin, userController.playerLogin);
 router.get('/players/:id', userController.getPlayerProfile);
 router.patch('/players/:id', userController.updatePlayerProfile);
 router.post('/players/:id/photo', upload.single('photo'), userController.uploadPlayerPhoto);

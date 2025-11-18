@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { toast } from "react-toastify";
 import PlayerIDCard from "./PlayerIDCard";
+import { clearAuthData } from "../utils/auth";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
                     (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-r1qa.onrender.com');
@@ -235,9 +236,31 @@ const PlayerDashboard = () => {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("playerData");
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      // Clear all auth data
+      clearAuthData();
+      
+      // Optionally call backend logout endpoint
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
+        (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-r1qa.onrender.com');
+      
+      try {
+        await axios.post(`${API_BASE_URL}/api/admin/logout`, {}, {
+          withCredentials: true
+        });
+      } catch (err) {
+        // Ignore logout errors, continue with client-side cleanup
+        console.log('Logout endpoint error (ignored):', err);
+      }
+      
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Still navigate to login even if logout fails
+      clearAuthData();
+      navigate("/login");
+    }
   };
 
   const renderContent = () => {

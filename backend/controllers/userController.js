@@ -3,8 +3,10 @@ const Contact = require("../models/Contact");
 
 const AccelerationForm = require("../models/AccelerationForm"); // update path as needed
 const Player = require("../models/Players");
+const bcrypt = require('bcrypt');
 
 const generatePassword = require("../utils/passwordGenerator");
+const { generateTokens } = require('../utils/jwt');
 const path = require("path");
 const fs = require("fs");
 const { uploadBufferToCloudinary, deleteFromCloudinary } = require('../config/cloudinary');
@@ -75,13 +77,21 @@ exports.loginStateUnion = async (req, res) => {
   try {
     const { email, password } = req.body;
     
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        error: "Email and password are required"
+      });
+    }
+    
     const normalizedEmail = email.trim().toLowerCase();
     const stateUnion = await AccelerationForm.findOne({ 
       email: { $regex: new RegExp(`^${normalizedEmail}$`, 'i') }
     });
 
     if (!stateUnion) {
-      return res.status(404).json({ 
+      return res.status(404).json({
+        success: false,
         error: "No state union found with this email" 
       });
     }
@@ -89,30 +99,70 @@ exports.loginStateUnion = async (req, res) => {
     // Check approved status first
     if (stateUnion.status !== "approved") {
       if (stateUnion.rejected) {
-        return res.status(403).json({ 
+        return res.status(403).json({
+          success: false,
           error: "Your registration has been rejected" 
         });
       }
-      return res.status(403).json({ 
+      return res.status(403).json({
+        success: false,
         error: "Your registration is pending approval" 
       });
     }
 
-    // Only check password if approved
+    // Check password - support both hashed and plain text (for migration)
     const expectedPassword = generatePassword(stateUnion.state);
+    let isPasswordValid = false;
+
+    if (stateUnion.password) {
+      // If password is stored, check if it's hashed
+      if (stateUnion.password.startsWith('$2b$')) {
+        isPasswordValid = await bcrypt.compare(password, stateUnion.password);
+      } else {
+        isPasswordValid = password === stateUnion.password;
+        // Auto-hash if plain text
+        if (isPasswordValid) {
+          stateUnion.password = await bcrypt.hash(password, 10);
+          await stateUnion.save();
+        }
+      }
+    } else {
+      // Fallback to generated password for backward compatibility
+      isPasswordValid = password === expectedPassword;
+      // Store hashed password
+      if (isPasswordValid) {
+        stateUnion.password = await bcrypt.hash(password, 10);
+        await stateUnion.save();
+      }
+    }
     
-    if (password !== expectedPassword) {
-      return res.status(401).json({ 
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
         error: "Invalid credentials" 
       });
     }
 
+    // Generate JWT tokens
+    const tokens = generateTokens({
+      userId: stateUnion._id.toString(),
+      email: stateUnion.email,
+      role: 'stateunion'
+    });
+
     const { password: _, ...userData } = stateUnion.toObject();
-    return res.status(200).json(userData);
+    
+    return res.status(200).json({
+      success: true,
+      message: "Login successful",
+      ...userData,
+      ...tokens
+    });
     
   } catch (error) {
     console.error("Login error:", error);
-    return res.status(500).json({ 
+    return res.status(500).json({
+      success: false,
       error: "Internal server error" 
     });
   }
@@ -503,13 +553,35 @@ exports.playerLogin = async (req, res) => {
       });
     }
 
-    // Verify password
-    if (player.password !== password) {
+    // Verify password - support both hashed and plain text (for migration)
+    let isPasswordValid = false;
+    if (player.password.startsWith('$2b$')) {
+      // Password is hashed
+      isPasswordValid = await bcrypt.compare(password, player.password);
+    } else {
+      // Password is plain text (legacy)
+      isPasswordValid = player.password === password;
+      // Auto-hash if plain text
+      if (isPasswordValid) {
+        player.password = await bcrypt.hash(password, 10);
+        await player.save();
+      }
+    }
+
+    if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
         error: "Invalid password"
       });
     }
+
+    // Generate JWT tokens
+    const tokens = generateTokens({
+      userId: player._id.toString(),
+      email: player.email,
+      role: 'player',
+      playerId: player.playerId
+    });
 
     // Return player data (without password)
     const playerData = player.toObject();
@@ -518,7 +590,8 @@ exports.playerLogin = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Login successful",
-      data: playerData
+      data: playerData,
+      ...tokens
     });
   } catch (error) {
     console.error("Error in player login:", error);

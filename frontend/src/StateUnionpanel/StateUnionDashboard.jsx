@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API_ENDPOINTS } from '../config/api';
 import { Search, User, Mail, Phone, Award, Calendar, MapPin, ChevronLeft, ChevronRight, Newspaper } from 'lucide-react';
+import { clearAuthData } from '../utils/auth';
 
 const StateUnionDashboard = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -219,10 +220,29 @@ const StateUnionDashboard = () => {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('stateUnionId');
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      clearAuthData();
+      
+      // Optionally call backend logout endpoint
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
+        (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-r1qa.onrender.com');
+      
+      try {
+        await axios.post(`${API_BASE_URL}/api/admin/logout`, {}, {
+          withCredentials: true
+        });
+      } catch (err) {
+        // Ignore logout errors
+        console.log('Logout endpoint error (ignored):', err);
+      }
+      
+      navigate('/login');
+    } catch (error) {
+      console.error("Logout error:", error);
+      clearAuthData();
+      navigate('/login');
+    }
   };
 
   const renderContent = () => {

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { API_ENDPOINTS } from "../config/api";
 import { Lock, UserCog, UserPlus, Users, X, Eye, EyeOff } from "lucide-react";
+import { setAuthData } from "../utils/auth";
 
 const modalVariants = {
   hidden: { opacity: 0, scale: 0.95 },
@@ -78,23 +79,47 @@ const LoginPage = () => {
         }
       );
 
-      // Only check for rejection/pending if response contains those flags
-      if (loginType === "stateunion") {
-        if (res.data?.rejected) {
-          throw new Error('Your registration has been rejected');
+      // Handle successful login
+      if (res.data?.success || res.status === 200) {
+        // Extract tokens and user data
+        const accessToken = res.data?.accessToken || res.data?.data?.accessToken;
+        const refreshToken = res.data?.refreshToken || res.data?.data?.refreshToken;
+        
+        let userData = null;
+        
+        if (loginType === "admin") {
+          userData = res.data?.data?.user || res.data;
+        } else if (loginType === "stateunion") {
+          // Check for rejection/pending
+          if (res.data?.rejected) {
+            throw new Error('Your registration has been rejected');
+          }
+          if (res.data?.status === 'pending') {
+            throw new Error('Your registration is pending approval');
+          }
+          userData = res.data;
+          // Remove password and tokens from userData
+          const { password, accessToken: _, refreshToken: __, ...cleanData } = userData;
+          userData = cleanData;
+        } else if (loginType === "player") {
+          userData = res.data?.data || res.data;
+          // Remove password and tokens from userData
+          const { password, accessToken: _, refreshToken: __, ...cleanData } = userData;
+          userData = cleanData;
         }
-        if (res.data?.status === 'pending') {
-          throw new Error('Your registration is pending approval');
-        }
-        // Store user ID in localStorage for dashboard access
-        if (res.data?._id) {
-          localStorage.setItem('stateUnionId', res.data._id);
-        }
-      }
 
-      // Store player data for player login
-      if (loginType === "player" && res.data?.success && res.data?.data) {
-        localStorage.setItem('playerData', JSON.stringify(res.data.data));
+        // Store tokens and user data
+        if (accessToken) {
+          setAuthData(accessToken, refreshToken, userData);
+        } else {
+          // Fallback: store user data for backward compatibility
+          if (loginType === "stateunion" && res.data?._id) {
+            localStorage.setItem('stateUnionId', res.data._id);
+          }
+          if (loginType === "player" && userData) {
+            localStorage.setItem('playerData', JSON.stringify(userData));
+          }
+        }
       }
 
       navigate(redirectMap[loginType]);

@@ -13,19 +13,52 @@ const { transporter, getEmailFrom } = require('../config/email');
 const AccelerationForm = require('../models/AccelerationForm');
 const { uploadBufferToCloudinary, deleteFromCloudinary } = require('../config/cloudinary');
 
+const { generateTokens } = require('../utils/jwt');
+
 exports.login = async (req, res) => {
   try {
     const admin = await adminService.loginAdmin(req.body);
+    
+    // Generate JWT tokens
+    const tokens = generateTokens({
+      userId: admin._id.toString(),
+      email: admin.email,
+      role: 'admin'
+    });
+
+    // Set session (for backward compatibility)
     req.session.admin = admin._id;
-    res.status(200).json({ message: 'Login successful' });
+
+    res.status(200).json({
+      success: true,
+      message: 'Login successful',
+      data: {
+        user: admin,
+        ...tokens
+      }
+    });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(401).json({
+      success: false,
+      error: err.message
+    });
   }
 };
 
 exports.logout = (req, res) => {
-  req.session.destroy(() => {
-    res.status(200).json({ message: 'Logged out' });
+  // Destroy session
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to logout'
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: 'Logged out successfully'
+    });
   });
 };
 
