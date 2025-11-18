@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { API_ENDPOINTS } from '../config/api';
-import { Search, User, Mail, Phone, Award, Calendar, MapPin, ChevronLeft, ChevronRight, Newspaper } from 'lucide-react';
+import { Search, User, Mail, Phone, Award, Calendar, MapPin, ChevronLeft, ChevronRight, Newspaper, Trophy } from 'lucide-react';
 import { clearAuthData } from '../utils/auth';
+import BeltPromotionForm from './BeltPromotionForm';
+import CompetitionRegistration from './CompetitionRegistration';
 
 const StateUnionDashboard = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -241,7 +243,7 @@ const StateUnionDashboard = () => {
     } catch (error) {
       console.error("Logout error:", error);
       clearAuthData();
-      navigate('/login');
+    navigate('/login');
     }
   };
 
@@ -661,6 +663,16 @@ const StateUnionDashboard = () => {
           </div>
         );
       
+      case 'belt-promotion':
+        return (
+          <BeltPromotionForm unionId={userId} />
+        );
+
+      case 'competition':
+        return (
+          <CompetitionRegistration />
+        );
+
       case 'events':
         return (
           <div className="bg-white rounded-lg shadow p-6">
@@ -856,6 +868,24 @@ const StateUnionDashboard = () => {
               >
                 <span className="mr-3">📅</span>
                 {!collapsed && <span>Events</span>}
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => setActiveMenu('belt-promotion')}
+                className={`w-full flex items-center p-3 rounded-md ${activeMenu === 'belt-promotion' ? 'bg-blue-700' : 'hover:bg-blue-700'}`}
+              >
+                <span className="mr-3">🎯</span>
+                {!collapsed && <span>Belt Promotion</span>}
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => setActiveMenu('competition')}
+                className={`w-full flex items-center p-3 rounded-md ${activeMenu === 'competition' ? 'bg-blue-700' : 'hover:bg-blue-700'}`}
+              >
+                <span className="mr-3">🏆</span>
+                {!collapsed && <span>Competition</span>}
               </button>
             </li>
           </ul>

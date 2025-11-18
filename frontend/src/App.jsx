@@ -30,6 +30,7 @@ import ModernFormSubmissions from './AdminPanel/Pages/ModernFormSubmissions';
 import ModernStatesDistrictsManager from './AdminPanel/Pages/ModernStatesDistrictsManager';
 import HeadsManagement from './AdminPanel/Pages/HeadsManagement';
 import PlayerManagement from './AdminPanel/Pages/PlayerManagement';
+import BeltPromotionManagement from './AdminPanel/Pages/BeltPromotionManagement';
 import ScrollToTop from './Components/ScrollToTop';
 import AdminLayout from './AdminPanel/Pages/AdminLayout';
 import StateUnionDashboard from './StateUnionpanel/StateUnionDashboard';
@@ -86,6 +87,7 @@ const App = () => {
       <Route path="/admin/states-districts" element={<ModernStatesDistrictsManager />} />
       <Route path="/admin/heads-management" element={<HeadsManagement />} />
       <Route path="/admin/player-management" element={<PlayerManagement />} />
+      <Route path="/admin/belt-promotion" element={<BeltPromotionManagement />} />
 </Route>
       </Routes>
 

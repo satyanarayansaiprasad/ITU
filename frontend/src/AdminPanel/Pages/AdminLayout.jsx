@@ -16,6 +16,7 @@ import {
   Shield,
   Type,
   User,
+  Award,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
@@ -39,6 +40,7 @@ const AdminLayout = () => {
     { title: "States & Districts", icon: <MapPin className="w-5 h-5" />, path: "/admin/states-districts" },
     { title: "District & State Heads", icon: <Crown className="w-5 h-5" />, path: "/admin/heads-management" },
     { title: "Player Management", icon: <User className="w-5 h-5" />, path: "/admin/player-management" },
+    { title: "Belt Promotion Tests", icon: <Award className="w-5 h-5" />, path: "/admin/belt-promotion" },
   ];
 
   const handleLogout = async () => {
