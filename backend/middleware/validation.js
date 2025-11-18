@@ -16,24 +16,27 @@ exports.handleValidationErrors = (req, res, next) => {
 };
 
 /**
- * Login validation rules
+ * Login validation rules - Simplified to not block valid logins
  */
 exports.validateLogin = [
   body('email')
-    .optional()
+    .optional({ checkFalsy: true })
     .trim()
-    .isEmail()
-    .withMessage('Please provide a valid email address')
     .normalizeEmail(),
   body('playerId')
-    .optional()
-    .trim()
-    .isLength({ min: 1 })
-    .withMessage('Player ID is required'),
+    .optional({ checkFalsy: true })
+    .trim(),
   body('password')
     .trim()
-    .isLength({ min: 1 })
+    .notEmpty()
     .withMessage('Password is required'),
+  // Custom validation: at least email or playerId must be present
+  body().custom((value) => {
+    if (!value.email && !value.playerId) {
+      throw new Error('Either email or playerId is required');
+    }
+    return true;
+  }),
   exports.handleValidationErrors
 ];
 

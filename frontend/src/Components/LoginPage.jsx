@@ -79,11 +79,16 @@ const LoginPage = () => {
         }
       );
 
+      // Check for errors first
+      if (res.data?.error || (!res.data?.success && res.status !== 200)) {
+        throw new Error(res.data?.error || 'Login failed');
+      }
+
       // Handle successful login
       if (res.data?.success || res.status === 200) {
         // Extract tokens and user data
-        const accessToken = res.data?.accessToken || res.data?.data?.accessToken;
-        const refreshToken = res.data?.refreshToken || res.data?.data?.refreshToken;
+        const accessToken = res.data?.accessToken;
+        const refreshToken = res.data?.refreshToken;
         
         let userData = null;
         
@@ -97,32 +102,34 @@ const LoginPage = () => {
           if (res.data?.status === 'pending') {
             throw new Error('Your registration is pending approval');
           }
-          userData = res.data;
-          // Remove password and tokens from userData
-          const { password, accessToken: _, refreshToken: __, ...cleanData } = userData;
+          // Extract user data, removing password and tokens
+          const { password, accessToken: _, refreshToken: __, success, message, ...cleanData } = res.data;
           userData = cleanData;
+          
+          // Store user ID for backward compatibility
+          if (res.data?._id) {
+            localStorage.setItem('stateUnionId', res.data._id);
+          }
         } else if (loginType === "player") {
+          // Player login returns data nested in 'data' property
           userData = res.data?.data || res.data;
           // Remove password and tokens from userData
           const { password, accessToken: _, refreshToken: __, ...cleanData } = userData;
           userData = cleanData;
+          
+          // Store player data for backward compatibility
+          localStorage.setItem('playerData', JSON.stringify(userData));
         }
 
-        // Store tokens and user data
+        // Store tokens if available
         if (accessToken) {
           setAuthData(accessToken, refreshToken, userData);
-        } else {
-          // Fallback: store user data for backward compatibility
-          if (loginType === "stateunion" && res.data?._id) {
-            localStorage.setItem('stateUnionId', res.data._id);
-          }
-          if (loginType === "player" && userData) {
-            localStorage.setItem('playerData', JSON.stringify(userData));
-          }
         }
-      }
 
-      navigate(redirectMap[loginType]);
+        navigate(redirectMap[loginType]);
+      } else {
+        throw new Error(res.data?.error || 'Login failed');
+      }
       
     } catch (err) {
       let errorMessage = "Login failed. Please try again.";
