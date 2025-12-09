@@ -141,12 +141,34 @@ exports.createNews = async (req, res) => {
       });
     }
 
-    // Upload image to Cloudinary
-    const cloudinaryResult = await uploadBufferToCloudinary(
-      req.file.buffer,
-      'itu/blog-posts',
-      `blog-${Date.now()}`
-    );
+    // Validate file buffer exists
+    if (!req.file.buffer || req.file.buffer.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid image file. Please upload a valid image."
+      });
+    }
+
+    // Upload image to Cloudinary with error handling
+    let cloudinaryResult;
+    try {
+      cloudinaryResult = await uploadBufferToCloudinary(
+        req.file.buffer,
+        'itu/blog-posts',
+        `blog-${Date.now()}`
+      );
+      
+      if (!cloudinaryResult || !cloudinaryResult.url) {
+        throw new Error('Cloudinary upload failed - no URL returned');
+      }
+    } catch (cloudinaryError) {
+      console.error("Cloudinary upload error:", cloudinaryError);
+      return res.status(500).json({
+        success: false,
+        message: "Failed to upload image to Cloudinary",
+        error: cloudinaryError.message
+      });
+    }
 
     // Parse tags if it's a string
     let parsedTags = [];
