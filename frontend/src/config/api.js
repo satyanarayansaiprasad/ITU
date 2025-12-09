@@ -33,6 +33,7 @@ export const API_ENDPOINTS = {
   UPDATE_CATEGORY_SLIDER: (id) => `${API_BASE_URL}/api/admin/editCategorySlider/${id}`,
   DELETE_CATEGORY_SLIDER: (id) => `${API_BASE_URL}/api/admin/deleteCategorySlider/${id}`,
   GET_ALL_NEWS: `${API_BASE_URL}/api/admin/getallNews`,
+  GET_NEWS_BY_ID: (id) => `${API_BASE_URL}/api/admin/getNews/${id}`,
   ADD_NEWS: `${API_BASE_URL}/api/admin/addNews`,
   EDIT_NEWS: (id) => `${API_BASE_URL}/api/admin/editNews/${id}`,
   DELETE_NEWS: (id) => `${API_BASE_URL}/api/admin/deleteNews/${id}`,

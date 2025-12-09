@@ -1763,6 +1763,56 @@ exports.getBlogPostBySlug = async (req, res) => {
   }
 };
 
+// Get single news post by ID
+exports.getNewsById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const post = await News.findByIdAndUpdate(
+      id,
+      { $inc: { views: 1 } }, // Increment view count
+      { new: true }
+    );
+
+    if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: "News post not found"
+      });
+    }
+
+    // Update image URL - handle Cloudinary URLs and local paths
+    const postObj = post.toObject();
+    let imageUrl = "/default-image.png";
+    
+    if (postObj.image) {
+      // If image is already a full URL (Cloudinary, http/https, or data URI), use it directly
+      if (/^(https?|data):/i.test(postObj.image)) {
+        imageUrl = postObj.image;
+      } else {
+        // Legacy: If it's a relative path or local filename, construct URL
+        const baseUrl = `${req.protocol}://${req.get("host")}/`;
+        imageUrl = `${baseUrl}${postObj.image.replace(/^\//, '')}`;
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      news: {
+        ...postObj,
+        image: imageUrl
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching news post:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch news post",
+      error: error.message
+    });
+  }
+};
+
 // Get blog categories
 exports.getBlogCategories = async (req, res) => {
   try {

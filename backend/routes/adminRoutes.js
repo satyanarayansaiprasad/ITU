@@ -11,6 +11,7 @@ router.get('/getContact',adminController.getContacts);
 router.delete('/deleteContact/:id',adminController.deleteContact);
 router.post('/addNews', upload.single('image'), adminController.createNews);
 router.get('/getallNews',adminController.getAllNews )
+router.get('/getNews/:id', adminController.getNewsById)
 
 router.put("/editNews/:id", upload.single("image"), adminController.editNews);
 router.delete("/deleteNews/:id", adminController.deleteNews);

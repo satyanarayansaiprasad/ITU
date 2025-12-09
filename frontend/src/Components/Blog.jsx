@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { API_ENDPOINTS } from "../config/api";
 import { 
@@ -19,6 +20,8 @@ import {
 } from "lucide-react";
 
 const Blog = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [featuredPosts, setFeaturedPosts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -60,10 +63,47 @@ const Blog = () => {
     }
   };
 
-  // Fetch blog data
+  // Fetch single post if ID is in URL
   useEffect(() => {
-    fetchBlogData();
-  }, [currentPage, selectedCategory, searchQuery]);
+    if (id) {
+      fetchSinglePostById(id);
+    } else {
+      // Reset selected post when navigating back to list
+      setSelectedPost(null);
+      fetchBlogData();
+    }
+  }, [id, currentPage, selectedCategory, searchQuery]);
+
+  // Fetch single post by ID
+  const fetchSinglePostById = async (postId) => {
+    try {
+      setLoading(true);
+      const response = await axios.get(API_ENDPOINTS.GET_NEWS_BY_ID(postId));
+      if (response.data && response.data.success) {
+        setSelectedPost(response.data.news);
+        // Fetch related posts based on category
+        if (response.data.news.category) {
+          try {
+            const relatedRes = await axios.get(`${API_ENDPOINTS.BLOG_POSTS}?category=${response.data.news.category}&limit=3`);
+            const related = (relatedRes.data.posts || []).filter(p => p._id !== postId).slice(0, 3);
+            setRelatedPosts(related);
+          } catch (err) {
+            console.error("Error fetching related posts:", err);
+            setRelatedPosts([]);
+          }
+        }
+      } else {
+        setError("Post not found");
+        navigate('/news');
+      }
+      setLoading(false);
+    } catch (err) {
+      console.error("Error fetching post:", err);
+      setError("Failed to load post. Please try again.");
+      setLoading(false);
+      navigate('/news');
+    }
+  };
 
   const fetchBlogData = async () => {
     try {
@@ -97,22 +137,27 @@ const Blog = () => {
     }
   };
 
-  const fetchSinglePost = async (slug) => {
-    try {
-      const [postRes, relatedRes] = await Promise.all([
-        axios.get(API_ENDPOINTS.BLOG_POST(slug)),
-        axios.get(API_ENDPOINTS.BLOG_RELATED(slug))
-      ]);
-      
-      setSelectedPost(postRes.data.post);
-      setRelatedPosts(relatedRes.data.posts || []);
-    } catch (err) {
-      console.error("Error fetching post:", err);
+  // Helper function to handle image URLs
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return "/default-image.png";
+    
+    // If it's already a full URL (Cloudinary, http/https, or data URI), use it directly
+    if (/^(https?|data):/i.test(imagePath)) {
+      return imagePath;
     }
+    
+    // Legacy: Handle relative paths or local filenames (for backward compatibility)
+    if (imagePath.startsWith('/')) {
+      return imagePath;
+    }
+    
+    // Otherwise, prepend / for relative paths
+    return `/${imagePath}`;
   };
 
   const handlePostClick = (post) => {
-    fetchSinglePost(post.slug);
+    // Navigate to the post URL
+    navigate(`/news/${post._id}`);
   };
 
   const handleSearch = (e) => {
@@ -157,7 +202,7 @@ const Blog = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-[130px] sm:pt-[135px] md:pt-[140px] pb-12">
       <div className="container-responsive">
         
-        {selectedPost ? (
+        {id && selectedPost ? (
           // Single Post View
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -166,7 +211,10 @@ const Blog = () => {
           >
             {/* Back Button */}
             <motion.button
-              onClick={() => setSelectedPost(null)}
+              onClick={() => {
+                setSelectedPost(null);
+                navigate('/news');
+              }}
               className="flex items-center gap-2 text-red-600 hover:text-red-700 font-semibold mb-6 group"
               whileHover={{ x: -5 }}
             >
@@ -178,9 +226,12 @@ const Blog = () => {
             <div className="bg-white rounded-3xl shadow-xl overflow-hidden mb-8">
               <div className="relative h-64 sm:h-80 md:h-96">
                 <img
-                  src={selectedPost.image}
+                  src={getImageUrl(selectedPost.image)}
                   alt={selectedPost.title}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.src = "/default-image.png";
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                 <div className="absolute bottom-6 left-6 right-6">
@@ -279,9 +330,12 @@ const Blog = () => {
                       <div className="bg-gray-50 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300">
                         <div className="relative h-40">
                           <img
-                            src={post.image}
+                            src={getImageUrl(post.image)}
                             alt={post.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            onError={(e) => {
+                              e.target.src = "/default-image.png";
+                            }}
                           />
                         </div>
                         <div className="p-4">
@@ -388,9 +442,12 @@ const Blog = () => {
                       <div className="bg-white rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300">
                         <div className={`relative ${index === 0 ? 'h-64 lg:h-80' : 'h-48'}`}>
                           <img
-                            src={post.image}
+                            src={getImageUrl(post.image)}
                             alt={post.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            onError={(e) => {
+                              e.target.src = "/default-image.png";
+                            }}
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                           <div className="absolute top-4 left-4">
@@ -458,9 +515,12 @@ const Blog = () => {
                       <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 h-full">
                         <div className="relative h-48">
                           <img
-                            src={post.image}
+                            src={getImageUrl(post.image)}
                             alt={post.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            onError={(e) => {
+                              e.target.src = "/default-image.png";
+                            }}
                           />
                           <div className="absolute top-3 left-3">
                             <span className="px-2 py-1 bg-red-600 text-white rounded-full text-xs font-semibold">

@@ -68,6 +68,7 @@ const App = () => {
         <Route path="/state-union/:stateName" element={<Districts />} />
         <Route path="/state-union/:stateName/district/:districtName" element={<DistrictDetails />} />
         <Route path="/news" element={<Blog />} />
+        <Route path="/news/:id" element={<Blog />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/forms" element={<Form />} />
         <Route path="/self-defence" element={<SelfDefence />} />
