@@ -317,7 +317,7 @@ const StateUnionDashboard = () => {
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Secretary Name</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{profileData?.district ? 'Secretary Name' : 'General Secretary Name'}</label>
                     <input 
                       type="text" 
                       name="secretaryName" 
@@ -393,7 +393,7 @@ const StateUnionDashboard = () => {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Secretary Image</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{profileData?.district ? 'Secretary Image' : 'General Secretary Image'}</label>
                   <input 
                     type="file" 
                     onChange={handleGeneralSecretaryImageUpload} 
@@ -404,7 +404,7 @@ const StateUnionDashboard = () => {
                     {secretaryImagePreview ? (
                       <img 
                         src={secretaryImagePreview} 
-                        alt="Secretary Preview" 
+                        alt={profileData?.district ? "Secretary Preview" : "General Secretary Preview"} 
                         className="h-32 w-auto rounded-lg object-cover border-2 border-blue-500 shadow-md" 
                       />
                     ) : profileData?.generalSecretaryImage ? (
@@ -466,7 +466,7 @@ const StateUnionDashboard = () => {
                   </div>
                   
                   <div className="border-b pb-4">
-                    <p className="text-sm font-medium text-gray-500 mb-1">Secretary Name</p>
+                    <p className="text-sm font-medium text-gray-500 mb-1">{profileData?.district ? 'Secretary Name' : 'General Secretary Name'}</p>
                     <p className="text-lg font-semibold">{profileData?.secretaryName || 'N/A'}</p>
                   </div>
                   
@@ -506,7 +506,7 @@ const StateUnionDashboard = () => {
                 
                 {profileData?.generalSecretaryImage && (
                   <div>
-                    <p className="text-sm font-medium text-gray-500 mb-2">Secretary Image</p>
+                    <p className="text-sm font-medium text-gray-500 mb-2">{profileData?.district ? 'Secretary Image' : 'General Secretary Image'}</p>
                     <img 
                       src={getImageUrl(profileData.generalSecretaryImage)} 
                       alt="Secretary" 

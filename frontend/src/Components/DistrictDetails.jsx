@@ -10,6 +10,7 @@ const DistrictDetails = () => {
   const { stateName, districtName } = useParams();
   const navigate = useNavigate();
   const [districtHead, setDistrictHead] = useState(null);
+  const [stateHead, setStateHead] = useState(null);
   const [unions, setUnions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedUnion, setSelectedUnion] = useState(null);
@@ -32,6 +33,19 @@ const DistrictDetails = () => {
           
           // Get all unions (including district head in the list)
           setUnions(organizations);
+        }
+        
+        // Fetch state head
+        try {
+          const orgResponse = await axios.get(API_ENDPOINTS.GET_ORGANIZATIONS_BY_STATE(stateName));
+          if (orgResponse.data.success) {
+            const head = orgResponse.data.data.find(org => org.isStateHead);
+            if (head) {
+              setStateHead(head);
+            }
+          }
+        } catch (err) {
+          console.error(`Error fetching state head for ${stateName}:`, err);
         }
       } catch (error) {
         console.error('Error fetching district data:', error);
@@ -360,6 +374,86 @@ const DistrictDetails = () => {
           <p className="text-lg sm:text-xl text-gray-600">{stateName}</p>
         </motion.div>
 
+        {/* State Head Section */}
+        {stateHead && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="bg-white rounded-xl shadow-lg mb-8 overflow-hidden relative"
+          >
+            <div className="absolute top-4 right-4 z-10">
+              <div className="bg-yellow-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2">
+                <Crown className="w-5 h-5" />
+                <span className="font-bold text-sm">State Head</span>
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="flex flex-col md:flex-row gap-6">
+                {stateHead.generalSecretaryImage && (
+                  <div className="flex-shrink-0">
+                    <div className="text-center">
+                      <img
+                        src={getImageUrl(stateHead.generalSecretaryImage)}
+                        alt="General Secretary"
+                        className="w-32 h-32 sm:w-40 sm:h-40 rounded-lg object-cover border-4 border-yellow-500 shadow-xl mx-auto"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                      <p className="text-sm font-semibold text-gray-700 mt-3">{stateHead.secretaryName || 'General Secretary'}</p>
+                    </div>
+                  </div>
+                )}
+                <div className="flex-1">
+                  <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 mb-3">
+                    {stateHead.name}
+                  </h3>
+                  {stateHead.state && (
+                    <p className="text-base text-gray-600 font-medium mb-4">
+                      {stateHead.state}
+                    </p>
+                  )}
+                  {stateHead.headOfficeAddress && (
+                    <div className="flex items-start gap-2 text-gray-700 mb-4">
+                      <MapPin className="w-5 h-5 text-yellow-600 mt-1 flex-shrink-0" />
+                      <span className="font-semibold leading-relaxed">{stateHead.headOfficeAddress}</span>
+                    </div>
+                  )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                    {stateHead.phone && (
+                      <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border-2 border-green-200">
+                        <div className="bg-green-200 rounded-lg p-2">
+                          <Phone className="w-5 h-5 text-green-700" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-xs font-semibold text-green-700 uppercase tracking-wide mb-1">Contact Phone</p>
+                          <a href={`tel:${stateHead.phone}`} className="text-base font-bold text-gray-800 hover:text-green-700 transition-colors">
+                            {stateHead.phone}
+                          </a>
+                        </div>
+                      </div>
+                    )}
+                    {stateHead.email && (
+                      <div className="flex items-start gap-3 p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border-2 border-purple-200">
+                        <div className="bg-purple-200 rounded-lg p-2">
+                          <Mail className="w-5 h-5 text-purple-700" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-xs font-semibold text-purple-700 uppercase tracking-wide mb-1">Email Address</p>
+                          <a href={`mailto:${stateHead.email}`} className="text-base font-bold text-gray-800 hover:text-purple-700 transition-colors break-all">
+                            {stateHead.email}
+                          </a>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         {!hasData ? (
           // No data available - Show contact us message
           <motion.div
@@ -417,13 +511,13 @@ const DistrictDetails = () => {
                         <div className="text-center">
                           <img
                             src={getImageUrl(districtHead.generalSecretaryImage)}
-                            alt="Secretary"
+                            alt={union.isStateHead ? "General Secretary" : "Secretary"}
                             className="w-32 h-32 sm:w-40 sm:h-40 rounded-lg object-cover border-4 border-orange-500 shadow-xl mx-auto"
                             onError={(e) => {
                               e.target.style.display = 'none';
                             }}
                           />
-                          <p className="text-sm font-semibold text-gray-700 mt-3">{districtHead.secretaryName || 'Secretary'}</p>
+                          <p className="text-sm font-semibold text-gray-700 mt-3">{districtHead.secretaryName || 'General Secretary'}</p>
                         </div>
                       </div>
                     )}
@@ -538,7 +632,7 @@ const DistrictDetails = () => {
                         {union.generalSecretaryImage ? (
                           <img
                             src={getImageUrl(union.generalSecretaryImage)}
-                            alt="Secretary"
+                            alt={union.isStateHead ? "General Secretary" : "Secretary"}
                             className="w-16 h-16 rounded-full object-cover border-2 border-orange-500"
                             onError={(e) => {
                               e.target.style.display = 'none';
@@ -660,14 +754,14 @@ const DistrictDetails = () => {
                         <div className="w-40 h-40 rounded-lg bg-orange-100 flex items-center justify-center border-4 border-orange-500 shadow-xl mx-auto hidden">
                           <User className="w-20 h-20 text-orange-600" />
                         </div>
-                        <p className="text-sm font-semibold text-gray-700 mt-3 id-card-secretary-name">{selectedUnion.secretaryName || 'Secretary'}</p>
+                        <p className="text-sm font-semibold text-gray-700 mt-3 id-card-secretary-name">{selectedUnion.secretaryName || (selectedUnion.isStateHead ? 'General Secretary' : 'Secretary')}</p>
                       </div>
                     ) : (
                       <div className="text-center">
                         <div className="w-40 h-40 rounded-lg bg-orange-100 flex items-center justify-center border-4 border-orange-500 shadow-xl mx-auto">
                           <User className="w-20 h-20 text-orange-600" />
                         </div>
-                        <p className="text-sm font-semibold text-gray-700 mt-3 id-card-secretary-name">{selectedUnion.secretaryName || 'Secretary'}</p>
+                        <p className="text-sm font-semibold text-gray-700 mt-3 id-card-secretary-name">{selectedUnion.secretaryName || (selectedUnion.isStateHead ? 'General Secretary' : 'Secretary')}</p>
                       </div>
                     )}
                   </div>

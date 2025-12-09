@@ -63,6 +63,17 @@ const StateUnion = () => {
             }
           });
           setStateHeads(headsMap);
+          
+          // Mark states with state heads as active
+          mappedStates.forEach(state => {
+            if (headsMap[state.name]) {
+              state.active = true;
+              state.unionName = headsMap[state.name].name;
+              state.secretary = headsMap[state.name].secretaryName || 'General Secretary';
+              state.established = headsMap[state.name].establishedDate;
+            }
+          });
+          setStates(mappedStates);
         }
       } catch (err) {
         console.error('Error fetching states:', err);
@@ -77,8 +88,8 @@ const StateUnion = () => {
     fetchStates();
   }, []);
 
-  const activeStates = states.filter(state => state.active);
-  const upcomingStates = states.filter(state => !state.active);
+  const activeStates = states.filter(state => state.active || stateHeads[state.name]);
+  const upcomingStates = states.filter(state => !state.active && !stateHeads[state.name]);
   
   // Filter states based on type
   const filteredUpcomingStates = useMemo(() => {
@@ -163,36 +174,47 @@ const StateUnion = () => {
                   <tr>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">State</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Union Name</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Secretary</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">General Secretary</th>
                     <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Districts</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {activeStates.map((state, index) => (
-                    <motion.tr
-                      key={state.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="hover:bg-orange-50 transition-colors cursor-pointer"
-                      onClick={() => navigate(`/state-union/${state.name}`)}
-                    >
-                      <td className="px-6 py-4">
-                        <span className="font-bold text-gray-800">{state.name}</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-gray-700">{state.unionName}</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-gray-700">{state.secretary}</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                          {state.districts}
-                        </span>
-                      </td>
-                    </motion.tr>
-                  ))}
+                  {activeStates.map((state, index) => {
+                    const stateHead = stateHeads[state.name];
+                    return (
+                      <motion.tr
+                        key={state.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="hover:bg-orange-50 transition-colors cursor-pointer"
+                        onClick={() => navigate(`/state-union/${state.name}`)}
+                      >
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-gray-800">{state.name}</span>
+                            {stateHead && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-yellow-500 text-white text-xs font-semibold rounded-full">
+                                <Crown className="w-3 h-3" />
+                                State Head
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="text-gray-700">{state.unionName || stateHead?.name || '-'}</span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="text-gray-700">{state.secretary || stateHead?.secretaryName || 'General Secretary'}</span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                            {state.districts}
+                          </span>
+                        </td>
+                      </motion.tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
