@@ -10,7 +10,6 @@ const DistrictDetails = () => {
   const { stateName, districtName } = useParams();
   const navigate = useNavigate();
   const [districtHead, setDistrictHead] = useState(null);
-  const [stateHead, setStateHead] = useState(null);
   const [unions, setUnions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedUnion, setSelectedUnion] = useState(null);
@@ -66,7 +65,6 @@ const DistrictDetails = () => {
         // Set empty state on error to prevent blank screen
         setUnions([]);
         setDistrictHead(null);
-        setStateHead(null);
       } finally {
         setLoading(false);
       }
