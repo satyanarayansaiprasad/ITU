@@ -383,14 +383,14 @@ const DistrictDetails = () => {
           className="mb-8"
         >
           <button
-            onClick={() => navigate(`/state-union/${stateName}`)}
+            onClick={() => navigate(`/state-union/${encodeURIComponent(stateName || '')}`)}
             className="mb-4 flex items-center text-orange-600 hover:text-orange-700 font-medium"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Districts
           </button>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-2">{districtName}</h1>
-          <p className="text-lg sm:text-xl text-gray-600">{stateName}</p>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-2">{decodeURIComponent(districtName || '')}</h1>
+          <p className="text-lg sm:text-xl text-gray-600">{decodeURIComponent(stateName || '')}</p>
         </motion.div>
 
         {/* State Head Section */}
