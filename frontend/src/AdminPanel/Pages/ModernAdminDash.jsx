@@ -504,8 +504,8 @@ const ModernAdminDash = () => {
                 title="Total Blog Posts"
                 value={analytics?.overview?.totalPosts || 0}
                 previousValue={previousStats?.totalPosts}
-                change={analytics?.overview?.totalPosts && previousStats?.totalPosts ? 
-                  Math.round(((analytics.overview.totalPosts - previousStats.totalPosts) / previousStats.totalPosts) * 100) : 0}
+                change={previousStats?.totalPosts && previousStats.totalPosts > 0 && analytics?.overview?.totalPosts ? 
+                  Math.round(((analytics.overview.totalPosts - previousStats.totalPosts) / previousStats.totalPosts) * 100) : undefined}
                 icon={<FileText size={24} />}
                 color="blue"
                 isAnimating={animatedStats?.totalPosts?.isAnimating}
@@ -514,8 +514,8 @@ const ModernAdminDash = () => {
                 title="Contact Messages"
                 value={analytics?.overview?.totalContacts || 0}
                 previousValue={previousStats?.totalContacts}
-                change={analytics?.overview?.totalContacts && previousStats?.totalContacts ? 
-                  Math.round(((analytics.overview.totalContacts - previousStats.totalContacts) / previousStats.totalContacts) * 100) : 0}
+                change={previousStats?.totalContacts && previousStats.totalContacts > 0 && analytics?.overview?.totalContacts ? 
+                  Math.round(((analytics.overview.totalContacts - previousStats.totalContacts) / previousStats.totalContacts) * 100) : undefined}
                 icon={<Mail size={24} />}
                 color="green"
                 isAnimating={animatedStats?.totalContacts?.isAnimating}
@@ -524,8 +524,8 @@ const ModernAdminDash = () => {
                 title="Form Submissions"
                 value={analytics?.overview?.totalForms || 0}
                 previousValue={previousStats?.totalForms}
-                change={analytics?.overview?.totalForms && previousStats?.totalForms ? 
-                  Math.round(((analytics.overview.totalForms - previousStats.totalForms) / previousStats.totalForms) * 100) : 0}
+                change={previousStats?.totalForms && previousStats.totalForms > 0 && analytics?.overview?.totalForms ? 
+                  Math.round(((analytics.overview.totalForms - previousStats.totalForms) / previousStats.totalForms) * 100) : undefined}
                 icon={<Users size={24} />}
                 color="purple"
                 isAnimating={animatedStats?.totalForms?.isAnimating}
@@ -534,8 +534,8 @@ const ModernAdminDash = () => {
                 title="Gallery Images"
                 value={analytics?.overview?.totalGalleryImages || 0}
                 previousValue={previousStats?.totalGalleryImages}
-                change={analytics?.overview?.totalGalleryImages && previousStats?.totalGalleryImages ? 
-                  Math.round(((analytics.overview.totalGalleryImages - previousStats.totalGalleryImages) / previousStats.totalGalleryImages) * 100) : 0}
+                change={previousStats?.totalGalleryImages && previousStats.totalGalleryImages > 0 && analytics?.overview?.totalGalleryImages ? 
+                  Math.round(((analytics.overview.totalGalleryImages - previousStats.totalGalleryImages) / previousStats.totalGalleryImages) * 100) : undefined}
                 icon={<ImageIcon size={24} />}
                 color="orange"
                 isAnimating={animatedStats?.totalGalleryImages?.isAnimating}
