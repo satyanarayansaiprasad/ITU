@@ -547,7 +547,7 @@ const DistrictDetails = () => {
                         <div className="text-center">
                           <img
                             src={getImageUrl(districtHead.generalSecretaryImage)}
-                            alt={union.isStateHead ? "General Secretary" : "Secretary"}
+                            alt={districtHead.isStateHead ? "General Secretary" : "Secretary"}
                             className="w-32 h-32 sm:w-40 sm:h-40 rounded-lg object-cover border-4 border-orange-500 shadow-xl mx-auto"
                             onError={(e) => {
                               e.target.style.display = 'none';
@@ -655,59 +655,65 @@ const DistrictDetails = () => {
                   </h2>
                 </div>
                 <div className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                  {safeUnions.map((union, index) => (
-                    <motion.div
-                      key={union._id || index}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.3 + index * 0.1 }}
-                      onClick={() => setSelectedUnion(union)}
-                      className="bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 rounded-lg p-6 cursor-pointer hover:border-orange-500 hover:shadow-lg transition-all"
-                    >
-                      <div className="flex items-start gap-4 mb-4">
-                        {union.generalSecretaryImage ? (
-                          <img
-                            src={getImageUrl(union.generalSecretaryImage)}
-                            alt={union.isStateHead ? "General Secretary" : "Secretary"}
-                            className="w-16 h-16 rounded-full object-cover border-2 border-orange-500"
-                            onError={(e) => {
-                              e.target.style.display = 'none';
-                            }}
-                          />
-                        ) : (
-                          <div className="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center">
-                            <User className="w-8 h-8 text-orange-600" />
-                          </div>
-                        )}
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-bold text-lg text-gray-800">{union.name}</h3>
-                            {union.isDistrictHead && (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-500 text-white text-xs font-semibold rounded-full">
-                                <Award className="w-3 h-3" />
-                                District Head
-                              </span>
+                  {safeUnions.map((union, index) => {
+                    if (!union || typeof union !== 'object') {
+                      console.warn('Invalid union data at index:', index, union);
+                      return null;
+                    }
+                    return (
+                      <motion.div
+                        key={union._id || union.id || `union-${index}`}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.3 + index * 0.1 }}
+                        onClick={() => setSelectedUnion(union)}
+                        className="bg-gradient-to-br from-white to-gray-50 border-2 border-gray-200 rounded-lg p-6 cursor-pointer hover:border-orange-500 hover:shadow-lg transition-all"
+                      >
+                        <div className="flex items-start gap-4 mb-4">
+                          {union.generalSecretaryImage ? (
+                            <img
+                              src={getImageUrl(union.generalSecretaryImage)}
+                              alt={union.isStateHead ? "General Secretary" : "Secretary"}
+                              className="w-16 h-16 rounded-full object-cover border-2 border-orange-500"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                              }}
+                            />
+                          ) : (
+                            <div className="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center">
+                              <User className="w-8 h-8 text-orange-600" />
+                            </div>
+                          )}
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="font-bold text-lg text-gray-800">{union.name || 'Unnamed Union'}</h3>
+                              {union.isDistrictHead && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-500 text-white text-xs font-semibold rounded-full">
+                                  <Award className="w-3 h-3" />
+                                  District Head
+                                </span>
+                              )}
+                            </div>
+                            {union.phone && (
+                              <p className="text-sm text-gray-600 flex items-center gap-1">
+                                <Phone className="w-4 h-4" />
+                                {union.phone}
+                              </p>
                             )}
                           </div>
-                          {union.phone && (
-                            <p className="text-sm text-gray-600 flex items-center gap-1">
-                              <Phone className="w-4 h-4" />
-                              {union.phone}
-                            </p>
-                          )}
                         </div>
-                      </div>
-                      {union.headOfficeAddress && (
-                        <p className="text-sm text-gray-600 flex items-start gap-2">
-                          <MapPin className="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" />
-                          <span className="line-clamp-2">{union.headOfficeAddress}</span>
-                        </p>
-                      )}
-                      <div className="mt-4 pt-4 border-t border-gray-200">
-                        <span className="text-xs text-orange-600 font-semibold">Click to view details →</span>
-                      </div>
-                    </motion.div>
-                  ))}
+                        {union.headOfficeAddress && (
+                          <p className="text-sm text-gray-600 flex items-start gap-2">
+                            <MapPin className="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" />
+                            <span className="line-clamp-2">{union.headOfficeAddress}</span>
+                          </p>
+                        )}
+                        <div className="mt-4 pt-4 border-t border-gray-200">
+                          <span className="text-xs text-orange-600 font-semibold">Click to view details →</span>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
                 </div>
               </motion.div>
             ) : (
