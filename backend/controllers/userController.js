@@ -53,7 +53,8 @@ exports.form = async (req, res) => {
     // For affiliation forms, the "name" field is actually the secretary name
     const newFormEntry = new AccelerationForm({
       state,
-      secretaryName: name, // Save name as secretaryName for affiliation forms
+      name: name, // Required field - secretary name for affiliation forms
+      secretaryName: name, // Also save as secretaryName for affiliation forms
       email,
       phone,
       address,
@@ -68,7 +69,25 @@ exports.form = async (req, res) => {
     res.status(201).json({ message: "Form submitted successfully" });
   } catch (error) {
     console.error("Error submitting form:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    
+    // Provide more detailed error messages for debugging
+    if (error.name === 'ValidationError') {
+      const validationErrors = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({ 
+        error: "Validation failed", 
+        details: validationErrors 
+      });
+    }
+    
+    if (error.code === 11000) {
+      // Duplicate key error (unique constraint violation)
+      return res.status(409).json({ error: "Email already exists" });
+    }
+    
+    res.status(500).json({ 
+      error: "Internal Server Error",
+      message: error.message 
+    });
   }
 };
 
