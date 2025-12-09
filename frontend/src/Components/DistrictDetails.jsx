@@ -18,21 +18,31 @@ const DistrictDetails = () => {
 
   useEffect(() => {
     const fetchDistrictData = async () => {
+      if (!stateName || !districtName) {
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
         
         // React Router already decodes URL parameters, so use them directly
-        // But handle cases where they might be encoded
-        const decodedDistrictName = districtName ? (districtName.includes('%') ? decodeURIComponent(districtName) : districtName) : '';
-        const decodedStateName = stateName ? (stateName.includes('%') ? decodeURIComponent(stateName) : stateName) : '';
+        const cleanStateName = stateName.trim();
+        const cleanDistrictName = districtName.trim();
         
-        console.log('Fetching district data for:', decodedStateName, decodedDistrictName);
+        console.log('Fetching district data for:', cleanStateName, cleanDistrictName);
         
         const response = await axios.get(
-          API_ENDPOINTS.GET_ORGANIZATIONS_BY_DISTRICT(decodedStateName, decodedDistrictName)
+          API_ENDPOINTS.GET_ORGANIZATIONS_BY_DISTRICT(cleanStateName, cleanDistrictName),
+          {
+            timeout: 10000, // 10 second timeout
+            validateStatus: function (status) {
+              return status < 500; // Don't throw for 4xx errors
+            }
+          }
         );
 
-        if (response.data && response.data.success) {
+        if (response.data && response.data.success && Array.isArray(response.data.data)) {
           const organizations = response.data.data || [];
           console.log('Organizations found:', organizations.length);
           
@@ -50,19 +60,29 @@ const DistrictDetails = () => {
         
         // Fetch state head
         try {
-          const orgResponse = await axios.get(API_ENDPOINTS.GET_ORGANIZATIONS_BY_STATE(decodedStateName));
-          if (orgResponse.data && orgResponse.data.success) {
+          const orgResponse = await axios.get(
+            API_ENDPOINTS.GET_ORGANIZATIONS_BY_STATE(cleanStateName),
+            {
+              timeout: 10000,
+              validateStatus: function (status) {
+                return status < 500;
+              }
+            }
+          );
+          if (orgResponse.data && orgResponse.data.success && Array.isArray(orgResponse.data.data)) {
             const head = orgResponse.data.data.find(org => org.isStateHead);
             if (head) {
               setStateHead(head);
             }
           }
         } catch (err) {
-          console.error(`Error fetching state head for ${decodedStateName}:`, err);
+          console.error(`Error fetching state head for ${cleanStateName}:`, err);
+          // Don't set state head on error, just continue
         }
       } catch (error) {
         console.error('Error fetching district data:', error);
         console.error('Error details:', error.response?.data || error.message);
+        console.error('Error stack:', error.stack);
         // Set empty state on error to prevent blank screen
         setUnions([]);
         setDistrictHead(null);
@@ -72,11 +92,7 @@ const DistrictDetails = () => {
       }
     };
 
-    if (stateName && districtName) {
-      fetchDistrictData();
-    } else {
-      setLoading(false);
-    }
+    fetchDistrictData();
   }, [stateName, districtName]);
 
   const getImageUrl = (imagePath) => {
@@ -626,7 +642,7 @@ const DistrictDetails = () => {
             )}
 
             {/* Unions List */}
-            {unions.length > 0 ? (
+            {safeUnions.length > 0 ? (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -635,11 +651,11 @@ const DistrictDetails = () => {
               >
                 <div className="bg-gradient-to-r from-orange-500 to-red-600 px-4 sm:px-6 py-3 sm:py-4">
                   <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white">
-                    Available Unions ({unions.length})
+                    Available Unions ({safeUnions.length})
                   </h2>
                 </div>
                 <div className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                  {unions.map((union, index) => (
+                  {safeUnions.map((union, index) => (
                     <motion.div
                       key={union._id || index}
                       initial={{ opacity: 0, scale: 0.9 }}
