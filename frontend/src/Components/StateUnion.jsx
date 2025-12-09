@@ -85,7 +85,7 @@ const StateUnion = () => {
               const head = headsMap[state.name];
               state.active = true;
               state.unionName = head.name;
-              state.secretary = head.secretaryName || 'General Secretary';
+              state.secretary = head.secretaryName || null; // Store actual secretary name or null
               state.established = head.establishedDate;
             }
           });
@@ -221,7 +221,9 @@ const StateUnion = () => {
                           <span className="text-gray-700">{state.unionName || stateHead?.name || '-'}</span>
                         </td>
                         <td className="px-6 py-4">
-                          <span className="text-gray-700">{state.secretary || stateHead?.secretaryName || 'General Secretary'}</span>
+                          <span className="text-gray-700">
+                            {stateHead?.secretaryName || state.secretary || '-'}
+                          </span>
                         </td>
                         <td className="px-6 py-4">
                           <span className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">

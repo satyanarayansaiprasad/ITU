@@ -1473,7 +1473,7 @@ exports.getOrganizationsByState = async (req, res) => {
     const organizations = await AccelerationForm.find({
       state: stateName,
       status: 'approved'
-    }).select('name email phone district headOfficeAddress isDistrictHead isStateHead state');
+    }).select('name email phone district headOfficeAddress isDistrictHead isStateHead state secretaryName presidentName generalSecretaryImage establishedDate');
     
     res.status(200).json({ 
       success: true, 
