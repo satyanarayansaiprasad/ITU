@@ -37,6 +37,7 @@ export const API_ENDPOINTS = {
   DELETE_NEWS: (id) => `${API_BASE_URL}/api/admin/deleteNews/${id}`,
   GET_FORM: `${API_BASE_URL}/api/admin/getForm`,
   APPROVE_FORM: `${API_BASE_URL}/api/admin/approveForm`,
+  REJECT_FORM: `${API_BASE_URL}/api/admin/rejectForm`,
   DELETE_USER: `${API_BASE_URL}/api/admin/deleteUser`,
   SET_DISTRICT_HEAD: `${API_BASE_URL}/api/admin/set-district-head`,
   SET_STATE_HEAD: `${API_BASE_URL}/api/admin/set-state-head`,

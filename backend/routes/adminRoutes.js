@@ -44,6 +44,7 @@ router.delete('/deleteCategorySlider/:id', adminController.deleteCategorySlider)
 router.get('/getForm',adminController.getForm);
 
 router.put('/approveForm',adminController.approveForm)
+router.put('/rejectForm',adminController.rejectForm)
 router.delete('/deleteUser',adminController.deleteUser)
 
 // District and State Head Management

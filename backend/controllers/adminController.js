@@ -1513,53 +1513,77 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
-// // In your backend controller
-// exports.rejectForm = async (req, res) => {
-//   try {
-//     const { formId, email } = req.body;
+// Reject form application
+exports.rejectForm = async (req, res) => {
+  try {
+    const { formId, email, reason } = req.body;
 
-//     // Update the form with rejected status and clear any existing approval
-//     const updatedForm = await User.findByIdAndUpdate(
-//       formId,
-//       { 
-//         rejected: true,
-//         password: undefined, // Clear any existing password if present
-//         $unset: { password: 1 } // Alternative way to remove the field
-//       },
-//       { new: true }
-//     );
+    if (!formId || !email) {
+      return res.status(400).json({ 
+        success: false,
+        error: "Form ID and email are required" 
+      });
+    }
 
-//     if (!updatedForm) {
-//       return res.status(404).json({ error: "Form not found" });
-//     }
+    // Update the form with rejected status
+    const updatedForm = await AccelerationForm.findByIdAndUpdate(
+      formId,
+      { 
+        status: "reject", // Using "reject" as per schema enum
+        rejectionReason: reason || 'Not specified'
+      },
+      { new: true }
+    );
 
-//     // Send rejection email
-//     const mailOptions = {
-//       from: `"Indian Taekwondo Union" <${process.env.EMAIL_FROM}>`,
-//       to: email,
-//       subject: "Your Application Status",
-//       html: `
-//         <p>We regret to inform you that your application has been rejected.</p>
-//         <p>For more information, please contact our support team.</p>
-//       `
-//     };
+    if (!updatedForm) {
+      return res.status(404).json({ 
+        success: false,
+        error: "Form not found" 
+      });
+    }
 
-//     await transporter.sendMail(mailOptions);
+    // Send rejection email
+    const mailOptions = {
+      from: `"Indian Taekwondo Union" <${getEmailFrom()}>`,
+      to: email,
+      subject: "Your Affiliation Request Status",
+      html: `
+        <h2>Application Status Update</h2>
+        <p>Dear ${updatedForm.name || 'Applicant'},</p>
+        <p>We regret to inform you that your affiliation request has been rejected.</p>
+        ${reason ? `<p><strong>Reason:</strong> ${reason}</p>` : ''}
+        <p>If you have any questions or would like to appeal this decision, please contact our support team.</p>
+        <p>Regards,<br/>
+        Indian Taekwondo Union<br/>
+        System Administrator</p>
+      `
+    };
 
-//     res.status(200).json({
-//       success: true,
-//       message: "Form rejected and notification sent",
-//       form: updatedForm
-//     });
+    if (transporter) {
+      await transporter.sendMail(mailOptions);
+      res.status(200).json({
+        success: true,
+        message: "Form rejected and notification sent",
+        form: updatedForm
+      });
+    } else {
+      console.error('Email transporter not configured. Email not sent to:', email);
+      res.status(200).json({
+        success: true,
+        message: "Form rejected but email could not be sent (email not configured)",
+        form: updatedForm
+      });
+    }
 
-//   } catch (error) {
-//     console.error("Error rejecting form:", error);
-//     res.status(500).json({
-//       error: "Server error while rejecting form",
-//       details: error.message
-//     });
-//   }
-// };
+  } catch (error) {
+    console.error("Error rejecting form:", error);
+    res.status(500).json({
+      success: false,
+      error: "Server error while rejecting form",
+      details: error.message
+    });
+  }
+};
 
 // ========== BLOG-SPECIFIC ENDPOINTS ==========
 

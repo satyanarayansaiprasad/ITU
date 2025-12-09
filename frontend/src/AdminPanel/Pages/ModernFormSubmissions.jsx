@@ -37,6 +37,7 @@ const ModernFormSubmissions = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [approvingId, setApprovingId] = useState(null);
+  const [rejectingId, setRejectingId] = useState(null);
   const [selectedForm, setSelectedForm] = useState(null);
   const [notification, setNotification] = useState(null);
   const [showPasswordModal, setShowPasswordModal] = useState(null);
@@ -103,7 +104,15 @@ const ModernFormSubmissions = () => {
         form.state?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         form.phone?.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesStatus = statusFilter === 'all' || form.status === statusFilter;
+      let matchesStatus = false;
+      if (statusFilter === 'all') {
+        matchesStatus = true;
+      } else if (statusFilter === 'rejected') {
+        // Handle both "reject" and "rejected" status
+        matchesStatus = form.status === 'reject' || form.status === 'rejected';
+      } else {
+        matchesStatus = form.status === statusFilter;
+      }
 
       return matchesSearch && matchesStatus;
     });
@@ -126,20 +135,83 @@ const ModernFormSubmissions = () => {
       const password = generatePassword(state);
       setGeneratedPassword(password);
       
-      await axios.put(API_ENDPOINTS.APPROVE_FORM, {
+      const response = await axios.put(API_ENDPOINTS.APPROVE_FORM, {
         formId,
         email,
         password
       });
 
-      await fetchForms();
-      setShowPasswordModal({ email, password, name, state });
-      showNotification(`Form approved! Credentials sent to ${email}`);
+      // Update local state immediately without waiting for refresh
+      if (response.data.success) {
+        setForms(prevForms => 
+          prevForms.map(form => 
+            form._id === formId 
+              ? { ...form, status: 'approved', password: password }
+              : form
+          )
+        );
+        
+        // Update selected form if it's the one being approved
+        if (selectedForm && selectedForm._id === formId) {
+          setSelectedForm({ ...selectedForm, status: 'approved', password: password });
+        }
+        
+        setShowPasswordModal({ email, password, name, state });
+        showNotification(`Form approved! Credentials sent to ${email}`);
+      }
+      
+      // Fetch fresh data in background to ensure consistency
+      fetchForms();
     } catch (error) {
       console.error("Error approving form:", error);
       showNotification(error.response?.data?.error || "Failed to approve form", "error");
     } finally {
       setApprovingId(null);
+    }
+  };
+
+  const handleReject = async (formId, email, name) => {
+    const reason = window.prompt('Please provide a reason for rejection (optional):');
+    
+    // If user cancels the prompt, don't proceed
+    if (reason === null) {
+      return;
+    }
+
+    try {
+      setRejectingId(formId);
+      
+      const response = await axios.put(API_ENDPOINTS.REJECT_FORM, {
+        formId,
+        email,
+        reason: reason || 'Not specified'
+      });
+
+      // Update local state immediately without waiting for refresh
+      if (response.data.success) {
+        setForms(prevForms => 
+          prevForms.map(form => 
+            form._id === formId 
+              ? { ...form, status: 'reject', rejectionReason: reason || 'Not specified' }
+              : form
+          )
+        );
+        
+        // Update selected form if it's the one being rejected
+        if (selectedForm && selectedForm._id === formId) {
+          setSelectedForm({ ...selectedForm, status: 'reject', rejectionReason: reason || 'Not specified' });
+        }
+        
+        showNotification(`Form rejected. Notification sent to ${email}`);
+      }
+      
+      // Fetch fresh data in background to ensure consistency
+      fetchForms();
+    } catch (error) {
+      console.error("Error rejecting form:", error);
+      showNotification(error.response?.data?.error || "Failed to reject form", "error");
+    } finally {
+      setRejectingId(null);
     }
   };
 
@@ -201,6 +273,7 @@ const ModernFormSubmissions = () => {
         return 'bg-green-100 text-green-700 border-green-200';
       case 'pending':
         return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+      case 'reject':
       case 'rejected':
         return 'bg-red-100 text-red-700 border-red-200';
       default:
@@ -214,6 +287,7 @@ const ModernFormSubmissions = () => {
         return <UserCheck size={14} />;
       case 'pending':
         return <Clock size={14} />;
+      case 'reject':
       case 'rejected':
         return <UserX size={14} />;
       default:
@@ -221,11 +295,16 @@ const ModernFormSubmissions = () => {
     }
   };
 
+  const getStatusDisplay = (status) => {
+    if (status === 'reject') return 'rejected';
+    return status || 'pending';
+  };
+
   const statusCounts = {
     total: forms.length,
     pending: forms.filter(f => f.status === 'pending').length,
     approved: forms.filter(f => f.status === 'approved').length,
-    rejected: forms.filter(f => f.status === 'rejected').length
+    rejected: forms.filter(f => f.status === 'reject' || f.status === 'rejected').length
   };
 
   return (
@@ -413,7 +492,7 @@ const ModernFormSubmissions = () => {
                           <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(form.status)}`}>
                             <div className="flex items-center gap-1">
                               {getStatusIcon(form.status)}
-                              {form.status || 'pending'}
+                              {getStatusDisplay(form.status)}
                             </div>
                           </span>
                         </div>
@@ -449,21 +528,38 @@ const ModernFormSubmissions = () => {
                     {/* Actions */}
                     <div className="flex items-center gap-2 ml-4">
                       {form.status === 'pending' && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleApprove(form._id, form.email, form.state, form.name);
-                          }}
-                          disabled={approvingId === form._id}
-                          className="flex items-center gap-1 px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 text-sm"
-                        >
-                          {approvingId === form._id ? (
-                            <Loader size={14} className="animate-spin" />
-                          ) : (
-                            <Check size={14} />
-                          )}
-                          Approve
-                        </button>
+                        <>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleApprove(form._id, form.email, form.state, form.name);
+                            }}
+                            disabled={approvingId === form._id}
+                            className="flex items-center gap-1 px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 text-sm"
+                          >
+                            {approvingId === form._id ? (
+                              <Loader size={14} className="animate-spin" />
+                            ) : (
+                              <Check size={14} />
+                            )}
+                            Approve
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleReject(form._id, form.email, form.name);
+                            }}
+                            disabled={rejectingId === form._id}
+                            className="flex items-center gap-1 px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 text-sm"
+                          >
+                            {rejectingId === form._id ? (
+                              <Loader size={14} className="animate-spin" />
+                            ) : (
+                              <X size={14} />
+                            )}
+                            Reject
+                          </button>
+                        </>
                       )}
 
                       {form.status === 'approved' && (
@@ -531,7 +627,7 @@ const ModernFormSubmissions = () => {
                           <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(selectedForm.status)}`}>
                             <div className="flex items-center gap-1">
                               {getStatusIcon(selectedForm.status)}
-                              {selectedForm.status || 'pending'}
+                              {getStatusDisplay(selectedForm.status)}
                             </div>
                           </span>
                         </div>
@@ -636,10 +732,27 @@ const ModernFormSubmissions = () => {
                           Approve Application
                         </button>
                         
-                        <button className="flex items-center gap-2 px-6 py-3 border border-red-200 text-red-700 rounded-xl hover:bg-red-50 transition-colors">
-                          <X size={16} />
-                          Reject
+                        <button
+                          onClick={() => handleReject(selectedForm._id, selectedForm.email, selectedForm.name)}
+                          disabled={rejectingId === selectedForm._id}
+                          className="flex items-center gap-2 px-6 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors disabled:opacity-50"
+                        >
+                          {rejectingId === selectedForm._id ? (
+                            <Loader size={16} className="animate-spin" />
+                          ) : (
+                            <X size={16} />
+                          )}
+                          Reject Application
                         </button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {(selectedForm.status === 'reject' || selectedForm.status === 'rejected') && selectedForm.rejectionReason && (
+                    <div className="mt-6 pt-6 border-t border-gray-200">
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <h4 className="text-sm font-semibold text-red-800 mb-2">Rejection Reason</h4>
+                        <p className="text-sm text-red-700">{selectedForm.rejectionReason}</p>
                       </div>
                     </div>
                   )}
