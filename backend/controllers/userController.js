@@ -371,13 +371,25 @@ exports.uploadGeneralSecretaryImage = async (req, res) => {
 // Get organizations by district
 exports.getOrganizationsByDistrict = async (req, res) => {
   try {
-    const { stateName, districtName } = req.params;
+    let { stateName, districtName } = req.params;
+    
+    // Decode URL-encoded parameters
+    stateName = decodeURIComponent(stateName || '');
+    districtName = decodeURIComponent(districtName || '');
+    
+    console.log('Fetching organizations for:', stateName, districtName);
+    
+    // Use case-insensitive search and trim whitespace
+    const stateRegex = new RegExp(`^${stateName.trim()}$`, 'i');
+    const districtRegex = new RegExp(`^${districtName.trim()}$`, 'i');
     
     const organizations = await AccelerationForm.find({
-      state: stateName,
-      district: districtName,
+      state: { $regex: stateRegex },
+      district: { $regex: districtRegex },
       status: 'approved'
     }).select('name email phone address district state isDistrictHead isStateHead secretaryName presidentName generalSecretaryImage establishedDate headOfficeAddress contactEmail contactPhone officialWebsite aboutUnion logo').lean();
+    
+    console.log(`Found ${organizations.length} organizations for ${stateName}, ${districtName}`);
     
     // Sort: district head first, then state head, then others
     organizations.sort((a, b) => {
@@ -394,7 +406,11 @@ exports.getOrganizationsByDistrict = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching organizations:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ 
+      success: false,
+      error: "Internal server error",
+      message: error.message 
+    });
   }
 };
 
