@@ -373,15 +373,25 @@ exports.getOrganizationsByDistrict = async (req, res) => {
   try {
     let { stateName, districtName } = req.params;
     
-    // Decode URL-encoded parameters
-    stateName = decodeURIComponent(stateName || '');
-    districtName = decodeURIComponent(districtName || '');
+    // Decode URL-encoded parameters if they contain encoded characters
+    try {
+      if (stateName && stateName.includes('%')) {
+        stateName = decodeURIComponent(stateName);
+      }
+      if (districtName && districtName.includes('%')) {
+        districtName = decodeURIComponent(districtName);
+      }
+    } catch (decodeError) {
+      // If decoding fails, use original values
+      console.warn('URL decoding warning:', decodeError);
+    }
     
     console.log('Fetching organizations for:', stateName, districtName);
     
-    // Use case-insensitive search and trim whitespace
-    const stateRegex = new RegExp(`^${stateName.trim()}$`, 'i');
-    const districtRegex = new RegExp(`^${districtName.trim()}$`, 'i');
+    // Use case-insensitive search and trim whitespace, escape special regex characters
+    const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const stateRegex = new RegExp(`^${escapeRegex(stateName.trim())}$`, 'i');
+    const districtRegex = new RegExp(`^${escapeRegex(districtName.trim())}$`, 'i');
     
     const organizations = await AccelerationForm.find({
       state: { $regex: stateRegex },

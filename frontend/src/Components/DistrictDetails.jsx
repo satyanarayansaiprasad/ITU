@@ -21,9 +21,10 @@ const DistrictDetails = () => {
       try {
         setLoading(true);
         
-        // Decode the district name properly in case of URL encoding issues
-        const decodedDistrictName = decodeURIComponent(districtName || '');
-        const decodedStateName = decodeURIComponent(stateName || '');
+        // React Router already decodes URL parameters, so use them directly
+        // But handle cases where they might be encoded
+        const decodedDistrictName = districtName ? (districtName.includes('%') ? decodeURIComponent(districtName) : districtName) : '';
+        const decodedStateName = stateName ? (stateName.includes('%') ? decodeURIComponent(stateName) : stateName) : '';
         
         console.log('Fetching district data for:', decodedStateName, decodedDistrictName);
         
@@ -383,14 +384,14 @@ const DistrictDetails = () => {
           className="mb-8"
         >
           <button
-            onClick={() => navigate(`/state-union/${encodeURIComponent(stateName || '')}`)}
+            onClick={() => navigate(`/state-union/${stateName || ''}`)}
             className="mb-4 flex items-center text-orange-600 hover:text-orange-700 font-medium"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Districts
           </button>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-2">{decodeURIComponent(districtName || '')}</h1>
-          <p className="text-lg sm:text-xl text-gray-600">{decodeURIComponent(stateName || '')}</p>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-2">{districtName || ''}</h1>
+          <p className="text-lg sm:text-xl text-gray-600">{stateName || ''}</p>
         </motion.div>
 
         {/* State Head Section */}
