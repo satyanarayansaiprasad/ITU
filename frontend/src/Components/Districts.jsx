@@ -229,7 +229,7 @@ const Districts = () => {
               {activeDistricts.map((district, i) => (
                 <div 
                   key={i} 
-                  onClick={() => navigate(`/state-union/${stateName}/district/${encodeURIComponent(district)}`)}
+                  onClick={() => navigate(`/state-union/${encodeURIComponent(stateName)}/district/${encodeURIComponent(district)}`)}
                   className="bg-green-50 border-2 border-green-200 rounded-lg p-4 cursor-pointer hover:border-green-400 hover:shadow-md transition-all"
                 >
                   <div className="text-green-700 font-medium text-sm mb-2 text-center">{district}</div>
@@ -251,7 +251,7 @@ const Districts = () => {
               {comingDistricts.map((district, i) => (
                 <div 
                   key={i} 
-                  onClick={() => navigate(`/state-union/${stateName}/district/${encodeURIComponent(district)}`)}
+                  onClick={() => navigate(`/state-union/${encodeURIComponent(stateName)}/district/${encodeURIComponent(district)}`)}
                   className="bg-white border-2 border-dashed border-amber-300 rounded-lg p-4 cursor-pointer hover:border-amber-400 hover:shadow-md transition-all"
                 >
                   <div className="text-gray-600 font-medium text-sm mb-2 text-center">{district}</div>

@@ -79,13 +79,14 @@ const StateUnion = () => {
           setStateHeads(headsMap);
           setDistrictsWithData(districtsDataMap);
           
-          // Mark states with state heads as active
+          // Mark states with state heads as active and update their details
           mappedStates.forEach(state => {
             if (headsMap[state.name]) {
+              const head = headsMap[state.name];
               state.active = true;
-              state.unionName = headsMap[state.name].name;
-              state.secretary = headsMap[state.name].secretaryName || 'General Secretary';
-              state.established = headsMap[state.name].establishedDate;
+              state.unionName = head.name;
+              state.secretary = head.secretaryName || 'General Secretary';
+              state.established = head.establishedDate;
             }
           });
           setStates(mappedStates);

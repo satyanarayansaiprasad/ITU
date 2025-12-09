@@ -20,12 +20,20 @@ const DistrictDetails = () => {
     const fetchDistrictData = async () => {
       try {
         setLoading(true);
+        
+        // Decode the district name properly in case of URL encoding issues
+        const decodedDistrictName = decodeURIComponent(districtName || '');
+        const decodedStateName = decodeURIComponent(stateName || '');
+        
+        console.log('Fetching district data for:', decodedStateName, decodedDistrictName);
+        
         const response = await axios.get(
-          API_ENDPOINTS.GET_ORGANIZATIONS_BY_DISTRICT(stateName, districtName)
+          API_ENDPOINTS.GET_ORGANIZATIONS_BY_DISTRICT(decodedStateName, decodedDistrictName)
         );
 
-        if (response.data.success) {
+        if (response.data && response.data.success) {
           const organizations = response.data.data || [];
+          console.log('Organizations found:', organizations.length);
           
           // Find district head
           const head = organizations.find(org => org.isDistrictHead);
@@ -33,22 +41,31 @@ const DistrictDetails = () => {
           
           // Get all unions (including district head in the list)
           setUnions(organizations);
+        } else {
+          console.warn('No organizations found or invalid response:', response.data);
+          setUnions([]);
+          setDistrictHead(null);
         }
         
         // Fetch state head
         try {
-          const orgResponse = await axios.get(API_ENDPOINTS.GET_ORGANIZATIONS_BY_STATE(stateName));
-          if (orgResponse.data.success) {
+          const orgResponse = await axios.get(API_ENDPOINTS.GET_ORGANIZATIONS_BY_STATE(decodedStateName));
+          if (orgResponse.data && orgResponse.data.success) {
             const head = orgResponse.data.data.find(org => org.isStateHead);
             if (head) {
               setStateHead(head);
             }
           }
         } catch (err) {
-          console.error(`Error fetching state head for ${stateName}:`, err);
+          console.error(`Error fetching state head for ${decodedStateName}:`, err);
         }
       } catch (error) {
         console.error('Error fetching district data:', error);
+        console.error('Error details:', error.response?.data || error.message);
+        // Set empty state on error to prevent blank screen
+        setUnions([]);
+        setDistrictHead(null);
+        setStateHead(null);
       } finally {
         setLoading(false);
       }
@@ -56,6 +73,8 @@ const DistrictDetails = () => {
 
     if (stateName && districtName) {
       fetchDistrictData();
+    } else {
+      setLoading(false);
     }
   }, [stateName, districtName]);
 
