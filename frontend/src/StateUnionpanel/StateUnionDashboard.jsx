@@ -410,7 +410,7 @@ const StateUnionDashboard = () => {
                     ) : profileData?.generalSecretaryImage ? (
                       <img 
                         src={getImageUrl(profileData.generalSecretaryImage)} 
-                        alt="Secretary" 
+                        alt={profileData?.district ? "Secretary" : "General Secretary"} 
                         className="h-32 w-auto rounded-lg object-cover border-2 border-gray-300" 
                         onError={(e) => {
                           console.error('Secretary image error:', e.target.src);
@@ -509,7 +509,7 @@ const StateUnionDashboard = () => {
                     <p className="text-sm font-medium text-gray-500 mb-2">{profileData?.district ? 'Secretary Image' : 'General Secretary Image'}</p>
                     <img 
                       src={getImageUrl(profileData.generalSecretaryImage)} 
-                      alt="Secretary" 
+                      alt={profileData?.district ? "Secretary" : "General Secretary"} 
                       className="h-32 rounded-lg shadow-md object-cover" 
                       onError={(e) => {
                         e.target.style.display = 'none';
