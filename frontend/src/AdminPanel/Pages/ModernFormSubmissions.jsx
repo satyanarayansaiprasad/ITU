@@ -1,17 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
-import { API_ENDPOINTS, GET_UPLOAD_URL } from '../../config/api';
+import { API_ENDPOINTS } from '../../config/api';
 import {
   FileText,
   Search,
-  Filter,
   Eye,
   Check,
   X,
   Clock,
   Mail,
-  User,
   MapPin,
   Phone,
   Calendar,
@@ -21,12 +19,9 @@ import {
   Download,
   RefreshCw,
   Key,
-  Send,
   UserCheck,
   UserX,
-  MoreVertical,
   Copy,
-  ExternalLink,
   Trash2
 } from "lucide-react";
 
