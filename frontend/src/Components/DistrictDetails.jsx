@@ -388,7 +388,9 @@ const DistrictDetails = () => {
     );
   }
 
-  const hasData = districtHead || unions.length > 0;
+  // Ensure unions is always an array to prevent crashes
+  const safeUnions = Array.isArray(unions) ? unions : [];
+  const hasData = districtHead || safeUnions.length > 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50 pt-[100px] sm:pt-[120px] md:pt-[130px] pb-8 sm:pb-12 px-3 sm:px-4 md:px-6">
