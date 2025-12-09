@@ -82,13 +82,16 @@ const Districts = () => {
     }
   }, [stateName]);
   
-  const getStatus = (i) => {
-    if (!state.active) return 'coming-soon';
-    return i % 2 === 0 ? 'active' : 'coming-soon';
+  // Determine district status based on actual data availability
+  const getDistrictStatus = (districtName) => {
+    // Check if district has organizations
+    return organizationsByDistrict[districtName] && organizationsByDistrict[districtName].length > 0 
+      ? 'active' 
+      : 'coming-soon';
   };
   
-  const activeDistricts = state.districts.filter((_, i) => getStatus(i) === 'active');
-  const comingDistricts = state.districts.filter((_, i) => getStatus(i) === 'coming-soon');
+  const activeDistricts = state.districts.filter(district => getDistrictStatus(district) === 'active');
+  const comingDistricts = state.districts.filter(district => getDistrictStatus(district) === 'coming-soon');
 
   if (loading) {
     return (

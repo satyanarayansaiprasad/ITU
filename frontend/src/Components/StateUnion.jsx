@@ -12,9 +12,7 @@ const StateUnion = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [stateHeads, setStateHeads] = useState({}); // Map of stateName -> stateHead data
-  
-  // No active states - all coming soon
-  const activeStatesInfo = {};
+  const [districtsWithData, setDistrictsWithData] = useState({}); // Map of stateName -> boolean (has districts with data)
 
   // Fetch states from Firebase API
   useEffect(() => {
@@ -24,14 +22,14 @@ const StateUnion = () => {
         const response = await axios.get(API_ENDPOINTS.GET_ALL_STATES);
         
         if (response.data.success) {
-          // Map Firebase data to component format - all states are coming soon
+          // Map Firebase data to component format
           const mappedStates = response.data.data.map((state, index) => {
             return {
               id: state.id || index + 1,
               name: state.name,
               districts: state.districtCount || state.districts?.length || 0,
               type: state.type,
-              active: false, // All states are coming soon
+              active: false,
               secretary: null,
               unionName: null,
               established: null
@@ -39,30 +37,47 @@ const StateUnion = () => {
           });
           setStates(mappedStates);
           
-          // Fetch state heads for all states in parallel for better performance
+          // Fetch state heads and check for districts with data
           const headsMap = {};
-          const stateHeadPromises = mappedStates.map(async (state) => {
+          const districtsDataMap = {};
+          
+          const stateDataPromises = mappedStates.map(async (state) => {
             try {
+              // Fetch organizations for the state
               const orgResponse = await axios.get(API_ENDPOINTS.GET_ORGANIZATIONS_BY_STATE(state.name));
               if (orgResponse.data.success) {
-                const stateHead = orgResponse.data.data.find(org => org.isStateHead);
-                if (stateHead) {
-                  return { stateName: state.name, stateHead };
-                }
+                const organizations = orgResponse.data.data || [];
+                const stateHead = organizations.find(org => org.isStateHead);
+                
+                // Check if any district has organizations (excluding state head)
+                const hasDistrictData = organizations.some(org => !org.isStateHead && org.district);
+                
+                return {
+                  stateName: state.name,
+                  stateHead: stateHead || null,
+                  hasDistrictData: hasDistrictData
+                };
               }
             } catch (err) {
-              console.error(`Error fetching state head for ${state.name}:`, err);
+              console.error(`Error fetching data for ${state.name}:`, err);
             }
-            return null;
+            return {
+              stateName: state.name,
+              stateHead: null,
+              hasDistrictData: false
+            };
           });
           
-          const results = await Promise.all(stateHeadPromises);
+          const results = await Promise.all(stateDataPromises);
           results.forEach(result => {
-            if (result && result.stateHead) {
+            if (result.stateHead) {
               headsMap[result.stateName] = result.stateHead;
             }
+            districtsDataMap[result.stateName] = result.hasDistrictData;
           });
+          
           setStateHeads(headsMap);
+          setDistrictsWithData(districtsDataMap);
           
           // Mark states with state heads as active
           mappedStates.forEach(state => {
@@ -287,10 +302,16 @@ const StateUnion = () => {
                     <div className="text-xs text-gray-500 mb-2">
                       {state.districts} {state.districts === 1 ? 'District' : 'Districts'}
                     </div>
-                    <div className="flex items-center justify-center gap-1">
-                      <span className="inline-block bg-amber-100 text-amber-800 px-2 py-1 rounded text-xs font-medium">
-                        Coming Soon
-                      </span>
+                    <div className="flex items-center justify-center gap-1 flex-wrap">
+                      {districtsWithData[state.name] ? (
+                        <span className="inline-block bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">
+                          Districts Active
+                        </span>
+                      ) : (
+                        <span className="inline-block bg-amber-100 text-amber-800 px-2 py-1 rounded text-xs font-medium">
+                          Coming Soon
+                        </span>
+                      )}
                       {state.type === 'Union Territory' && (
                         <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
                           UT
