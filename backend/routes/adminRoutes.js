@@ -8,6 +8,7 @@ const { validateLogin, sanitizeInput } = require('../middleware/validation');
 router.post('/login', loginLimiter, sanitizeInput, validateLogin, adminController.login);
 router.get('/logout', adminController.logout);
 router.get('/getContact',adminController.getContacts);
+router.delete('/deleteContact/:id',adminController.deleteContact);
 router.post('/addNews', upload.single('image'), adminController.createNews);
 router.get('/getallNews',adminController.getAllNews )
 

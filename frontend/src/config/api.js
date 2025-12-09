@@ -18,6 +18,7 @@ export const API_ENDPOINTS = {
   // Admin endpoints
   ADMIN_LOGIN: `${API_BASE_URL}/api/admin/login`,
   GET_CONTACT: `${API_BASE_URL}/api/admin/getContact`,
+  DELETE_CONTACT: (id) => `${API_BASE_URL}/api/admin/deleteContact/${id}`,
   GET_GALLERY: `${API_BASE_URL}/api/admin/getGallery`,
   UPLOAD_GALLERY: `${API_BASE_URL}/api/admin/uploadGallery`,
   DELETE_GALLERY: (id) => `${API_BASE_URL}/api/admin/deleteGallery/${id}`,

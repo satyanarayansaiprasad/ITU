@@ -138,15 +138,26 @@ const ModernViewContact = () => {
   };
 
   const handleDelete = async (contactId) => {
-    if (!window.confirm('Are you sure you want to delete this contact?')) return;
+    if (!window.confirm('Are you sure you want to permanently delete this contact?')) return;
 
     try {
       setDeleteLoading(contactId);
-      // Add delete API call here if available
-      setContacts(prev => prev.filter(contact => contact._id !== contactId));
-      showNotification('Contact deleted successfully');
+      const response = await axios.delete(API_ENDPOINTS.DELETE_CONTACT(contactId));
+      
+      if (response.data.success) {
+        // Update local state immediately
+        setContacts(prev => prev.filter(contact => contact._id !== contactId));
+        
+        // Close modal if the deleted contact was selected
+        if (selectedContact && selectedContact._id === contactId) {
+          setSelectedContact(null);
+        }
+        
+        showNotification('Contact deleted successfully', 'success');
+      }
     } catch (error) {
-      showNotification('Failed to delete contact', 'error');
+      console.error('Error deleting contact:', error);
+      showNotification(error.response?.data?.error || 'Failed to delete contact', 'error');
     } finally {
       setDeleteLoading(null);
     }
@@ -485,6 +496,18 @@ const ModernViewContact = () => {
                     >
                       <Star size={16} className={selectedContact.starred ? 'fill-current' : ''} />
                       {selectedContact.starred ? 'Unstar' : 'Star'}
+                    </button>
+                    <button
+                      onClick={() => handleDelete(selectedContact._id)}
+                      disabled={deleteLoading === selectedContact._id}
+                      className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50"
+                    >
+                      {deleteLoading === selectedContact._id ? (
+                        <Loader size={16} className="animate-spin" />
+                      ) : (
+                        <Trash2 size={16} />
+                      )}
+                      Delete
                     </button>
                   </div>
                 </div>
