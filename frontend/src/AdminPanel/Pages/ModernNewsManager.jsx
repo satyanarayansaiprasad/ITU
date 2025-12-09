@@ -249,6 +249,19 @@ const ModernNewsManager = () => {
     });
   };
 
+  // Function to handle image URL - supports Cloudinary and local storage
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return "/default-image.png";
+    
+    // If it's already a full URL (Cloudinary, http/https, or data URI), use it directly
+    if (/^(https?|data):/i.test(imagePath)) {
+      return imagePath;
+    }
+    
+    // Legacy: If it's a local filename, use GET_UPLOAD_URL
+    return GET_UPLOAD_URL(imagePath);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
       <div className="max-w-7xl mx-auto">
@@ -461,11 +474,11 @@ const ModernNewsManager = () => {
                     <>
                       <div className="relative h-48">
                         <img
-                          src={GET_UPLOAD_URL(news.image)}
+                          src={getImageUrl(news.image)}
                           alt={news.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           onError={(e) => {
-                            e.target.src = '/api/placeholder/400/200';
+                            e.target.src = '/default-image.png';
                           }}
                         />
                         <div className="absolute top-3 left-3 flex items-center gap-2">
@@ -536,11 +549,11 @@ const ModernNewsManager = () => {
                   ) : (
                     <div className="flex items-start gap-4">
                       <img
-                        src={GET_UPLOAD_URL(news.image)}
+                        src={getImageUrl(news.image)}
                         alt={news.title}
                         className="w-24 h-16 object-cover rounded-lg flex-shrink-0"
                         onError={(e) => {
-                          e.target.src = '/api/placeholder/100/80';
+                          e.target.src = '/default-image.png';
                         }}
                       />
                       
@@ -732,11 +745,11 @@ const ModernNewsManager = () => {
                           <div className="mb-3">
                             <p className="text-xs text-gray-500 mb-2">Current image:</p>
                             <img 
-                              src={GET_UPLOAD_URL(newsList.find(n => n._id === editId).image)} 
+                              src={getImageUrl(newsList.find(n => n._id === editId).image)} 
                               alt="Current" 
                               className="w-full h-32 object-cover rounded-lg border border-gray-200"
                               onError={(e) => {
-                                e.target.style.display = 'none';
+                                e.target.src = '/default-image.png';
                               }}
                             />
                             <p className="text-xs text-gray-500 mt-1">Upload a new image to replace it (optional)</p>
@@ -872,9 +885,12 @@ const ModernNewsManager = () => {
               >
                 <div className="relative">
                   <img
-                    src={GET_UPLOAD_URL(selectedPost.image)}
+                    src={getImageUrl(selectedPost.image)}
                     alt={selectedPost.title}
                     className="w-full h-64 object-cover"
+                    onError={(e) => {
+                      e.target.src = '/default-image.png';
+                    }}
                   />
                   <button
                     onClick={() => setSelectedPost(null)}
