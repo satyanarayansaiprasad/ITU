@@ -105,28 +105,7 @@ exports.deleteContact = async (req, res) => {
 // Create News
 
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        // Create uploads directory if it doesn't exist
-        
-        cb(null, "uploads/");
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
-    },
-});
-
-const upload = multer({ 
-  storage: storage,
-  fileFilter: (req, file, cb) => {
-      const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-      if (allowedTypes.includes(file.mimetype)) {
-          cb(null, true);
-      } else {
-          cb(new Error("Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed."), false);
-      }
-  }
-});
+// Removed duplicate multer storage - using middleware/multer.js instead
 
 
 
@@ -224,11 +203,11 @@ exports.getAllNews = async (req, res) => {
       let imageUrl = "/default-image.png"; // Default fallback
       
       if (item.image) {
-        // If image is already a full URL (http/https) or data URI
+        // If image is already a full URL (Cloudinary, http/https, or data URI), use it directly
         if (/^(https?|data):/i.test(item.image)) {
           imageUrl = item.image;
         } 
-        // If it's a relative path
+        // Legacy: If it's a relative path or local filename, construct URL (for backward compatibility)
         else {
           const baseUrl = `${req.protocol}://${req.get("host")}/`;
           imageUrl = `${baseUrl}${item.image.replace(/^\//, '')}`; // Remove leading slash if present
@@ -310,6 +289,14 @@ exports.editNews = async (req, res) => {
 
     // If new image uploaded, upload to Cloudinary
     if (req.file) {
+      // Validate file buffer exists
+      if (!req.file.buffer || req.file.buffer.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid image file. Please upload a valid image."
+        });
+      }
+
       // Delete old image from Cloudinary if it exists
       if (news.cloudinaryPublicId) {
         try {
@@ -320,15 +307,29 @@ exports.editNews = async (req, res) => {
         }
       }
 
-      // Upload new image to Cloudinary
-      const cloudinaryResult = await uploadBufferToCloudinary(
-        req.file.buffer,
-        'itu/blog-posts',
-        `blog-${Date.now()}`
-      );
-
-      news.image = cloudinaryResult.url;
-      news.cloudinaryPublicId = cloudinaryResult.public_id;
+      // Upload new image to Cloudinary with error handling
+      let cloudinaryResult;
+      try {
+        cloudinaryResult = await uploadBufferToCloudinary(
+          req.file.buffer,
+          'itu/blog-posts',
+          `blog-${Date.now()}`
+        );
+        
+        if (!cloudinaryResult || !cloudinaryResult.url) {
+          throw new Error('Cloudinary upload failed - no URL returned');
+        }
+        
+        news.image = cloudinaryResult.url;
+        news.cloudinaryPublicId = cloudinaryResult.public_id;
+      } catch (cloudinaryError) {
+        console.error("Cloudinary upload error:", cloudinaryError);
+        return res.status(500).json({
+          success: false,
+          message: "Failed to upload image to Cloudinary",
+          error: cloudinaryError.message
+        });
+      }
     }
 
     await news.save();

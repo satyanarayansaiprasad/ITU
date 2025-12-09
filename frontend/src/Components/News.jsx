@@ -9,15 +9,23 @@ const News = () => {
   const [error, setError] = useState(null);
   const [imageLoadErrors, setImageLoadErrors] = useState({});
 
-  // Function to handle image URL processing
+  // Function to handle image URL processing - supports Cloudinary and local storage
   const getImageUrl = (imagePath) => {
     if (!imagePath) return "/default-image.png";
-    // If it's already a full URL or data URI
+    
+    // If it's already a full URL (Cloudinary, http/https, or data URI), use it directly
     if (/^(https?|data):/i.test(imagePath)) {
       return imagePath;
     }
-    // Handle relative paths
-    return imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+    
+    // Legacy: Handle relative paths or local filenames (for backward compatibility)
+    // If it starts with /, return as is
+    if (imagePath.startsWith('/')) {
+      return imagePath;
+    }
+    
+    // Otherwise, prepend / for relative paths
+    return `/${imagePath}`;
   };
 
   // Function to handle image loading errors
