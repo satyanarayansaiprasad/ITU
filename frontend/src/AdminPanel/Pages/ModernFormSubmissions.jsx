@@ -151,8 +151,8 @@ const ModernFormSubmissions = () => {
           setSelectedForm({ ...selectedForm, status: 'approved', password: password });
         }
         
-        setShowPasswordModal({ email, password, name, state });
-        showNotification(`Form approved! Credentials sent to ${email}`);
+      setShowPasswordModal({ email, password, name, state });
+      showNotification(`Form approved! Credentials sent to ${email}`);
       }
       
       // Fetch fresh data in background to ensure consistency
@@ -524,21 +524,21 @@ const ModernFormSubmissions = () => {
                     <div className="flex items-center gap-2 ml-4">
                       {form.status === 'pending' && (
                         <>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleApprove(form._id, form.email, form.state, form.name);
-                            }}
-                            disabled={approvingId === form._id}
-                            className="flex items-center gap-1 px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 text-sm"
-                          >
-                            {approvingId === form._id ? (
-                              <Loader size={14} className="animate-spin" />
-                            ) : (
-                              <Check size={14} />
-                            )}
-                            Approve
-                          </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleApprove(form._id, form.email, form.state, form.name);
+                          }}
+                          disabled={approvingId === form._id}
+                          className="flex items-center gap-1 px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 text-sm"
+                        >
+                          {approvingId === form._id ? (
+                            <Loader size={14} className="animate-spin" />
+                          ) : (
+                            <Check size={14} />
+                          )}
+                          Approve
+                        </button>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -557,7 +557,7 @@ const ModernFormSubmissions = () => {
                         </>
                       )}
 
-                      {form.status === 'approved' && (
+                      {(form.status === 'approved' || form.status === 'reject' || form.status === 'rejected') && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -735,7 +735,7 @@ const ModernFormSubmissions = () => {
                           {rejectingId === selectedForm._id ? (
                             <Loader size={16} className="animate-spin" />
                           ) : (
-                            <X size={16} />
+                          <X size={16} />
                           )}
                           Reject Application
                         </button>
@@ -743,11 +743,30 @@ const ModernFormSubmissions = () => {
                     </div>
                   )}
                   
-                  {(selectedForm.status === 'reject' || selectedForm.status === 'rejected') && selectedForm.rejectionReason && (
-                    <div className="mt-6 pt-6 border-t border-gray-200">
-                      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                        <h4 className="text-sm font-semibold text-red-800 mb-2">Rejection Reason</h4>
-                        <p className="text-sm text-red-700">{selectedForm.rejectionReason}</p>
+                  {(selectedForm.status === 'reject' || selectedForm.status === 'rejected') && (
+                    <div className="mt-6 pt-6 border-t border-gray-200 space-y-4">
+                      {selectedForm.rejectionReason && (
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                          <h4 className="text-sm font-semibold text-red-800 mb-2">Rejection Reason</h4>
+                          <p className="text-sm text-red-700">{selectedForm.rejectionReason}</p>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => handleDelete(selectedForm._id, selectedForm.email, selectedForm.name)}
+                          disabled={deletingId === selectedForm._id}
+                          className="flex items-center gap-2 px-6 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors disabled:opacity-50"
+                        >
+                          {deletingId === selectedForm._id ? (
+                            <Loader size={16} className="animate-spin" />
+                          ) : (
+                            <Trash2 size={16} />
+                          )}
+                          Delete User Completely
+                        </button>
+                        <p className="text-xs text-gray-500 ml-2">
+                          This will permanently delete the user from all databases
+                        </p>
                       </div>
                     </div>
                   )}
