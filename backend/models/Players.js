@@ -82,6 +82,18 @@ const PlayerSchema = new mongoose.Schema(
       ref: 'Admin',
       default: null,
     },
+    emailSent: {
+      type: Boolean,
+      default: false,
+    },
+    emailSentAt: {
+      type: Date,
+      default: null,
+    },
+    emailError: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 );

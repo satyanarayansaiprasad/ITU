@@ -1077,7 +1077,18 @@ exports.approvePlayers = async (req, res) => {
 
         // Use the sendEmail helper function for reliable email sending
         const emailResult = await sendEmail(mailOptions);
-        if (!emailResult.success) {
+        if (emailResult.success) {
+          // Track successful email sending
+          player.emailSent = true;
+          player.emailSentAt = new Date();
+          player.emailError = null;
+          await player.save();
+          console.log(`✅ Email sent and tracked for player: ${player.name}`);
+        } else {
+          // Track failed email sending
+          player.emailSent = false;
+          player.emailError = emailResult.error || 'Unknown error';
+          await player.save();
           console.error(`\n⚠️⚠️⚠️  FAILED TO SEND WELCOME EMAIL ⚠️⚠️⚠️`);
           console.error(`Player: ${player.name}`);
           console.error(`Email: ${player.email}`);
@@ -1087,7 +1098,12 @@ exports.approvePlayers = async (req, res) => {
           }
           console.error(`\n`);
         }
-        approvedPlayers.push(player);
+        approvedPlayers.push({
+          ...player.toObject(),
+          emailSent: player.emailSent,
+          emailSentAt: player.emailSentAt,
+          emailError: player.emailError
+        });
       } catch (error) {
         console.error(`Error approving player ${player._id}:`, error);
         errors.push({
@@ -1284,12 +1300,24 @@ exports.approveForm = async (req, res) => {
     // Use the sendEmail helper function for reliable email sending
     const emailResult = await sendEmail(mailOptions);
     if (emailResult.success) {
+      // Track successful email sending
+      updatedForm.emailSent = true;
+      updatedForm.emailSentAt = new Date();
+      updatedForm.emailError = null;
+      await updatedForm.save();
+      console.log(`✅ Email sent and tracked for form: ${updatedForm.name}`);
       res.status(200).json({
         success: true,
         message: "Form approved and email sent successfully",
+        emailSent: true,
+        emailSentAt: updatedForm.emailSentAt,
         form: updatedForm
       });
     } else {
+      // Track failed email sending
+      updatedForm.emailSent = false;
+      updatedForm.emailError = emailResult.error || 'Unknown error';
+      await updatedForm.save();
       console.error(`\n⚠️⚠️⚠️  FAILED TO SEND APPROVAL EMAIL ⚠️⚠️⚠️`);
       console.error(`Form: ${updatedForm.name}`);
       console.error(`Email: ${email}`);
@@ -1301,7 +1329,8 @@ exports.approveForm = async (req, res) => {
       res.status(200).json({
         success: true,
         message: "Form approved but email could not be sent",
-        error: emailResult.error,
+        emailSent: false,
+        emailError: emailResult.error,
         form: updatedForm
       });
     }

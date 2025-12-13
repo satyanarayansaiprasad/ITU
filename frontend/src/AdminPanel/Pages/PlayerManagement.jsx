@@ -82,7 +82,17 @@ const PlayerManagement = () => {
       });
 
       if (response.data.success) {
-        toast.success(`${response.data.approved} player(s) approved successfully! Welcome emails sent.`);
+        const approvedCount = response.data.approved || 0;
+        const errors = response.data.errors || [];
+        const emailFailedCount = errors.length;
+        
+        if (emailFailedCount > 0) {
+          toast.warning(`${approvedCount} player(s) approved. ${emailFailedCount} email(s) failed to send.`, {
+            autoClose: 5000
+          });
+        } else {
+          toast.success(`${approvedCount} player(s) approved successfully! Welcome emails sent.`);
+        }
         
         // Update local state immediately
         setPlayers(prevPlayers => 
@@ -418,6 +428,39 @@ const PlayerManagement = () => {
                     {player.approvedAt && (
                       <div className="mt-2 text-xs text-gray-500">
                         Approved on: {formatDate(player.approvedAt)}
+                      </div>
+                    )}
+
+                    {player.status === 'approved' && (
+                      <div className="mt-3 pt-3 border-t border-gray-200">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-gray-700">Email Status:</span>
+                          {player.emailSent ? (
+                            <div className="flex items-center gap-2">
+                              <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+                                ✅ Email Sent
+                              </span>
+                              {player.emailSentAt && (
+                                <span className="text-xs text-gray-500">
+                                  on {new Date(player.emailSentAt).toLocaleString()}
+                                </span>
+                              )}
+                            </div>
+                          ) : player.emailError ? (
+                            <div className="flex items-center gap-2">
+                              <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
+                                ❌ Email Failed
+                              </span>
+                              <span className="text-xs text-red-600" title={player.emailError}>
+                                {player.emailError.length > 40 ? player.emailError.substring(0, 40) + '...' : player.emailError}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
+                              ⏳ Not Sent Yet
+                            </span>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>

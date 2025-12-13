@@ -47,17 +47,33 @@ const FormSubmissions = () => {
         setForms(prevForms => 
           prevForms.map(form => 
             form._id === formId 
-              ? { ...form, password: password, status: 'approved' }
+              ? { 
+                  ...form, 
+                  password: password, 
+                  status: 'approved',
+                  emailSent: response.data.emailSent || false,
+                  emailSentAt: response.data.emailSentAt || null,
+                  emailError: response.data.emailError || null
+                }
               : form
           )
         );
         
-        toast.success(`Credentials sent to ${email}`, {
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-        });
+        if (response.data.emailSent) {
+          toast.success(`✅ Form approved and email sent successfully to ${email}`, {
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+          });
+        } else {
+          toast.warning(`⚠️ Form approved but email could not be sent: ${response.data.emailError || 'Unknown error'}`, {
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+          });
+        }
         
         // Also fetch fresh data to ensure consistency
         await fetchForms();
@@ -93,6 +109,7 @@ const FormSubmissions = () => {
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">State</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Address</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Email Status</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Action</th>
               </tr>
             </thead>
@@ -112,6 +129,37 @@ const FormSubmissions = () => {
                     ) : (
                       <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
                         Pending
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-sm">
+                    {form.password ? (
+                      form.emailSent ? (
+                        <div className="flex flex-col gap-1">
+                          <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+                            ✅ Email Sent
+                          </span>
+                          {form.emailSentAt && (
+                            <span className="text-xs text-gray-500">
+                              {new Date(form.emailSentAt).toLocaleString()}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="flex flex-col gap-1">
+                          <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
+                            ❌ Email Failed
+                          </span>
+                          {form.emailError && (
+                            <span className="text-xs text-red-600" title={form.emailError}>
+                              {form.emailError.length > 30 ? form.emailError.substring(0, 30) + '...' : form.emailError}
+                            </span>
+                          )}
+                        </div>
+                      )
+                    ) : (
+                      <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
+                        Not Sent
                       </span>
                     )}
                   </td>
