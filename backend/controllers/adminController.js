@@ -12,7 +12,6 @@ const News =require('../models/News')
 const emailConfig = require('../config/email');
 const { sendEmail } = require('../config/email');
 const getEmailFrom = emailConfig.getEmailFrom;
-const firebaseEmailService = require('../services/firebaseEmailService');
 const AccelerationForm = require('../models/AccelerationForm');
 const { uploadBufferToCloudinary, deleteFromCloudinary } = require('../config/cloudinary');
 
@@ -978,22 +977,20 @@ const generatePlayerPassword = (playerName) => {
 
 // Approve multiple players at once
 exports.approvePlayers = async (req, res) => {
-  console.log('\n========== PLAYER APPROVAL STARTED ==========');
-  console.log('Request Body:', JSON.stringify(req.body, null, 2));
+  console.log('\n\n🔥🔥🔥 APPROVE PLAYERS FUNCTION CALLED 🔥🔥🔥');
   console.log('Timestamp:', new Date().toISOString());
+  console.log('Request Body:', JSON.stringify(req.body, null, 2));
+  console.log('===========================================\n');
   
   try {
     const { playerIds } = req.body;
 
     if (!playerIds || !Array.isArray(playerIds) || playerIds.length === 0) {
-      console.error('❌ ERROR: Player IDs array is required');
       return res.status(400).json({
         success: false,
         error: "Player IDs array is required"
       });
     }
-
-    console.log(`📋 Found ${playerIds.length} player ID(s) to approve:`, playerIds);
 
     // Find all players
     const players = await Player.find({
@@ -1001,10 +998,7 @@ exports.approvePlayers = async (req, res) => {
       status: 'pending'
     });
 
-    console.log(`📋 Found ${players.length} pending player(s) in database`);
-
     if (players.length === 0) {
-      console.error('❌ ERROR: No pending players found');
       return res.status(404).json({
         success: false,
         error: "No pending players found with the provided IDs"
@@ -1016,7 +1010,6 @@ exports.approvePlayers = async (req, res) => {
 
     // Approve each player and send email
     for (const player of players) {
-      console.log(`\n🔄 Processing player: ${player.name} (${player.email})`);
       try {
         // Generate password: playerName + ITU + Union + 540720
         const password = generatePlayerPassword(player.name);
@@ -1035,13 +1028,7 @@ exports.approvePlayers = async (req, res) => {
         await player.save();
 
         // Send welcome email automatically after approval
-        console.log(`\n📧📧📧 EMAIL SENDING PROCESS STARTED 📧📧📧`);
-        console.log(`Player Name: ${player.name}`);
-        console.log(`Player Email: ${player.email}`);
-        console.log(`Player ID: ${player.playerId}`);
-        console.log(`Password Generated: ${password ? 'YES' : 'NO'}`);
-        console.log(`Email From: ${getEmailFrom()}`);
-        
+        console.log(`📧 Preparing to send welcome email to: ${player.email}`);
         const mailOptions = {
           from: `"Indian Taekwondo Union" <${getEmailFrom()}>`,
           to: player.email,
@@ -1088,54 +1075,19 @@ exports.approvePlayers = async (req, res) => {
           `
         };
 
-        // Try Firebase Email Service first (if enabled), then fallback to regular email
-        let emailResult = null;
-        
-        if (process.env.USE_FIRESTORE_EMAIL_QUEUE === 'true') {
-          console.log('📤 Calling Firebase Email Service...');
-          try {
-            emailResult = await firebaseEmailService.sendEmail(mailOptions);
-            console.log('📥 Firebase Email Service returned:', JSON.stringify({ success: emailResult.success, error: emailResult.error }, null, 2));
-            
-            if (emailResult.success) {
-              console.log(`✅✅✅ EMAIL SENT SUCCESSFULLY VIA FIREBASE ✅✅✅`);
-              console.log(`Player: ${player.name}`);
-              console.log(`Email: ${player.email}`);
-              if (emailResult.messageId) {
-                console.log(`Message ID: ${emailResult.messageId}`);
-              }
-              if (emailResult.queueId) {
-                console.log(`Queued in Firestore: ${emailResult.queueId}`);
-              }
-            }
-          } catch (firebaseError) {
-            console.error('Firebase Email Service error:', firebaseError.message);
-            emailResult = { success: false, error: firebaseError.message };
+        // Use the sendEmail helper function for reliable email sending
+        const emailResult = await sendEmail(mailOptions);
+        if (!emailResult.success) {
+          console.error(`\n⚠️⚠️⚠️  FAILED TO SEND WELCOME EMAIL ⚠️⚠️⚠️`);
+          console.error(`Player: ${player.name}`);
+          console.error(`Email: ${player.email}`);
+          console.error(`Error: ${emailResult.error}`);
+          if (emailResult.fullError) {
+            console.error('Full Error Details:', JSON.stringify(emailResult.fullError, Object.getOwnPropertyNames(emailResult.fullError), 2));
           }
-        }
-        
-        // Fallback to regular email service if Firebase failed or not enabled
-        if (!emailResult || !emailResult.success) {
-          console.log('📤 Using regular email service (with retry logic)...');
-          emailResult = await sendEmail(mailOptions);
-          
-          if (emailResult.success) {
-            console.log(`✅✅✅ EMAIL SENT SUCCESSFULLY ✅✅✅`);
-            console.log(`Player: ${player.name}`);
-            console.log(`Email: ${player.email}`);
-            if (emailResult.info && emailResult.info.messageId) {
-              console.log(`Message ID: ${emailResult.info.messageId}`);
-            }
-          } else {
-            console.error(`\n⚠️⚠️⚠️  FAILED TO SEND WELCOME EMAIL ⚠️⚠️⚠️`);
-            console.error(`Player: ${player.name}`);
-            console.error(`Email: ${player.email}`);
-            console.error(`Error: ${emailResult.error}`);
-            console.error(`\n`);
-          }
+          console.error(`\n`);
         }
         approvedPlayers.push(player);
-        console.log(`✅ Player ${player.name} approved and processed`);
       } catch (error) {
         console.error(`Error approving player ${player._id}:`, error);
         errors.push({
@@ -1147,11 +1099,6 @@ exports.approvePlayers = async (req, res) => {
       }
     }
 
-    console.log(`\n========== PLAYER APPROVAL COMPLETED ==========`);
-    console.log(`Total Approved: ${approvedPlayers.length}`);
-    console.log(`Total Errors: ${errors.length}`);
-    console.log(`==============================================\n`);
-    
     res.status(200).json({
       success: true,
       message: `${approvedPlayers.length} player(s) approved successfully`,
@@ -1159,64 +1106,7 @@ exports.approvePlayers = async (req, res) => {
       errors: errors.length > 0 ? errors : undefined
     });
   } catch (error) {
-    console.error("\n========== PLAYER APPROVAL ERROR ==========");
-    console.error("Error:", error);
-    console.error("Error Message:", error.message);
-    console.error("Error Stack:", error.stack);
-    console.error("==========================================\n");
-    res.status(500).json({
-      success: false,
-      error: "Internal server error",
-      details: error.message
-    });
-  }
-};
-
-// Test email endpoint for debugging
-exports.testEmail = async (req, res) => {
-  console.log('\n========== TEST EMAIL ENDPOINT CALLED ==========');
-  const { email } = req.body;
-  
-  if (!email) {
-    return res.status(400).json({
-      success: false,
-      error: "Email address is required"
-    });
-  }
-  
-  try {
-    const mailOptions = {
-      from: `"Indian Taekwondo Union" <${getEmailFrom()}>`,
-      to: email,
-      subject: "Test Email - ITU System",
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h2 style="color: #0E2A4E;">Test Email</h2>
-          <p>This is a test email from the ITU system.</p>
-          <p>If you received this, the email system is working correctly.</p>
-          <p>Timestamp: ${new Date().toISOString()}</p>
-        </div>
-      `
-    };
-    
-    console.log('Sending test email to:', email);
-    const emailResult = await sendEmail(mailOptions);
-    
-    if (emailResult.success) {
-      res.status(200).json({
-        success: true,
-        message: "Test email sent successfully",
-        details: emailResult.info
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        error: "Failed to send test email",
-        details: emailResult.error
-      });
-    }
-  } catch (error) {
-    console.error("Test email error:", error);
+    console.error("Error approving players:", error);
     res.status(500).json({
       success: false,
       error: "Internal server error",
@@ -1320,15 +1210,13 @@ exports.deletePlayers = async (req, res) => {
 
 //
 exports.approveForm = async (req, res) => {
-  console.log('\n========== FORM APPROVAL STARTED ==========');
-  console.log('Request Body:', JSON.stringify(req.body, null, 2));
+  console.log('\n\n🔥🔥🔥 APPROVE FORM FUNCTION CALLED 🔥🔥🔥');
   console.log('Timestamp:', new Date().toISOString());
+  console.log('Request Body:', JSON.stringify(req.body, null, 2));
+  console.log('===========================================\n');
   
   try {
     const { formId, email, password } = req.body;
-    console.log(`📋 Form ID: ${formId}`);
-    console.log(`📋 Email: ${email}`);
-    console.log(`📋 Password: ${password ? '***provided***' : 'NOT PROVIDED'}`);
 
     // 1. Update the form with password
     const updatedForm = await AccelerationForm.findByIdAndUpdate(
@@ -1346,12 +1234,7 @@ exports.approveForm = async (req, res) => {
     }
 
     // 2. Send welcome email automatically after approval
-    console.log(`\n📧📧📧 EMAIL SENDING PROCESS STARTED 📧📧📧`);
-    console.log(`Form Name: ${updatedForm.name}`);
-    console.log(`Form Email: ${email}`);
-    console.log(`Password: ${password ? '***provided***' : 'NOT PROVIDED'}`);
-    console.log(`Email From: ${getEmailFrom()}`);
-    
+    console.log(`📧 Preparing to send approval email to: ${email}`);
     const mailOptions = {
       from: `"Indian Taekwondo Union" <${getEmailFrom()}>`,
       to: email,
@@ -1398,46 +1281,9 @@ exports.approveForm = async (req, res) => {
       `
     };
 
-    // Try Firebase Email Service first (if enabled), then fallback to regular email
-    let emailResult = null;
-    
-    if (process.env.USE_FIRESTORE_EMAIL_QUEUE === 'true') {
-      console.log('📤 Calling Firebase Email Service...');
-      try {
-        emailResult = await firebaseEmailService.sendEmail(mailOptions);
-        console.log('📥 Firebase Email Service returned:', JSON.stringify({ success: emailResult.success, error: emailResult.error }, null, 2));
-        
-        if (emailResult.success) {
-          console.log(`✅✅✅ EMAIL SENT SUCCESSFULLY VIA FIREBASE ✅✅✅`);
-          console.log(`Form: ${updatedForm.name}`);
-          console.log(`Email: ${email}`);
-          if (emailResult.messageId) {
-            console.log(`Message ID: ${emailResult.messageId}`);
-          }
-          if (emailResult.queueId) {
-            console.log(`Queued in Firestore: ${emailResult.queueId}`);
-          }
-        }
-      } catch (firebaseError) {
-        console.error('Firebase Email Service error:', firebaseError.message);
-        emailResult = { success: false, error: firebaseError.message };
-      }
-    }
-    
-    // Fallback to regular email service if Firebase failed or not enabled
-    if (!emailResult || !emailResult.success) {
-      console.log('📤 Using regular email service (with retry logic)...');
-      emailResult = await sendEmail(mailOptions);
-    }
-    
+    // Use the sendEmail helper function for reliable email sending
+    const emailResult = await sendEmail(mailOptions);
     if (emailResult.success) {
-      console.log(`✅✅✅ EMAIL SENT SUCCESSFULLY ✅✅✅`);
-      console.log(`Form: ${updatedForm.name}`);
-      console.log(`Email: ${email}`);
-      if (emailResult.info && emailResult.info.messageId) {
-        console.log(`Message ID: ${emailResult.info.messageId}`);
-      }
-      console.log(`\n========== FORM APPROVAL COMPLETED ==========\n`);
       res.status(200).json({
         success: true,
         message: "Form approved and email sent successfully",
@@ -1448,7 +1294,10 @@ exports.approveForm = async (req, res) => {
       console.error(`Form: ${updatedForm.name}`);
       console.error(`Email: ${email}`);
       console.error(`Error: ${emailResult.error}`);
-      console.error(`\n========== FORM APPROVAL COMPLETED (WITH EMAIL ERROR) ==========\n`);
+      if (emailResult.fullError) {
+        console.error('Full Error Details:', JSON.stringify(emailResult.fullError, Object.getOwnPropertyNames(emailResult.fullError), 2));
+      }
+      console.error(`\n`);
       res.status(200).json({
         success: true,
         message: "Form approved but email could not be sent",
