@@ -1,6 +1,14 @@
 const nodemailer = require("nodemailer");
 require('dotenv').config();
 
+let cachedTransporter = null;
+let lastConfigHash = null;
+
+// Create a hash of the current email configuration
+const getConfigHash = () => {
+  return `${process.env.EMAIL_USER || ''}_${process.env.EMAIL_PASS || ''}_${process.env.EMAIL_HOST || ''}_${process.env.EMAIL_PORT || ''}`;
+};
+
 // Create and configure email transporter
 const createTransporter = () => {
   const emailService = process.env.EMAIL_SERVICE || 'gmail';
@@ -12,6 +20,8 @@ const createTransporter = () => {
 
   if (!emailUser || !emailPass) {
     console.error('Email configuration missing: EMAIL_USER and EMAIL_PASS are required');
+    console.error('Current EMAIL_USER:', emailUser ? '***set***' : 'NOT SET');
+    console.error('Current EMAIL_PASS:', emailPass ? '***set***' : 'NOT SET');
     return null;
   }
 
@@ -36,10 +46,11 @@ const createTransporter = () => {
   try {
     const transporter = nodemailer.createTransport(config);
     
-    // Verify connection
+    // Verify connection (async, don't block)
     transporter.verify((error, success) => {
       if (error) {
-        console.error('Email transporter verification failed:', error);
+        console.error('Email transporter verification failed:', error.message);
+        console.error('Full error:', error);
       } else {
         console.log('Email server is ready to send messages');
       }
@@ -52,7 +63,24 @@ const createTransporter = () => {
   }
 };
 
+// Get transporter - recreate if config changed
+const getTransporter = () => {
+  const currentConfigHash = getConfigHash();
+  
+  // If config changed or transporter is null, recreate it
+  if (!cachedTransporter || lastConfigHash !== currentConfigHash) {
+    console.log('Recreating email transporter with updated configuration...');
+    cachedTransporter = createTransporter();
+    lastConfigHash = currentConfigHash;
+  }
+  
+  return cachedTransporter;
+};
+
+// Initialize transporter on module load
 const transporter = createTransporter();
+cachedTransporter = transporter;
+lastConfigHash = getConfigHash();
 
 // Get email from address
 const getEmailFrom = () => {
@@ -60,7 +88,9 @@ const getEmailFrom = () => {
 };
 
 module.exports = {
-  transporter,
+  get transporter() {
+    return getTransporter();
+  },
   getEmailFrom,
   createTransporter
 };

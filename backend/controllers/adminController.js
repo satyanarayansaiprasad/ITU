@@ -1068,9 +1068,21 @@ exports.approvePlayers = async (req, res) => {
         };
 
         if (transporter) {
-          await transporter.sendMail(mailOptions);
+          try {
+            await transporter.sendMail(mailOptions);
+            console.log(`Welcome email sent successfully to: ${player.email}`);
+          } catch (emailError) {
+            console.error(`Error sending welcome email to ${player.email}:`, emailError.message);
+            console.error('Email error details:', {
+              message: emailError.message,
+              code: emailError.code,
+              command: emailError.command,
+              response: emailError.response
+            });
+          }
         } else {
           console.error('Email transporter not configured. Email not sent to:', player.email);
+          console.error('Please check EMAIL_USER and EMAIL_PASS in .env file');
         }
         approvedPlayers.push(player);
       } catch (error) {
@@ -1250,14 +1262,32 @@ const mailOptions = {
 };
 
     if (transporter) {
-    await transporter.sendMail(mailOptions);
-    res.status(200).json({
-      success: true,
-      message: "Form approved and email sent",
-      form: updatedForm
-    });
+      try {
+        await transporter.sendMail(mailOptions);
+        console.log(`Email sent successfully to: ${email}`);
+        res.status(200).json({
+          success: true,
+          message: "Form approved and email sent",
+          form: updatedForm
+        });
+      } catch (emailError) {
+        console.error('Error sending email:', emailError);
+        console.error('Email error details:', {
+          message: emailError.message,
+          code: emailError.code,
+          command: emailError.command,
+          response: emailError.response
+        });
+        res.status(200).json({
+          success: true,
+          message: "Form approved but email could not be sent",
+          error: emailError.message,
+          form: updatedForm
+        });
+      }
     } else {
       console.error('Email transporter not configured. Email not sent to:', email);
+      console.error('Please check EMAIL_USER and EMAIL_PASS in .env file');
       res.status(200).json({
         success: true,
         message: "Form approved but email could not be sent (email not configured)",
@@ -1612,14 +1642,32 @@ exports.rejectForm = async (req, res) => {
     };
 
     if (transporter) {
-      await transporter.sendMail(mailOptions);
-      res.status(200).json({
-        success: true,
-        message: "Form rejected and notification sent",
-        form: updatedForm
-      });
+      try {
+        await transporter.sendMail(mailOptions);
+        console.log(`Rejection email sent successfully to: ${email}`);
+        res.status(200).json({
+          success: true,
+          message: "Form rejected and notification sent",
+          form: updatedForm
+        });
+      } catch (emailError) {
+        console.error('Error sending rejection email:', emailError);
+        console.error('Email error details:', {
+          message: emailError.message,
+          code: emailError.code,
+          command: emailError.command,
+          response: emailError.response
+        });
+        res.status(200).json({
+          success: true,
+          message: "Form rejected but email could not be sent",
+          error: emailError.message,
+          form: updatedForm
+        });
+      }
     } else {
       console.error('Email transporter not configured. Email not sent to:', email);
+      console.error('Please check EMAIL_USER and EMAIL_PASS in .env file');
       res.status(200).json({
         success: true,
         message: "Form rejected but email could not be sent (email not configured)",
