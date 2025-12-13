@@ -15,7 +15,8 @@ const createTransporter = () => {
   const emailHost = process.env.EMAIL_HOST;
   const emailPort = process.env.EMAIL_PORT ? parseInt(process.env.EMAIL_PORT) : 587;
   const emailUser = process.env.EMAIL_USER;
-  const emailPass = process.env.EMAIL_PASS;
+  // Remove spaces from password (Gmail app passwords should not have spaces)
+  const emailPass = process.env.EMAIL_PASS ? process.env.EMAIL_PASS.replace(/\s+/g, '') : null;
   const emailFrom = process.env.EMAIL_FROM || emailUser;
 
   if (!emailUser || !emailPass) {
@@ -25,16 +26,19 @@ const createTransporter = () => {
     return null;
   }
 
+  // Log password length for debugging (without showing actual password)
+  console.log(`📧 Email Password Length: ${emailPass.length} characters`);
+
   // Configuration object
   const config = {
     auth: {
-      user: emailUser,
+      user: emailUser.trim(),
       pass: emailPass
     },
     // Add connection timeout options to prevent hanging
-    connectionTimeout: 5000, // 5 seconds
-    greetingTimeout: 5000, // 5 seconds
-    socketTimeout: 5000, // 5 seconds
+    connectionTimeout: 10000, // 10 seconds (increased for reliability)
+    greetingTimeout: 10000, // 10 seconds
+    socketTimeout: 10000, // 10 seconds
   };
 
   // If custom host is provided, use it (for custom SMTP servers)
@@ -45,6 +49,11 @@ const createTransporter = () => {
   } else {
     // Use service name (gmail, outlook, yahoo, etc.)
     config.service = emailService;
+    // For Gmail, ensure we use the correct settings
+    if (emailService === 'gmail' || emailService.toLowerCase() === 'gmail') {
+      config.secure = false; // Gmail uses STARTTLS on port 587
+      config.requireTLS = true;
+    }
   }
 
   try {
@@ -127,6 +136,7 @@ const sendEmail = async (mailOptions) => {
     console.log('To:', mailOptions.to);
     console.log('Subject:', mailOptions.subject);
     console.log('From:', mailOptions.from);
+    console.log('Timestamp:', new Date().toISOString());
     
     let transporter = getTransporter();
     
@@ -143,10 +153,20 @@ const sendEmail = async (mailOptions) => {
       console.error('ERROR TYPE: Transporter Not Configured');
       console.error('ERROR MESSAGE:', errorMsg);
       console.error('EMAIL_USER:', process.env.EMAIL_USER ? '***set***' : '❌ NOT SET');
-      console.error('EMAIL_PASS:', process.env.EMAIL_PASS ? '***set***' : '❌ NOT SET');
+      console.error('EMAIL_PASS:', process.env.EMAIL_PASS ? `***set*** (${process.env.EMAIL_PASS.replace(/\s+/g, '').length} chars)` : '❌ NOT SET');
       console.error('EMAIL_SERVICE:', process.env.EMAIL_SERVICE || 'gmail (default)');
       console.error('=========================================\n');
       throw new Error(errorMsg);
+    }
+    
+    // Verify transporter before sending
+    console.log('Verifying email transporter connection...');
+    try {
+      await transporter.verify();
+      console.log('✅ Email transporter verified successfully');
+    } catch (verifyError) {
+      console.warn('⚠️  Email transporter verification failed:', verifyError.message);
+      console.warn('⚠️  Attempting to send anyway...');
     }
     
     // Send email
@@ -157,6 +177,8 @@ const sendEmail = async (mailOptions) => {
     console.log('To:', mailOptions.to);
     console.log('Subject:', mailOptions.subject);
     console.log('Response:', info.response || 'N/A');
+    console.log('Accepted:', info.accepted || 'N/A');
+    console.log('Rejected:', info.rejected || 'N/A');
     console.log('=============================================\n');
     return { success: true, info };
   } catch (error) {
