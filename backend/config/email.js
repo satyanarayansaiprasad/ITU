@@ -88,9 +88,15 @@ const getTransporter = () => {
   
   // If config changed or transporter is null, recreate it
   if (!cachedTransporter || lastConfigHash !== currentConfigHash) {
-    console.log('Recreating email transporter with updated configuration...');
+    console.log('📧 Recreating email transporter with updated configuration...');
     cachedTransporter = createTransporter();
     lastConfigHash = currentConfigHash;
+    
+    if (cachedTransporter) {
+      console.log('✅ Email transporter created successfully');
+    } else {
+      console.error('❌ Email transporter creation failed - check EMAIL_USER and EMAIL_PASS');
+    }
   }
   
   return cachedTransporter;

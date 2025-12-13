@@ -9,7 +9,8 @@ const News =require('../models/News')
  const path=require("path")
  const multer = require('multer');
  const fs = require('fs');
-const { transporter, getEmailFrom } = require('../config/email');
+const emailConfig = require('../config/email');
+const getEmailFrom = emailConfig.getEmailFrom;
 const AccelerationForm = require('../models/AccelerationForm');
 const { uploadBufferToCloudinary, deleteFromCloudinary } = require('../config/cloudinary');
 
@@ -1067,21 +1068,23 @@ exports.approvePlayers = async (req, res) => {
           `
         };
 
+        const transporter = emailConfig.transporter;
         if (transporter) {
           try {
             await transporter.sendMail(mailOptions);
-            console.log(`Welcome email sent successfully to: ${player.email}`);
+            console.log(`✅ Welcome email sent successfully to: ${player.email}`);
           } catch (emailError) {
-            console.error(`Error sending welcome email to ${player.email}:`, emailError.message);
+            console.error(`❌ Error sending welcome email to ${player.email}:`, emailError.message);
             console.error('Email error details:', {
               message: emailError.message,
               code: emailError.code,
               command: emailError.command,
               response: emailError.response
             });
+            // Don't fail the approval if email fails
           }
         } else {
-          console.error('Email transporter not configured. Email not sent to:', player.email);
+          console.error('⚠️  Email transporter not configured. Email not sent to:', player.email);
           console.error('Please check EMAIL_USER and EMAIL_PASS in .env file');
         }
         approvedPlayers.push(player);
@@ -1261,17 +1264,18 @@ const mailOptions = {
   `
 };
 
+    const transporter = emailConfig.transporter;
     if (transporter) {
       try {
         await transporter.sendMail(mailOptions);
-        console.log(`Email sent successfully to: ${email}`);
+        console.log(`✅ Email sent successfully to: ${email}`);
         res.status(200).json({
           success: true,
           message: "Form approved and email sent",
           form: updatedForm
         });
       } catch (emailError) {
-        console.error('Error sending email:', emailError);
+        console.error('❌ Error sending email:', emailError);
         console.error('Email error details:', {
           message: emailError.message,
           code: emailError.code,
@@ -1286,7 +1290,7 @@ const mailOptions = {
         });
       }
     } else {
-      console.error('Email transporter not configured. Email not sent to:', email);
+      console.error('⚠️  Email transporter not configured. Email not sent to:', email);
       console.error('Please check EMAIL_USER and EMAIL_PASS in .env file');
       res.status(200).json({
         success: true,
@@ -1641,17 +1645,18 @@ exports.rejectForm = async (req, res) => {
       `
     };
 
+    const transporter = emailConfig.transporter;
     if (transporter) {
       try {
         await transporter.sendMail(mailOptions);
-        console.log(`Rejection email sent successfully to: ${email}`);
+        console.log(`✅ Rejection email sent successfully to: ${email}`);
         res.status(200).json({
           success: true,
           message: "Form rejected and notification sent",
           form: updatedForm
         });
       } catch (emailError) {
-        console.error('Error sending rejection email:', emailError);
+        console.error('❌ Error sending rejection email:', emailError);
         console.error('Email error details:', {
           message: emailError.message,
           code: emailError.code,
@@ -1666,7 +1671,7 @@ exports.rejectForm = async (req, res) => {
         });
       }
     } else {
-      console.error('Email transporter not configured. Email not sent to:', email);
+      console.error('⚠️  Email transporter not configured. Email not sent to:', email);
       console.error('Please check EMAIL_USER and EMAIL_PASS in .env file');
       res.status(200).json({
         success: true,
