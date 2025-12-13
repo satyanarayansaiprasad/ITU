@@ -1073,7 +1073,14 @@ exports.approvePlayers = async (req, res) => {
         // Use the sendEmail helper function for reliable email sending
         const emailResult = await sendEmail(mailOptions);
         if (!emailResult.success) {
-          console.error(`⚠️  Failed to send welcome email to ${player.email}:`, emailResult.error);
+          console.error(`\n⚠️⚠️⚠️  FAILED TO SEND WELCOME EMAIL ⚠️⚠️⚠️`);
+          console.error(`Player: ${player.name}`);
+          console.error(`Email: ${player.email}`);
+          console.error(`Error: ${emailResult.error}`);
+          if (emailResult.fullError) {
+            console.error('Full Error Details:', JSON.stringify(emailResult.fullError, Object.getOwnPropertyNames(emailResult.fullError), 2));
+          }
+          console.error(`\n`);
         }
         approvedPlayers.push(player);
       } catch (error) {
@@ -1273,7 +1280,14 @@ exports.approveForm = async (req, res) => {
         form: updatedForm
       });
     } else {
-      console.error(`⚠️  Failed to send approval email to ${email}:`, emailResult.error);
+      console.error(`\n⚠️⚠️⚠️  FAILED TO SEND APPROVAL EMAIL ⚠️⚠️⚠️`);
+      console.error(`Form: ${updatedForm.name}`);
+      console.error(`Email: ${email}`);
+      console.error(`Error: ${emailResult.error}`);
+      if (emailResult.fullError) {
+        console.error('Full Error Details:', JSON.stringify(emailResult.fullError, Object.getOwnPropertyNames(emailResult.fullError), 2));
+      }
+      console.error(`\n`);
       res.status(200).json({
         success: true,
         message: "Form approved but email could not be sent",
@@ -1637,7 +1651,14 @@ exports.rejectForm = async (req, res) => {
         form: updatedForm
       });
     } else {
-      console.error(`⚠️  Failed to send rejection email to ${email}:`, emailResult.error);
+      console.error(`\n⚠️⚠️⚠️  FAILED TO SEND REJECTION EMAIL ⚠️⚠️⚠️`);
+      console.error(`Form: ${updatedForm.name}`);
+      console.error(`Email: ${email}`);
+      console.error(`Error: ${emailResult.error}`);
+      if (emailResult.fullError) {
+        console.error('Full Error Details:', JSON.stringify(emailResult.fullError, Object.getOwnPropertyNames(emailResult.fullError), 2));
+      }
+      console.error(`\n`);
       res.status(200).json({
         success: true,
         message: "Form rejected but email could not be sent",

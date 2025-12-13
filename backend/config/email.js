@@ -123,6 +123,11 @@ const getEmailFrom = () => {
 // Helper function to send email with retry logic
 const sendEmail = async (mailOptions) => {
   try {
+    console.log('\n========== EMAIL SENDING ATTEMPT ==========');
+    console.log('To:', mailOptions.to);
+    console.log('Subject:', mailOptions.subject);
+    console.log('From:', mailOptions.from);
+    
     let transporter = getTransporter();
     
     // If transporter is null, try to recreate it
@@ -133,27 +138,50 @@ const sendEmail = async (mailOptions) => {
     }
     
     if (!transporter) {
-      throw new Error('Email transporter is not configured. Please check EMAIL_USER and EMAIL_PASS environment variables.');
+      const errorMsg = 'Email transporter is not configured. Please check EMAIL_USER and EMAIL_PASS environment variables.';
+      console.error('\n========== EMAIL ERROR DETAILS ==========');
+      console.error('ERROR TYPE: Transporter Not Configured');
+      console.error('ERROR MESSAGE:', errorMsg);
+      console.error('EMAIL_USER:', process.env.EMAIL_USER ? '***set***' : '❌ NOT SET');
+      console.error('EMAIL_PASS:', process.env.EMAIL_PASS ? '***set***' : '❌ NOT SET');
+      console.error('EMAIL_SERVICE:', process.env.EMAIL_SERVICE || 'gmail (default)');
+      console.error('=========================================\n');
+      throw new Error(errorMsg);
     }
     
     // Send email
+    console.log('Attempting to send email...');
     const info = await transporter.sendMail(mailOptions);
-    console.log('✅ Email sent successfully:', {
-      messageId: info.messageId,
-      to: mailOptions.to,
-      subject: mailOptions.subject
-    });
+    console.log('\n========== EMAIL SENT SUCCESSFULLY ==========');
+    console.log('Message ID:', info.messageId);
+    console.log('To:', mailOptions.to);
+    console.log('Subject:', mailOptions.subject);
+    console.log('Response:', info.response || 'N/A');
+    console.log('=============================================\n');
     return { success: true, info };
   } catch (error) {
-    console.error('❌ Error sending email:', {
-      to: mailOptions.to,
-      subject: mailOptions.subject,
-      error: error.message,
-      code: error.code,
-      command: error.command,
-      response: error.response
-    });
-    return { success: false, error: error.message };
+    console.error('\n========== EMAIL ERROR DETAILS ==========');
+    console.error('ERROR TYPE:', error.name || 'Unknown');
+    console.error('ERROR MESSAGE:', error.message);
+    console.error('ERROR CODE:', error.code || 'N/A');
+    console.error('ERROR COMMAND:', error.command || 'N/A');
+    console.error('ERROR RESPONSE:', error.response || 'N/A');
+    console.error('ERROR STACK:', error.stack || 'N/A');
+    console.error('\n--- Email Details ---');
+    console.error('To:', mailOptions.to);
+    console.error('Subject:', mailOptions.subject);
+    console.error('From:', mailOptions.from);
+    console.error('\n--- Configuration Check ---');
+    console.error('EMAIL_USER:', process.env.EMAIL_USER ? '***configured***' : '❌ NOT SET');
+    console.error('EMAIL_PASS:', process.env.EMAIL_PASS ? '***configured***' : '❌ NOT SET');
+    console.error('EMAIL_SERVICE:', process.env.EMAIL_SERVICE || 'gmail (default)');
+    console.error('EMAIL_HOST:', process.env.EMAIL_HOST || 'not set (using service)');
+    console.error('===========================================\n');
+    
+    // Also log full error object for debugging
+    console.error('FULL ERROR OBJECT:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
+    
+    return { success: false, error: error.message, fullError: error };
   }
 };
 
