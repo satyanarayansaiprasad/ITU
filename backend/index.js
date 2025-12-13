@@ -18,16 +18,6 @@ connectDB();
 // Initialize Firebase
 initializeFirebase();
 
-// Log email service configuration
-console.log('\n📧 Email Service Configuration:');
-console.log('  USE_FIRESTORE_EMAIL_QUEUE:', process.env.USE_FIRESTORE_EMAIL_QUEUE || 'false');
-if (process.env.USE_FIRESTORE_EMAIL_QUEUE === 'true') {
-  console.log('  ✅ Using Firebase Firestore Queue for emails');
-} else {
-  console.log('  ℹ️  Using direct email service (nodemailer)');
-}
-console.log('');
-
 // CORS Configuration
 const allowedOrigins = [
   'https://itu-mu.vercel.app',

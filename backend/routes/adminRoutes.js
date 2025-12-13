@@ -47,7 +47,6 @@ router.get('/getForm',adminController.getForm);
 
 router.put('/approveForm',adminController.approveForm)
 router.put('/rejectForm',adminController.rejectForm)
-router.post('/testEmail', adminController.testEmail); // Test email endpoint
 router.delete('/deleteUser',adminController.deleteUser)
 
 // District and State Head Management
