@@ -1021,7 +1021,8 @@ exports.approvePlayers = async (req, res) => {
         player.approvedAt = new Date();
         await player.save();
 
-        // Send welcome email
+        // Send welcome email automatically after approval
+        console.log(`📧 Preparing to send welcome email to: ${player.email}`);
         const mailOptions = {
           from: `"Indian Taekwondo Union" <${getEmailFrom()}>`,
           to: player.email,
@@ -1228,41 +1229,53 @@ exports.approveForm = async (req, res) => {
       return res.status(404).json({ error: "Form not found" });
     }
 
-    // 2. Send email with credentials
-const mailOptions = {
-  from: `"Indian Taekwondo Union" <${getEmailFrom()}>`,
-  to: email,
-  subject: "Your Affiliation Request Has Been Approved",
-  html: `
-    <h2>Congratulations! Your Affiliation Request Has Been Approved</h2>
-    
-    <p>Dear ${updatedForm.name},</p>
-    
-    <p>We are pleased to inform you that your affiliation request has been approved by the admin.</p>
-    
-    <p><strong>Next Steps:</strong></p>
-    <p>Please update your profile by logging in using the password that was already generated and sent to you via email.</p>
-    
-    <p><strong>Login Email:</strong> ${email}</p>
-    <p><strong>Password:</strong> ${password}</p>
-    
-    <h3>IMPORTANT:</h3>
-    <ul>
-      <li>This password was previously sent to you when your account was created</li>
-      <li>Please use this same password to login and update your profile</li>
-      <li>Store this password securely</li>
-      <li>Do not share this password with anyone</li>
-    </ul>
-    
-    <p>After logging in, please complete your profile update to ensure all information is current.</p>
-    
-    <p>If you didn't request this account or have any questions, contact admin immediately.</p>
-    
-    <p>Regards,<br/>
-    Indian Taekwondo Union<br/>
-    System Administrator</p>
-  `
-};
+    // 2. Send welcome email automatically after approval
+    console.log(`📧 Preparing to send approval email to: ${email}`);
+    const mailOptions = {
+      from: `"Indian Taekwondo Union" <${getEmailFrom()}>`,
+      to: email,
+      subject: "🎉 Welcome to Indian Taekwondo Union - Your Affiliation Request Has Been Approved!",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #0E2A4E;">🎉 Congratulations! Your Affiliation Request Has Been Approved</h2>
+          
+          <p>Dear <strong>${updatedForm.name}</strong>,</p>
+          
+          <p>We are delighted to inform you that your affiliation request has been approved by the admin!</p>
+          
+          <div style="background-color: #f0f8ff; padding: 15px; border-radius: 5px; margin: 20px 0;">
+            <h3 style="color: #0E2A4E; margin-top: 0;">Your Login Credentials:</h3>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Password:</strong> ${password}</p>
+          </div>
+          
+          <h3 style="color: #0E2A4E;">Next Steps:</h3>
+          <ol>
+            <li>Login using your Email and the password provided above</li>
+            <li>Complete your profile information</li>
+            <li>Update any additional details as needed</li>
+          </ol>
+          
+          <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107;">
+            <p style="margin: 0;"><strong>⚠️ Important Security Notice:</strong></p>
+            <ul style="margin: 10px 0;">
+              <li>Keep your credentials secure and confidential</li>
+              <li>Do not share your password with anyone</li>
+              <li>Store this password securely</li>
+              <li>If you didn't request this account, contact admin immediately</li>
+            </ul>
+          </div>
+          
+          <p>If you have any questions or need assistance, please contact our support team.</p>
+          
+          <p style="margin-top: 30px;">
+            Best regards,<br/>
+            <strong>Indian Taekwondo Union</strong><br/>
+            System Administrator
+          </p>
+        </div>
+      `
+    };
 
     const transporter = emailConfig.transporter;
     if (transporter) {
