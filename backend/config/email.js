@@ -130,58 +130,88 @@ const getEmailFrom = () => {
 };
 
 // Helper function to send email with retry logic
-const sendEmail = async (mailOptions) => {
-  try {
-    console.log('\n========== EMAIL SENDING ATTEMPT ==========');
-    console.log('To:', mailOptions.to);
-    console.log('Subject:', mailOptions.subject);
-    console.log('From:', mailOptions.from);
-    console.log('Timestamp:', new Date().toISOString());
-    
-    let transporter = getTransporter();
-    
-    // If transporter is null, try to recreate it
-    if (!transporter) {
-      console.log('⚠️  Transporter is null, attempting to recreate...');
-      cachedTransporter = null; // Reset cache
-      transporter = getTransporter();
-    }
-    
-    if (!transporter) {
-      const errorMsg = 'Email transporter is not configured. Please check EMAIL_USER and EMAIL_PASS environment variables.';
-      console.error('\n========== EMAIL ERROR DETAILS ==========');
-      console.error('ERROR TYPE: Transporter Not Configured');
-      console.error('ERROR MESSAGE:', errorMsg);
-      console.error('EMAIL_USER:', process.env.EMAIL_USER ? '***set***' : '❌ NOT SET');
-      console.error('EMAIL_PASS:', process.env.EMAIL_PASS ? `***set*** (${process.env.EMAIL_PASS.replace(/\s+/g, '').length} chars)` : '❌ NOT SET');
-      console.error('EMAIL_SERVICE:', process.env.EMAIL_SERVICE || 'gmail (default)');
-      console.error('=========================================\n');
-      throw new Error(errorMsg);
-    }
-    
-    // Verify transporter before sending
-    console.log('Verifying email transporter connection...');
+const sendEmail = async (mailOptions, retries = 3) => {
+  for (let attempt = 1; attempt <= retries; attempt++) {
     try {
-      await transporter.verify();
-      console.log('✅ Email transporter verified successfully');
-    } catch (verifyError) {
-      console.warn('⚠️  Email transporter verification failed:', verifyError.message);
-      console.warn('⚠️  Attempting to send anyway...');
+      console.log(`\n========== EMAIL SENDING ATTEMPT ${attempt}/${retries} ==========`);
+      console.log('To:', mailOptions.to);
+      console.log('Subject:', mailOptions.subject);
+      console.log('From:', mailOptions.from);
+      console.log('Timestamp:', new Date().toISOString());
+      
+      let transporter = getTransporter();
+      
+      // If transporter is null, try to recreate it
+      if (!transporter) {
+        console.log('⚠️  Transporter is null, attempting to recreate...');
+        cachedTransporter = null; // Reset cache
+        transporter = getTransporter();
+      }
+      
+      if (!transporter) {
+        const errorMsg = 'Email transporter is not configured. Please check EMAIL_USER and EMAIL_PASS environment variables.';
+        console.error('\n========== EMAIL ERROR DETAILS ==========');
+        console.error('ERROR TYPE: Transporter Not Configured');
+        console.error('ERROR MESSAGE:', errorMsg);
+        console.error('EMAIL_USER:', process.env.EMAIL_USER ? '***set***' : '❌ NOT SET');
+        console.error('EMAIL_PASS:', process.env.EMAIL_PASS ? `***set*** (${process.env.EMAIL_PASS.replace(/\s+/g, '').length} chars)` : '❌ NOT SET');
+        console.error('EMAIL_SERVICE:', process.env.EMAIL_SERVICE || 'gmail (default)');
+        console.error('=========================================\n');
+        throw new Error(errorMsg);
+      }
+      
+      // Send email directly (skip verification to avoid timeout)
+      console.log('Sending email...');
+      const info = await transporter.sendMail(mailOptions);
+      
+      console.log('\n========== EMAIL SENT SUCCESSFULLY ==========');
+      console.log('Message ID:', info.messageId);
+      console.log('To:', mailOptions.to);
+      console.log('Subject:', mailOptions.subject);
+      console.log('Response:', info.response || 'N/A');
+      console.log('Accepted:', info.accepted || 'N/A');
+      console.log('Rejected:', info.rejected || 'N/A');
+      console.log('=============================================\n');
+      return { success: true, info };
+    } catch (error) {
+      console.error(`\n❌ Attempt ${attempt}/${retries} failed:`);
+      console.error('Error:', error.message);
+      
+      // If this is the last attempt, return error
+      if (attempt === retries) {
+        console.error('\n========== EMAIL ERROR DETAILS ==========');
+        console.error('ERROR TYPE:', error.name || 'Unknown');
+        console.error('ERROR MESSAGE:', error.message);
+        console.error('ERROR CODE:', error.code || 'N/A');
+        console.error('ERROR COMMAND:', error.command || 'N/A');
+        console.error('ERROR RESPONSE:', error.response || 'N/A');
+        console.error('\n--- Email Details ---');
+        console.error('To:', mailOptions.to);
+        console.error('Subject:', mailOptions.subject);
+        console.error('From:', mailOptions.from);
+        console.error('\n--- Configuration Check ---');
+        console.error('EMAIL_USER:', process.env.EMAIL_USER ? '***configured***' : '❌ NOT SET');
+        console.error('EMAIL_PASS:', process.env.EMAIL_PASS ? '***configured***' : '❌ NOT SET');
+        console.error('EMAIL_SERVICE:', process.env.EMAIL_SERVICE || 'gmail (default)');
+        console.error('EMAIL_HOST:', process.env.EMAIL_HOST || 'not set (using service)');
+        console.error('===========================================\n');
+        
+        // Reset transporter cache for next time
+        cachedTransporter = null;
+        
+        return { success: false, error: error.message, fullError: error };
+      }
+      
+      // Wait before retry (exponential backoff)
+      const waitTime = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
+      console.log(`⏳ Waiting ${waitTime}ms before retry...`);
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+      
+      // Reset transporter cache before retry
+      cachedTransporter = null;
     }
-    
-    // Send email
-    console.log('Attempting to send email...');
-    const info = await transporter.sendMail(mailOptions);
-    console.log('\n========== EMAIL SENT SUCCESSFULLY ==========');
-    console.log('Message ID:', info.messageId);
-    console.log('To:', mailOptions.to);
-    console.log('Subject:', mailOptions.subject);
-    console.log('Response:', info.response || 'N/A');
-    console.log('Accepted:', info.accepted || 'N/A');
-    console.log('Rejected:', info.rejected || 'N/A');
-    console.log('=============================================\n');
-    return { success: true, info };
-  } catch (error) {
+  }
+};
     console.error('\n========== EMAIL ERROR DETAILS ==========');
     console.error('ERROR TYPE:', error.name || 'Unknown');
     console.error('ERROR MESSAGE:', error.message);

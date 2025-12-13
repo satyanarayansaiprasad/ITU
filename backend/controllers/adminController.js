@@ -1088,33 +1088,50 @@ exports.approvePlayers = async (req, res) => {
           `
         };
 
-        // Use Firebase Email Service for reliable email sending
-        console.log('📤 Calling Firebase Email Service...');
-        const emailResult = await firebaseEmailService.sendEmail(mailOptions);
-        console.log('📥 Firebase Email Service returned:', JSON.stringify({ success: emailResult.success, error: emailResult.error }, null, 2));
+        // Try Firebase Email Service first (if enabled), then fallback to regular email
+        let emailResult = null;
         
-        if (emailResult.success) {
-          console.log(`✅✅✅ EMAIL SENT SUCCESSFULLY VIA FIREBASE ✅✅✅`);
-          console.log(`Player: ${player.name}`);
-          console.log(`Email: ${player.email}`);
-          if (emailResult.messageId) {
-            console.log(`Message ID: ${emailResult.messageId}`);
+        if (process.env.USE_FIRESTORE_EMAIL_QUEUE === 'true') {
+          console.log('📤 Calling Firebase Email Service...');
+          try {
+            emailResult = await firebaseEmailService.sendEmail(mailOptions);
+            console.log('📥 Firebase Email Service returned:', JSON.stringify({ success: emailResult.success, error: emailResult.error }, null, 2));
+            
+            if (emailResult.success) {
+              console.log(`✅✅✅ EMAIL SENT SUCCESSFULLY VIA FIREBASE ✅✅✅`);
+              console.log(`Player: ${player.name}`);
+              console.log(`Email: ${player.email}`);
+              if (emailResult.messageId) {
+                console.log(`Message ID: ${emailResult.messageId}`);
+              }
+              if (emailResult.queueId) {
+                console.log(`Queued in Firestore: ${emailResult.queueId}`);
+              }
+            }
+          } catch (firebaseError) {
+            console.error('Firebase Email Service error:', firebaseError.message);
+            emailResult = { success: false, error: firebaseError.message };
           }
-          if (emailResult.queueId) {
-            console.log(`Queued in Firestore: ${emailResult.queueId}`);
-          }
-        } else {
-          console.error(`\n⚠️⚠️⚠️  FAILED TO SEND WELCOME EMAIL ⚠️⚠️⚠️`);
-          console.error(`Player: ${player.name}`);
-          console.error(`Email: ${player.email}`);
-          console.error(`Error: ${emailResult.error}`);
-          console.error(`\n`);
+        }
+        
+        // Fallback to regular email service if Firebase failed or not enabled
+        if (!emailResult || !emailResult.success) {
+          console.log('📤 Using regular email service (with retry logic)...');
+          emailResult = await sendEmail(mailOptions);
           
-          // Fallback to regular email service
-          console.log('🔄 Attempting fallback to regular email service...');
-          const fallbackResult = await sendEmail(mailOptions);
-          if (fallbackResult.success) {
-            console.log('✅ Fallback email sent successfully');
+          if (emailResult.success) {
+            console.log(`✅✅✅ EMAIL SENT SUCCESSFULLY ✅✅✅`);
+            console.log(`Player: ${player.name}`);
+            console.log(`Email: ${player.email}`);
+            if (emailResult.info && emailResult.info.messageId) {
+              console.log(`Message ID: ${emailResult.info.messageId}`);
+            }
+          } else {
+            console.error(`\n⚠️⚠️⚠️  FAILED TO SEND WELCOME EMAIL ⚠️⚠️⚠️`);
+            console.error(`Player: ${player.name}`);
+            console.error(`Email: ${player.email}`);
+            console.error(`Error: ${emailResult.error}`);
+            console.error(`\n`);
           }
         }
         approvedPlayers.push(player);
@@ -1381,20 +1398,44 @@ exports.approveForm = async (req, res) => {
       `
     };
 
-    // Use Firebase Email Service for reliable email sending
-    console.log('📤 Calling Firebase Email Service...');
-    const emailResult = await firebaseEmailService.sendEmail(mailOptions);
-    console.log('📥 Firebase Email Service returned:', JSON.stringify({ success: emailResult.success, error: emailResult.error }, null, 2));
+    // Try Firebase Email Service first (if enabled), then fallback to regular email
+    let emailResult = null;
+    
+    if (process.env.USE_FIRESTORE_EMAIL_QUEUE === 'true') {
+      console.log('📤 Calling Firebase Email Service...');
+      try {
+        emailResult = await firebaseEmailService.sendEmail(mailOptions);
+        console.log('📥 Firebase Email Service returned:', JSON.stringify({ success: emailResult.success, error: emailResult.error }, null, 2));
+        
+        if (emailResult.success) {
+          console.log(`✅✅✅ EMAIL SENT SUCCESSFULLY VIA FIREBASE ✅✅✅`);
+          console.log(`Form: ${updatedForm.name}`);
+          console.log(`Email: ${email}`);
+          if (emailResult.messageId) {
+            console.log(`Message ID: ${emailResult.messageId}`);
+          }
+          if (emailResult.queueId) {
+            console.log(`Queued in Firestore: ${emailResult.queueId}`);
+          }
+        }
+      } catch (firebaseError) {
+        console.error('Firebase Email Service error:', firebaseError.message);
+        emailResult = { success: false, error: firebaseError.message };
+      }
+    }
+    
+    // Fallback to regular email service if Firebase failed or not enabled
+    if (!emailResult || !emailResult.success) {
+      console.log('📤 Using regular email service (with retry logic)...');
+      emailResult = await sendEmail(mailOptions);
+    }
     
     if (emailResult.success) {
-      console.log(`✅✅✅ EMAIL SENT SUCCESSFULLY VIA FIREBASE ✅✅✅`);
+      console.log(`✅✅✅ EMAIL SENT SUCCESSFULLY ✅✅✅`);
       console.log(`Form: ${updatedForm.name}`);
       console.log(`Email: ${email}`);
-      if (emailResult.messageId) {
-        console.log(`Message ID: ${emailResult.messageId}`);
-      }
-      if (emailResult.queueId) {
-        console.log(`Queued in Firestore: ${emailResult.queueId}`);
+      if (emailResult.info && emailResult.info.messageId) {
+        console.log(`Message ID: ${emailResult.info.messageId}`);
       }
       console.log(`\n========== FORM APPROVAL COMPLETED ==========\n`);
       res.status(200).json({
@@ -1407,28 +1448,13 @@ exports.approveForm = async (req, res) => {
       console.error(`Form: ${updatedForm.name}`);
       console.error(`Email: ${email}`);
       console.error(`Error: ${emailResult.error}`);
-      console.error(`\n`);
-      
-      // Fallback to regular email service
-      console.log('🔄 Attempting fallback to regular email service...');
-      const fallbackResult = await sendEmail(mailOptions);
-      
-      if (fallbackResult.success) {
-        console.log('✅ Fallback email sent successfully');
-        res.status(200).json({
-          success: true,
-          message: "Form approved and email sent successfully (via fallback)",
-          form: updatedForm
-        });
-      } else {
-        console.error(`\n========== FORM APPROVAL COMPLETED (WITH EMAIL ERROR) ==========\n`);
-        res.status(200).json({
-          success: true,
-          message: "Form approved but email could not be sent",
-          error: emailResult.error,
-          form: updatedForm
-        });
-      }
+      console.error(`\n========== FORM APPROVAL COMPLETED (WITH EMAIL ERROR) ==========\n`);
+      res.status(200).json({
+        success: true,
+        message: "Form approved but email could not be sent",
+        error: emailResult.error,
+        form: updatedForm
+      });
     }
 
   } catch (error) {
