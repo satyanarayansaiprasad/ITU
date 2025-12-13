@@ -30,7 +30,11 @@ const createTransporter = () => {
     auth: {
       user: emailUser,
       pass: emailPass
-    }
+    },
+    // Add connection timeout options to prevent hanging
+    connectionTimeout: 5000, // 5 seconds
+    greetingTimeout: 5000, // 5 seconds
+    socketTimeout: 5000, // 5 seconds
   };
 
   // If custom host is provided, use it (for custom SMTP servers)
@@ -46,15 +50,30 @@ const createTransporter = () => {
   try {
     const transporter = nodemailer.createTransport(config);
     
-    // Verify connection (async, don't block)
-    transporter.verify((error, success) => {
-      if (error) {
-        console.error('Email transporter verification failed:', error.message);
-        console.error('Full error:', error);
-      } else {
-        console.log('Email server is ready to send messages');
-      }
-    });
+    // Skip verification on startup to prevent deployment timeouts
+    // Verification will happen on first email send attempt
+    // Only verify if explicitly enabled via environment variable
+    if (process.env.EMAIL_VERIFY_ON_STARTUP === 'true') {
+      // Verify connection (async, non-blocking) with timeout handling
+      setImmediate(() => {
+        const verifyTimeout = setTimeout(() => {
+          console.warn('⚠️  Email verification timed out - server will continue. Email will be verified on first use.');
+        }, 3000); // 3 second timeout
+        
+        transporter.verify((error, success) => {
+          clearTimeout(verifyTimeout);
+          if (error) {
+            console.warn('⚠️  Email transporter verification failed:', error.message);
+            console.warn('Email functionality will still be available but may fail on first use. Check your email configuration.');
+          } else {
+            console.log('✅ Email server is ready to send messages');
+          }
+        });
+      });
+    } else {
+      console.log('ℹ️  Email transporter created. Verification skipped on startup to prevent deployment timeouts.');
+      console.log('ℹ️  Email will be verified on first send attempt.');
+    }
 
     return transporter;
   } catch (error) {
