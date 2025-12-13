@@ -1144,6 +1144,59 @@ exports.approvePlayers = async (req, res) => {
   }
 };
 
+// Test email endpoint for debugging
+exports.testEmail = async (req, res) => {
+  console.log('\n========== TEST EMAIL ENDPOINT CALLED ==========');
+  const { email } = req.body;
+  
+  if (!email) {
+    return res.status(400).json({
+      success: false,
+      error: "Email address is required"
+    });
+  }
+  
+  try {
+    const mailOptions = {
+      from: `"Indian Taekwondo Union" <${getEmailFrom()}>`,
+      to: email,
+      subject: "Test Email - ITU System",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #0E2A4E;">Test Email</h2>
+          <p>This is a test email from the ITU system.</p>
+          <p>If you received this, the email system is working correctly.</p>
+          <p>Timestamp: ${new Date().toISOString()}</p>
+        </div>
+      `
+    };
+    
+    console.log('Sending test email to:', email);
+    const emailResult = await sendEmail(mailOptions);
+    
+    if (emailResult.success) {
+      res.status(200).json({
+        success: true,
+        message: "Test email sent successfully",
+        details: emailResult.info
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: "Failed to send test email",
+        details: emailResult.error
+      });
+    }
+  } catch (error) {
+    console.error("Test email error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error",
+      details: error.message
+    });
+  }
+};
+
 // Reject players
 exports.rejectPlayers = async (req, res) => {
   try {
