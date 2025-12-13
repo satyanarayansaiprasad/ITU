@@ -107,9 +107,54 @@ const transporter = createTransporter();
 cachedTransporter = transporter;
 lastConfigHash = getConfigHash();
 
+// Log email configuration status on startup
+console.log('📧 Email Configuration Status:');
+console.log('  EMAIL_USER:', process.env.EMAIL_USER ? '***configured***' : '❌ NOT SET');
+console.log('  EMAIL_PASS:', process.env.EMAIL_PASS ? '***configured***' : '❌ NOT SET');
+console.log('  EMAIL_SERVICE:', process.env.EMAIL_SERVICE || 'gmail (default)');
+console.log('  EMAIL_HOST:', process.env.EMAIL_HOST || 'not set (using service)');
+console.log('  Transporter Status:', transporter ? '✅ Created' : '❌ Failed to create');
+
 // Get email from address
 const getEmailFrom = () => {
   return process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@example.com';
+};
+
+// Helper function to send email with retry logic
+const sendEmail = async (mailOptions) => {
+  try {
+    let transporter = getTransporter();
+    
+    // If transporter is null, try to recreate it
+    if (!transporter) {
+      console.log('⚠️  Transporter is null, attempting to recreate...');
+      cachedTransporter = null; // Reset cache
+      transporter = getTransporter();
+    }
+    
+    if (!transporter) {
+      throw new Error('Email transporter is not configured. Please check EMAIL_USER and EMAIL_PASS environment variables.');
+    }
+    
+    // Send email
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Email sent successfully:', {
+      messageId: info.messageId,
+      to: mailOptions.to,
+      subject: mailOptions.subject
+    });
+    return { success: true, info };
+  } catch (error) {
+    console.error('❌ Error sending email:', {
+      to: mailOptions.to,
+      subject: mailOptions.subject,
+      error: error.message,
+      code: error.code,
+      command: error.command,
+      response: error.response
+    });
+    return { success: false, error: error.message };
+  }
 };
 
 module.exports = {
@@ -117,6 +162,7 @@ module.exports = {
     return getTransporter();
   },
   getEmailFrom,
-  createTransporter
+  createTransporter,
+  sendEmail
 };
 
