@@ -2032,6 +2032,104 @@ exports.getRelatedPosts = async (req, res) => {
   }
 };
 
+// ========== EMAIL TEST ENDPOINT ==========
+exports.testEmail = async (req, res) => {
+  console.log('\n\n🧪🧪🧪 TEST EMAIL ENDPOINT CALLED 🧪🧪🧪');
+  console.log('Request Body:', JSON.stringify(req.body, null, 2));
+  console.log('Timestamp:', new Date().toISOString());
+  
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: "Email address is required"
+      });
+    }
+
+    // Check email configuration
+    const emailConfig = require('../config/email');
+    const transporter = emailConfig.transporter;
+    const emailFrom = emailConfig.getEmailFrom();
+    
+    console.log('\n--- Email Configuration Check ---');
+    console.log('EMAIL_USER:', process.env.EMAIL_USER ? '***configured***' : '❌ NOT SET');
+    console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? '***configured***' : '❌ NOT SET');
+    console.log('EMAIL_SERVICE:', process.env.EMAIL_SERVICE || 'gmail (default)');
+    console.log('Email From:', emailFrom);
+    console.log('Transporter:', transporter ? '✅ Available' : '❌ Not Available');
+    
+    if (!transporter) {
+      return res.status(500).json({
+        success: false,
+        error: "Email transporter is not configured",
+        details: {
+          EMAIL_USER: process.env.EMAIL_USER ? 'set' : 'NOT SET',
+          EMAIL_PASS: process.env.EMAIL_PASS ? 'set' : 'NOT SET',
+          EMAIL_SERVICE: process.env.EMAIL_SERVICE || 'gmail (default)'
+        }
+      });
+    }
+
+    const mailOptions = {
+      from: `"Indian Taekwondo Union" <${emailFrom}>`,
+      to: email,
+      subject: "🧪 Test Email - ITU System",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #0E2A4E;">Test Email from ITU System</h2>
+          <p>This is a test email to verify that the email system is working correctly.</p>
+          <p><strong>Timestamp:</strong> ${new Date().toISOString()}</p>
+          <p><strong>From:</strong> ${emailFrom}</p>
+          <p><strong>To:</strong> ${email}</p>
+          <p>If you received this email, the email system is configured correctly!</p>
+          <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
+          <p style="color: #666; font-size: 12px;">This is an automated test email from Indian Taekwondo Union system.</p>
+        </div>
+      `,
+      text: `Test Email from ITU System\n\nThis is a test email to verify that the email system is working correctly.\nTimestamp: ${new Date().toISOString()}\nFrom: ${emailFrom}\nTo: ${email}\n\nIf you received this email, the email system is configured correctly!`
+    };
+
+    console.log('\n--- Sending Test Email ---');
+    console.log('To:', email);
+    console.log('From:', emailFrom);
+    
+    const { sendEmail } = require('../config/email');
+    const emailResult = await sendEmail(mailOptions);
+    
+    if (emailResult.success) {
+      res.status(200).json({
+        success: true,
+        message: "Test email sent successfully",
+        details: {
+          to: email,
+          from: emailFrom,
+          messageId: emailResult.info?.messageId,
+          response: emailResult.info?.response
+        }
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: "Failed to send test email",
+        details: {
+          error: emailResult.error,
+          to: email,
+          from: emailFrom
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Test email error:', error);
+    res.status(500).json({
+      success: false,
+      error: "Server error while sending test email",
+      details: error.message
+    });
+  }
+};
+
 // ========== ANALYTICS ENDPOINTS ==========
 
 // Get dashboard analytics

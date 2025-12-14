@@ -45,6 +45,14 @@ const createTransporter = () => {
   } else {
     // Use service name (gmail, outlook, yahoo, etc.)
     config.service = emailService;
+    
+    // Gmail-specific configuration
+    if (emailService === 'gmail' || emailService.toLowerCase() === 'gmail') {
+      // Gmail requires these settings for app passwords
+      config.secure = false; // Use STARTTLS
+      config.requireTLS = true;
+      // Don't set host/port when using service: 'gmail'
+    }
   }
 
   try {

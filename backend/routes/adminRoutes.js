@@ -71,6 +71,9 @@ router.get('/blog/tags', adminController.getBlogTags);
 router.get('/blog/featured', adminController.getFeaturedPosts);
 router.get('/blog/related/:slug', adminController.getRelatedPosts);
 
+// ========== EMAIL TEST ROUTE ==========
+router.post('/test-email', adminController.testEmail);
+
 // ========== ANALYTICS ROUTES ==========
 router.get('/analytics/dashboard', adminController.getDashboardAnalytics);
 router.get('/analytics/engagement', adminController.getUserEngagement);
