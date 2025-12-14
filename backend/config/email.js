@@ -31,10 +31,10 @@ const createTransporter = () => {
       user: emailUser,
       pass: emailPass
     },
-    // Add connection timeout options to prevent hanging
-    connectionTimeout: 5000, // 5 seconds
-    greetingTimeout: 5000, // 5 seconds
-    socketTimeout: 5000, // 5 seconds
+    // Increased timeout options for better reliability
+    connectionTimeout: 10000, // 10 seconds
+    greetingTimeout: 10000, // 10 seconds
+    socketTimeout: 10000, // 10 seconds
   };
 
   // If custom host is provided, use it (for custom SMTP servers)
@@ -43,15 +43,19 @@ const createTransporter = () => {
     config.port = emailPort;
     config.secure = emailPort === 465; // true for 465, false for other ports
   } else {
-    // Use service name (gmail, outlook, yahoo, etc.)
-    config.service = emailService;
-    
-    // Gmail-specific configuration
+    // For Gmail, use explicit SMTP settings instead of service name
     if (emailService === 'gmail' || emailService.toLowerCase() === 'gmail') {
-      // Gmail requires these settings for app passwords
+      // Gmail SMTP settings
+      config.host = 'smtp.gmail.com';
+      config.port = 587;
       config.secure = false; // Use STARTTLS
       config.requireTLS = true;
-      // Don't set host/port when using service: 'gmail'
+      config.tls = {
+        rejectUnauthorized: false // Allow self-signed certificates
+      };
+    } else {
+      // Use service name for other providers
+      config.service = emailService;
     }
   }
 
@@ -160,9 +164,22 @@ const sendEmail = async (mailOptions) => {
       throw new Error(errorMsg);
     }
     
-    // Send email
+    // Send email with timeout wrapper
     console.log('Attempting to send email...');
-    const info = await transporter.sendMail(mailOptions);
+    console.log('Using SMTP:', {
+      host: transporter.options?.host || 'service-based',
+      port: transporter.options?.port || 'service-based',
+      secure: transporter.options?.secure,
+      service: transporter.options?.service
+    });
+    
+    // Wrap sendMail in a timeout promise
+    const sendPromise = transporter.sendMail(mailOptions);
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Email send timeout after 30 seconds')), 30000);
+    });
+    
+    const info = await Promise.race([sendPromise, timeoutPromise]);
     console.log('\n========== EMAIL SENT SUCCESSFULLY ==========');
     console.log('Message ID:', info.messageId);
     console.log('To:', mailOptions.to);
