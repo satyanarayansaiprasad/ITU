@@ -122,6 +122,61 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Test email endpoint (no auth required for testing)
+app.post('/test-email', async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: "Email address is required"
+      });
+    }
+
+    const { sendEmail, getEmailFrom } = require('./config/email');
+    
+    const mailOptions = {
+      from: `"Indian Taekwondo Union" <${getEmailFrom()}>`,
+      to: email,
+      subject: "🧪 Test Email - ITU System",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #0E2A4E;">Test Email from ITU System</h2>
+          <p>This is a test email to verify that the email system is working correctly.</p>
+          <p><strong>Timestamp:</strong> ${new Date().toISOString()}</p>
+          <p>If you received this email, the email system is configured correctly!</p>
+        </div>
+      `
+    };
+
+    const emailResult = await sendEmail(mailOptions);
+    
+    if (emailResult.success) {
+      res.status(200).json({
+        success: true,
+        message: "Test email sent successfully",
+        details: {
+          to: email,
+          messageId: emailResult.info?.messageId
+        }
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: "Failed to send test email",
+        details: emailResult.error
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: "Server error",
+      details: error.message
+    });
+  }
+});
+
 // Routes
 app.use('/api/admin', adminRoutes);
 app.use('/api/user', userRoutes);
