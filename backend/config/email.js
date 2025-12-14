@@ -45,14 +45,19 @@ const createTransporter = () => {
   } else {
     // For Gmail, use explicit SMTP settings instead of service name
     if (emailService === 'gmail' || emailService.toLowerCase() === 'gmail') {
-      // Gmail SMTP settings
+      // Gmail SMTP settings - try port 587 first (STARTTLS)
       config.host = 'smtp.gmail.com';
       config.port = 587;
       config.secure = false; // Use STARTTLS
       config.requireTLS = true;
       config.tls = {
-        rejectUnauthorized: false // Allow self-signed certificates
+        ciphers: 'SSLv3',
+        rejectUnauthorized: false // Allow self-signed certificates for Render
       };
+      // Alternative: Try port 465 (SSL) if 587 doesn't work
+      // Uncomment below and comment above if 587 times out:
+      // config.port = 465;
+      // config.secure = true;
     } else {
       // Use service name for other providers
       config.service = emailService;
