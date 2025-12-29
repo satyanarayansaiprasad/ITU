@@ -1251,24 +1251,24 @@ exports.approveForm = async (req, res) => {
 
     // 2. Send welcome email automatically after approval
     console.log(`📧 Preparing to send approval email to: ${email}`);
-    const mailOptions = {
-      from: `"Indian Taekwondo Union" <${getEmailFrom()}>`,
-      to: email,
+const mailOptions = {
+  from: `"Indian Taekwondo Union" <${getEmailFrom()}>`,
+  to: email,
       subject: "🎉 Welcome to Indian Taekwondo Union - Your Affiliation Request Has Been Approved!",
-      html: `
+  html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h2 style="color: #0E2A4E;">🎉 Congratulations! Your Affiliation Request Has Been Approved</h2>
-          
+    
           <p>Dear <strong>${updatedForm.name}</strong>,</p>
-          
+    
           <p>We are delighted to inform you that your affiliation request has been approved by the admin!</p>
-          
+    
           <div style="background-color: #f0f8ff; padding: 15px; border-radius: 5px; margin: 20px 0;">
             <h3 style="color: #0E2A4E; margin-top: 0;">Your Login Credentials:</h3>
             <p><strong>Email:</strong> ${email}</p>
-            <p><strong>Password:</strong> ${password}</p>
+    <p><strong>Password:</strong> ${password}</p>
           </div>
-          
+    
           <h3 style="color: #0E2A4E;">Next Steps:</h3>
           <ol>
             <li>Login using your Email and the password provided above</li>
@@ -1281,21 +1281,21 @@ exports.approveForm = async (req, res) => {
             <ul style="margin: 10px 0;">
               <li>Keep your credentials secure and confidential</li>
               <li>Do not share your password with anyone</li>
-              <li>Store this password securely</li>
+      <li>Store this password securely</li>
               <li>If you didn't request this account, contact admin immediately</li>
-            </ul>
+    </ul>
           </div>
-          
+    
           <p>If you have any questions or need assistance, please contact our support team.</p>
-          
+    
           <p style="margin-top: 30px;">
             Best regards,<br/>
             <strong>Indian Taekwondo Union</strong><br/>
             System Administrator
           </p>
         </div>
-      `
-    };
+  `
+};
 
     // Use the sendEmail helper function for reliable email sending
     const emailResult = await sendEmail(mailOptions);
@@ -1306,13 +1306,13 @@ exports.approveForm = async (req, res) => {
       updatedForm.emailError = null;
       await updatedForm.save();
       console.log(`✅ Email sent and tracked for form: ${updatedForm.name}`);
-      res.status(200).json({
-        success: true,
+        res.status(200).json({
+          success: true,
         message: "Form approved and email sent successfully",
         emailSent: true,
         emailSentAt: updatedForm.emailSentAt,
-        form: updatedForm
-      });
+          form: updatedForm
+        });
     } else {
       // Track failed email sending
       updatedForm.emailSent = false;
@@ -1326,9 +1326,9 @@ exports.approveForm = async (req, res) => {
         console.error('Full Error Details:', JSON.stringify(emailResult.fullError, Object.getOwnPropertyNames(emailResult.fullError), 2));
       }
       console.error(`\n`);
-      res.status(200).json({
-        success: true,
-        message: "Form approved but email could not be sent",
+        res.status(200).json({
+          success: true,
+          message: "Form approved but email could not be sent",
         emailSent: false,
         emailError: emailResult.error,
         form: updatedForm
@@ -1684,11 +1684,11 @@ exports.rejectForm = async (req, res) => {
     // Use the sendEmail helper function for reliable email sending
     const emailResult = await sendEmail(mailOptions);
     if (emailResult.success) {
-      res.status(200).json({
-        success: true,
+        res.status(200).json({
+          success: true,
         message: "Form rejected and notification sent successfully",
-        form: updatedForm
-      });
+          form: updatedForm
+        });
     } else {
       console.error(`\n⚠️⚠️⚠️  FAILED TO SEND REJECTION EMAIL ⚠️⚠️⚠️`);
       console.error(`Form: ${updatedForm.name}`);
@@ -1698,9 +1698,9 @@ exports.rejectForm = async (req, res) => {
         console.error('Full Error Details:', JSON.stringify(emailResult.fullError, Object.getOwnPropertyNames(emailResult.fullError), 2));
       }
       console.error(`\n`);
-      res.status(200).json({
-        success: true,
-        message: "Form rejected but email could not be sent",
+        res.status(200).json({
+          success: true,
+          message: "Form rejected but email could not be sent",
         error: emailResult.error,
         form: updatedForm
       });

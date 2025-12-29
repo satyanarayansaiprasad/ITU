@@ -60,7 +60,7 @@ const createTransporter = () => {
       // config.secure = true;
     } else {
       // Use service name for other providers
-      config.service = emailService;
+    config.service = emailService;
     }
   }
 
@@ -77,15 +77,15 @@ const createTransporter = () => {
           console.warn('⚠️  Email verification timed out - server will continue. Email will be verified on first use.');
         }, 3000); // 3 second timeout
         
-        transporter.verify((error, success) => {
+    transporter.verify((error, success) => {
           clearTimeout(verifyTimeout);
-          if (error) {
+      if (error) {
             console.warn('⚠️  Email transporter verification failed:', error.message);
             console.warn('Email functionality will still be available but may fail on first use. Check your email configuration.');
-          } else {
+      } else {
             console.log('✅ Email server is ready to send messages');
-          }
-        });
+      }
+    });
       });
     } else {
       console.log('ℹ️  Email transporter created. Verification skipped on startup to prevent deployment timeouts.');
