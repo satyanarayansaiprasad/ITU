@@ -89,15 +89,17 @@ const sendEmail = async (mailOptions) => {
       console.warn('⚠️  Gmail/Yahoo/Hotmail addresses require domain verification. Using Resend default domain.');
     }
     
-    // Format properly
-    if (!fromEmail.includes('<')) {
-      const fromName = process.env.RESEND_FROM_NAME || 'Indian Taekwondo Union';
-      fromEmail = `${fromName} <${emailOnly}>`;
-    } else {
-      // Replace the email part in "Name <email>" format
-      const nameMatch = fromEmail.match(/^(.+?)\s*</);
-      const fromName = nameMatch ? nameMatch[1].trim() : (process.env.RESEND_FROM_NAME || 'Indian Taekwondo Union');
-      fromEmail = `${fromName} <${emailOnly}>`;
+    // Format properly - Resend requires "Name <email@domain.com>" format
+    const fromName = process.env.RESEND_FROM_NAME || 'Indian Taekwondo Union';
+    
+    // Always format as "Name <email@domain.com>"
+    fromEmail = `${fromName} <${emailOnly}>`;
+    
+    // Validate format
+    const emailFormatRegex = /^.+?\s*<[^\s<>]+@[^\s<>]+>$/;
+    if (!emailFormatRegex.test(fromEmail)) {
+      console.error('❌ Invalid email format:', fromEmail);
+      throw new Error(`Invalid from email format: ${fromEmail}. Must be "Name <email@domain.com>"`);
     }
     
     // Ensure 'to' is an array
