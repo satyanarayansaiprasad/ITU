@@ -30,7 +30,7 @@ console.log('==========================================================\n');
 // Get email from address
 const getEmailFrom = () => {
   // Resend format: "Name <email@domain.com>" or just "email@domain.com"
-  const fromEmail = process.env.RESEND_FROM_EMAIL || process.env.EMAIL_USER || 'onboarding@resend.dev';
+  const fromEmail = process.env.RESEND_FROM_EMAIL || process.env.EMAIL_USER || 'satyanarayansaiprasadofficial@gmail.com';
   const fromName = process.env.RESEND_FROM_NAME || 'Indian Taekwondo Union';
   
   // If email contains @, use it; otherwise format it properly
