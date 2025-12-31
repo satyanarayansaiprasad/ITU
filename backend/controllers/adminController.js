@@ -1032,46 +1032,246 @@ exports.approvePlayers = async (req, res) => {
         const mailOptions = {
           from: getEmailFrom(),
           to: player.email,
-          subject: "Welcome to Indian Taekwondo Union - Your Registration is Approved!",
+          subject: "🎉 Welcome to Indian Taekwondo Union - Your Registration is Approved!",
           html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-              <h2 style="color: #0E2A4E;">🎉 Welcome to Indian Taekwondo Union!</h2>
-              
-              <p>Dear <strong>${player.name}</strong>,</p>
-              
-              <p>We are delighted to inform you that your player registration has been approved!</p>
-              
-              <div style="background-color: #f0f8ff; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                <h3 style="color: #0E2A4E; margin-top: 0;">Your Login Credentials:</h3>
-                <p><strong>Player ID:</strong> ${player.playerId}</p>
-                <p><strong>Email:</strong> ${player.email}</p>
-                <p><strong>Password:</strong> ${password}</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #f5f7fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+  <table role="presentation" style="width: 100%; border-collapse: collapse; background-color: #f5f7fa;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table role="presentation" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); overflow: hidden;">
+          
+          <!-- Header with Gradient -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #0E2A4E 0%, #1a4a7a 100%); padding: 40px 30px; text-align: center;">
+              <img src="https://itu-r1qa.onrender.com/uploads/ITU%20LOGO.png" alt="ITU Logo" style="max-width: 120px; height: auto; margin-bottom: 20px;" onerror="this.style.display='none'">
+              <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                🎉 Welcome to ITU!
+              </h1>
+              <p style="color: #e0e7ff; margin: 10px 0 0 0; font-size: 16px;">
+                Your Player Registration Has Been Approved
+              </p>
+            </td>
+          </tr>
+
+          <!-- Certificate Section -->
+          <tr>
+            <td style="padding: 40px 30px; text-align: center; background: linear-gradient(to bottom, #f8fafc 0%, #ffffff 100%);">
+              <div style="border: 3px solid #0E2A4E; border-radius: 12px; padding: 30px; background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%); box-shadow: 0 8px 16px rgba(14, 42, 78, 0.1);">
+                <div style="border: 2px dashed #0E2A4E; border-radius: 8px; padding: 25px; background-color: #ffffff;">
+                  <h2 style="color: #0E2A4E; margin: 0 0 15px 0; font-size: 24px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+                    Player Registration Certificate
+                  </h2>
+                  <div style="width: 80px; height: 80px; margin: 0 auto 20px; background: linear-gradient(135deg, #0E2A4E 0%, #1a4a7a 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+                    <span style="font-size: 40px;">🥋</span>
+                  </div>
+                  <p style="color: #1e293b; margin: 0; font-size: 18px; font-weight: 600; line-height: 1.6;">
+                    This certifies that<br/>
+                    <span style="color: #0E2A4E; font-size: 22px; font-weight: 700; display: block; margin: 10px 0;">${player.name}</span>
+                    <span style="color: #64748b; font-size: 16px; font-weight: 400; display: block; margin-top: 8px;">
+                      Player ID: ${player.playerId}
+                    </span>
+                  </p>
+                  <p style="color: #64748b; margin: 20px 0 0 0; font-size: 14px; font-style: italic;">
+                    is officially registered with<br/>
+                    <strong style="color: #0E2A4E;">Indian Taekwondo Union</strong>
+                  </p>
+                  <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+                    <p style="color: #64748b; margin: 0; font-size: 12px;">
+                      Registration Date: ${new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}
+                    </p>
+                  </div>
+                </div>
               </div>
-              
-              <h3 style="color: #0E2A4E;">Next Steps:</h3>
-              <ol>
-                <li>Login using your Player ID or Email and the password provided above</li>
-                <li>Upload your photo</li>
-                <li>Complete your profile information</li>
-              </ol>
-              
-              <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107;">
-                <p style="margin: 0;"><strong>⚠️ Important Security Notice:</strong></p>
-                <ul style="margin: 10px 0;">
-                  <li>Keep your credentials secure and confidential</li>
-                  <li>Do not share your password with anyone</li>
-                  <li>Change your password after first login (if this feature is available)</li>
+            </td>
+          </tr>
+
+          <!-- Login Credentials Section -->
+          <tr>
+            <td style="padding: 0 30px 30px 30px;">
+              <div style="background: linear-gradient(135deg, #0E2A4E 0%, #1a4a7a 100%); border-radius: 10px; padding: 25px; box-shadow: 0 4px 12px rgba(14, 42, 78, 0.15);">
+                <h3 style="color: #ffffff; margin: 0 0 20px 0; font-size: 20px; font-weight: 600; display: flex; align-items: center;">
+                  <span style="margin-right: 10px; font-size: 24px;">🔐</span>
+                  Your Login Credentials
+                </h3>
+                <div style="background-color: rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 20px; margin-bottom: 15px;">
+                  <div style="margin-bottom: 15px;">
+                    <label style="color: #cbd5e1; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 5px;">Player ID</label>
+                    <div style="background-color: #ffffff; border-radius: 6px; padding: 12px 15px; font-family: 'Courier New', monospace; font-size: 16px; color: #0E2A4E; font-weight: 600;">
+                      ${player.playerId}
+                    </div>
+                  </div>
+                  <div style="margin-bottom: 15px;">
+                    <label style="color: #cbd5e1; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 5px;">Email Address</label>
+                    <div style="background-color: #ffffff; border-radius: 6px; padding: 12px 15px; font-family: 'Courier New', monospace; font-size: 16px; color: #0E2A4E; font-weight: 600; word-break: break-all;">
+                      ${player.email}
+                    </div>
+                  </div>
+                  <div>
+                    <label style="color: #cbd5e1; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 5px;">Password</label>
+                    <div style="background-color: #ffffff; border-radius: 6px; padding: 12px 15px; font-family: 'Courier New', monospace; font-size: 16px; color: #0E2A4E; font-weight: 600; letter-spacing: 1px;">
+                      ${password}
+                    </div>
+                  </div>
+                </div>
+                <div style="background-color: rgba(255, 255, 255, 0.15); border-radius: 6px; padding: 12px; margin-top: 15px;">
+                  <p style="color: #e0e7ff; margin: 0; font-size: 13px; line-height: 1.5;">
+                    <strong>🔗 Login URL:</strong> <a href="https://taekwondounion.com/login" style="color: #ffffff; text-decoration: underline;">taekwondounion.com/login</a>
+                  </p>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Dashboard Features Section -->
+          <tr>
+            <td style="padding: 0 30px 30px 30px;">
+              <div style="background-color: #ffffff; border: 2px solid #e2e8f0; border-radius: 10px; padding: 30px;">
+                <h3 style="color: #0E2A4E; margin: 0 0 25px 0; font-size: 22px; font-weight: 700; text-align: center; display: flex; align-items: center; justify-content: center;">
+                  <span style="margin-right: 10px; font-size: 28px;">✨</span>
+                  What You Can Do in Your Player Dashboard
+                </h3>
+                
+                <div style="display: grid; gap: 15px;">
+                  <!-- Feature 1 -->
+                  <div style="background: linear-gradient(135deg, #f0f8ff 0%, #ffffff 100%); border-left: 4px solid #0E2A4E; border-radius: 8px; padding: 18px;">
+                    <div style="display: flex; align-items: start;">
+                      <div style="background: linear-gradient(135deg, #0E2A4E 0%, #1a4a7a 100%); width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 15px;">
+                        <span style="font-size: 20px;">🆔</span>
+                      </div>
+                      <div style="flex: 1;">
+                        <h4 style="color: #0E2A4E; margin: 0 0 5px 0; font-size: 16px; font-weight: 600;">View Your Digital ID Card</h4>
+                        <p style="color: #64748b; margin: 0; font-size: 14px; line-height: 1.5;">Access your official ITU Player ID card with a beautiful 3D flip design. Download and share your ID card.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Feature 2 -->
+                  <div style="background: linear-gradient(135deg, #f0f8ff 0%, #ffffff 100%); border-left: 4px solid #0E2A4E; border-radius: 8px; padding: 18px;">
+                    <div style="display: flex; align-items: start;">
+                      <div style="background: linear-gradient(135deg, #0E2A4E 0%, #1a4a7a 100%); width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 15px;">
+                        <span style="font-size: 20px;">📝</span>
+                      </div>
+                      <div style="flex: 1;">
+                        <h4 style="color: #0E2A4E; margin: 0 0 5px 0; font-size: 16px; font-weight: 600;">Complete Your Profile</h4>
+                        <p style="color: #64748b; margin: 0; font-size: 14px; line-height: 1.5;">Update your personal information, upload your photo, add contact details, and keep your profile up to date.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Feature 3 -->
+                  <div style="background: linear-gradient(135deg, #f0f8ff 0%, #ffffff 100%); border-left: 4px solid #0E2A4E; border-radius: 8px; padding: 18px;">
+                    <div style="display: flex; align-items: start;">
+                      <div style="background: linear-gradient(135deg, #0E2A4E 0%, #1a4a7a 100%); width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 15px;">
+                        <span style="font-size: 20px;">🎯</span>
+                      </div>
+                      <div style="flex: 1;">
+                        <h4 style="color: #0E2A4E; margin: 0 0 5px 0; font-size: 16px; font-weight: 600;">Belt Promotion Tests</h4>
+                        <p style="color: #64748b; margin: 0; font-size: 14px; line-height: 1.5;">View your belt promotion test history, track your progress, and see upcoming promotion opportunities.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Feature 4 -->
+                  <div style="background: linear-gradient(135deg, #f0f8ff 0%, #ffffff 100%); border-left: 4px solid #0E2A4E; border-radius: 8px; padding: 18px;">
+                    <div style="display: flex; align-items: start;">
+                      <div style="background: linear-gradient(135deg, #0E2A4E 0%, #1a4a7a 100%); width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 15px;">
+                        <span style="font-size: 20px;">📊</span>
+                      </div>
+                      <div style="flex: 1;">
+                        <h4 style="color: #0E2A4E; margin: 0 0 5px 0; font-size: 16px; font-weight: 600;">Track Your Progress</h4>
+                        <p style="color: #64748b; margin: 0; font-size: 14px; line-height: 1.5;">Monitor your training progress, belt advancement, and achievements throughout your Taekwondo journey.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="margin-top: 25px; padding: 20px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 8px; border-left: 4px solid #f59e0b;">
+                  <p style="color: #92400e; margin: 0; font-size: 14px; line-height: 1.6;">
+                    <strong>💡 Pro Tip:</strong> Start by uploading your photo and completing your profile. This ensures your ID card looks professional and all your information is up to date.
+                  </p>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Next Steps Section -->
+          <tr>
+            <td style="padding: 0 30px 30px 30px;">
+              <div style="background-color: #ffffff; border-radius: 10px; padding: 25px; border: 2px solid #e2e8f0;">
+                <h3 style="color: #0E2A4E; margin: 0 0 20px 0; font-size: 20px; font-weight: 600; display: flex; align-items: center;">
+                  <span style="margin-right: 10px; font-size: 24px;">🚀</span>
+                  Quick Start Guide
+                </h3>
+                <ol style="margin: 0; padding-left: 20px; color: #1e293b;">
+                  <li style="margin-bottom: 12px; line-height: 1.6;">
+                    <strong style="color: #0E2A4E;">Login</strong> using your Player ID or Email and password provided above
+                  </li>
+                  <li style="margin-bottom: 12px; line-height: 1.6;">
+                    <strong style="color: #0E2A4E;">Upload your photo</strong> - Add a professional photo for your ID card
+                  </li>
+                  <li style="margin-bottom: 12px; line-height: 1.6;">
+                    <strong style="color: #0E2A4E;">Complete your profile</strong> - Fill in all your personal and contact details
+                  </li>
+                  <li style="margin-bottom: 12px; line-height: 1.6;">
+                    <strong style="color: #0E2A4E;">View your ID card</strong> - Check out your digital player ID card
+                  </li>
+                </ol>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Security Notice -->
+          <tr>
+            <td style="padding: 0 30px 30px 30px;">
+              <div style="background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border-left: 4px solid #ef4444; border-radius: 8px; padding: 20px;">
+                <p style="color: #991b1b; margin: 0 0 10px 0; font-size: 15px; font-weight: 600; display: flex; align-items: center;">
+                  <span style="margin-right: 8px; font-size: 20px;">🔒</span>
+                  Important Security Notice
+                </p>
+                <ul style="margin: 0; padding-left: 20px; color: #7f1d1d; font-size: 14px; line-height: 1.8;">
+                  <li>Keep your login credentials secure and confidential</li>
+                  <li>Do not share your password with anyone, including ITU staff</li>
+                  <li>Store this password securely - you won't receive it again</li>
+                  <li>If you suspect unauthorized access, contact admin immediately</li>
                 </ul>
               </div>
-              
-              <p>If you have any questions or need assistance, please contact our support team.</p>
-              
-              <p style="margin-top: 30px;">
-                Best regards,<br/>
-                <strong>Indian Taekwondo Union</strong><br/>
-                System Administrator
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #0E2A4E; padding: 30px; text-align: center;">
+              <p style="color: #ffffff; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">
+                Welcome to the ITU Family! 🎉
               </p>
-            </div>
+              <p style="color: #cbd5e1; margin: 0 0 20px 0; font-size: 14px; line-height: 1.6;">
+                If you have any questions or need assistance, please don't hesitate to contact our support team.
+              </p>
+              <div style="border-top: 1px solid rgba(255, 255, 255, 0.2); padding-top: 20px; margin-top: 20px;">
+                <p style="color: #94a3b8; margin: 0; font-size: 12px;">
+                  Best regards,<br/>
+                  <strong style="color: #ffffff; font-size: 14px;">Indian Taekwondo Union</strong><br/>
+                  System Administrator
+                </p>
+                <p style="color: #64748b; margin: 15px 0 0 0; font-size: 11px;">
+                  This is an automated email. Please do not reply to this message.
+                </p>
+              </div>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
           `
         };
 
