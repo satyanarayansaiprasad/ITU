@@ -1234,6 +1234,23 @@ exports.approveForm = async (req, res) => {
   try {
     const { formId, email, password } = req.body;
 
+    // Validate required fields
+    if (!formId) {
+      return res.status(400).json({ error: "Form ID is required" });
+    }
+    if (!email) {
+      return res.status(400).json({ error: "Email is required" });
+    }
+    if (!password) {
+      return res.status(400).json({ error: "Password is required" });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: "Invalid email format" });
+    }
+
     // 1. Update the form with password
     const updatedForm = await AccelerationForm.findByIdAndUpdate(
   formId,
@@ -1251,6 +1268,8 @@ exports.approveForm = async (req, res) => {
 
     // 2. Send welcome email automatically after approval
     console.log(`📧 Preparing to send approval email to: ${email}`);
+    console.log(`📧 Form ID: ${formId}`);
+    console.log(`📧 Password: ${password ? '***set***' : 'NOT SET'}`);
 const mailOptions = {
   from: getEmailFrom(),
   to: email,
@@ -1298,8 +1317,11 @@ const mailOptions = {
 };
 
     // Use the sendEmail helper function for reliable email sending
+    console.log(`\n📧📧📧 CALLING sendEmail FUNCTION 📧📧📧`);
     const emailResult = await sendEmail(mailOptions);
-    if (emailResult.success) {
+    console.log(`\n📧📧📧 sendEmail RESULT:`, JSON.stringify(emailResult, null, 2));
+    
+    if (emailResult && emailResult.success) {
       // Track successful email sending
       updatedForm.emailSent = true;
       updatedForm.emailSentAt = new Date();
@@ -1315,14 +1337,16 @@ const mailOptions = {
         });
     } else {
       // Track failed email sending
+      const errorMessage = emailResult?.error || emailResult?.fullError?.message || 'Unknown error';
       updatedForm.emailSent = false;
-      updatedForm.emailError = emailResult.error || 'Unknown error';
+      updatedForm.emailError = errorMessage;
       await updatedForm.save();
       console.error(`\n⚠️⚠️⚠️  FAILED TO SEND APPROVAL EMAIL ⚠️⚠️⚠️`);
       console.error(`Form: ${updatedForm.name}`);
       console.error(`Email: ${email}`);
-      console.error(`Error: ${emailResult.error}`);
-      if (emailResult.fullError) {
+      console.error(`Error: ${errorMessage}`);
+      console.error(`Full Result:`, JSON.stringify(emailResult, null, 2));
+      if (emailResult?.fullError) {
         console.error('Full Error Details:', JSON.stringify(emailResult.fullError, Object.getOwnPropertyNames(emailResult.fullError), 2));
       }
       console.error(`\n`);
@@ -1330,7 +1354,7 @@ const mailOptions = {
           success: true,
           message: "Form approved but email could not be sent",
         emailSent: false,
-        emailError: emailResult.error,
+        emailError: errorMessage,
         form: updatedForm
       });
     }

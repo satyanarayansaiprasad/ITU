@@ -9,15 +9,20 @@ const getResendClient = () => {
   
   if (!apiKey) {
     console.error('❌ RESEND_API_KEY is not set in environment variables');
+    console.error('Please set RESEND_API_KEY in your environment variables');
     return null;
   }
   
-  if (!resendClient) {
+  // Always create a new client to ensure we have the latest API key
+  // (in case env vars changed after startup)
+  try {
     resendClient = new Resend(apiKey);
-    console.log('✅ Resend client initialized');
+    console.log('✅ Resend client initialized/refreshed');
+    return resendClient;
+  } catch (error) {
+    console.error('❌ Error creating Resend client:', error.message);
+    return null;
   }
-  
-  return resendClient;
 };
 
 // Log email configuration status on startup
