@@ -130,11 +130,34 @@ const ModernFormSubmissions = () => {
       const password = generatePassword(state);
       setGeneratedPassword(password);
       
-      const response = await axios.put(API_ENDPOINTS.APPROVE_FORM, {
+      // 📧 LOG: Data being sent to backend
+      const requestData = {
         formId,
         email,
         password
+      };
+      console.log('\n\n🚀🚀🚀 FRONTEND: APPROVE BUTTON CLICKED 🚀🚀🚀');
+      console.log('📤 Sending data to backend:', JSON.stringify(requestData, null, 2));
+      console.log('🌐 API Endpoint:', API_ENDPOINTS.APPROVE_FORM);
+      console.log('📋 Request Details:', {
+        method: 'PUT',
+        url: API_ENDPOINTS.APPROVE_FORM,
+        headers: { 'Content-Type': 'application/json' },
+        body: requestData
       });
+      console.log('👤 User Details:', { name, email, state });
+      console.log('==========================================\n');
+      
+      const response = await axios.put(API_ENDPOINTS.APPROVE_FORM, requestData);
+      
+      // 📧 LOG: Response from backend
+      console.log('\n\n✅✅✅ FRONTEND: BACKEND RESPONSE RECEIVED ✅✅✅');
+      console.log('📥 Response Status:', response.status);
+      console.log('📥 Response Data:', JSON.stringify(response.data, null, 2));
+      console.log('📧 Email Sent:', response.data.emailSent || false);
+      console.log('📧 Email Sent At:', response.data.emailSentAt || 'N/A');
+      console.log('📧 Email Error:', response.data.emailError || 'N/A');
+      console.log('==========================================\n');
 
       // Update local state immediately without waiting for refresh
       if (response.data.success) {
