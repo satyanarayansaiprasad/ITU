@@ -1030,7 +1030,7 @@ exports.approvePlayers = async (req, res) => {
         // Send welcome email automatically after approval
         console.log(`📧 Preparing to send welcome email to: ${player.email}`);
         const mailOptions = {
-          from: `"Indian Taekwondo Union" <${getEmailFrom()}>`,
+          from: getEmailFrom(),
           to: player.email,
           subject: "Welcome to Indian Taekwondo Union - Your Registration is Approved!",
           html: `
@@ -1252,7 +1252,7 @@ exports.approveForm = async (req, res) => {
     // 2. Send welcome email automatically after approval
     console.log(`📧 Preparing to send approval email to: ${email}`);
 const mailOptions = {
-  from: `"Indian Taekwondo Union" <${getEmailFrom()}>`,
+  from: getEmailFrom(),
   to: email,
       subject: "🎉 Welcome to Indian Taekwondo Union - Your Affiliation Request Has Been Approved!",
   html: `
@@ -1666,7 +1666,7 @@ exports.rejectForm = async (req, res) => {
 
     // Send rejection email
     const mailOptions = {
-      from: `"Indian Taekwondo Union" <${getEmailFrom()}>`,
+      from: getEmailFrom(),
       to: email,
       subject: "Your Affiliation Request Status",
       html: `
