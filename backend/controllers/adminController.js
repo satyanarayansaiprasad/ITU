@@ -2074,24 +2074,24 @@ exports.testEmail = async (req, res) => {
 
     // Check email configuration
     const emailConfig = require('../config/email');
-    const transporter = emailConfig.transporter;
     const emailFrom = emailConfig.getEmailFrom();
+    const resendClient = emailConfig.getResendClient();
     
     console.log('\n--- Email Configuration Check ---');
-    console.log('EMAIL_USER:', process.env.EMAIL_USER ? '***configured***' : '❌ NOT SET');
-    console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? '***configured***' : '❌ NOT SET');
-    console.log('EMAIL_SERVICE:', process.env.EMAIL_SERVICE || 'gmail (default)');
+    console.log('RESEND_API_KEY:', process.env.RESEND_API_KEY ? '***configured***' : '❌ NOT SET');
+    console.log('RESEND_FROM_EMAIL:', process.env.RESEND_FROM_EMAIL || 'not set (using default)');
+    console.log('RESEND_FROM_NAME:', process.env.RESEND_FROM_NAME || 'not set (using default)');
     console.log('Email From:', emailFrom);
-    console.log('Transporter:', transporter ? '✅ Available' : '❌ Not Available');
+    console.log('Resend Client:', resendClient ? '✅ Available' : '❌ Not Available');
     
-    if (!transporter) {
+    if (!resendClient) {
       return res.status(500).json({
         success: false,
-        error: "Email transporter is not configured",
+        error: "Resend email client is not configured",
         details: {
-          EMAIL_USER: process.env.EMAIL_USER ? 'set' : 'NOT SET',
-          EMAIL_PASS: process.env.EMAIL_PASS ? 'set' : 'NOT SET',
-          EMAIL_SERVICE: process.env.EMAIL_SERVICE || 'gmail (default)'
+          RESEND_API_KEY: process.env.RESEND_API_KEY ? 'set' : 'NOT SET',
+          RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL || 'not set',
+          RESEND_FROM_NAME: process.env.RESEND_FROM_NAME || 'not set'
         }
       });
     }
