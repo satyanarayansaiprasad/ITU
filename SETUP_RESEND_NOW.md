@@ -22,13 +22,13 @@ Go to: **Render Dashboard → Your Service → Environment**
 **Add these:**
 ```
 RESEND_API_KEY=re_your_api_key_here
-RESEND_FROM_EMAIL=indiantaekwondounion@gmail.com
+RESEND_FROM_EMAIL=satyanarayansaiprasadofficial@gmail.com
 RESEND_FROM_NAME=Indian Taekwondo Union
 ```
 
 ### 3. Verify Email in Resend
 - Go to: https://resend.com/emails
-- Verify: `indiantaekwondounion@gmail.com`
+- Verify: `satyanarayansaiprasadofficial@gmail.com`
 
 ### 4. Save & Redeploy
 - Click **"Save Changes"** in Render
