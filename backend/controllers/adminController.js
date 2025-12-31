@@ -1049,7 +1049,7 @@ exports.approvePlayers = async (req, res) => {
           <!-- Header with Gradient -->
           <tr>
             <td style="background: linear-gradient(135deg, #0E2A4E 0%, #1a4a7a 100%); padding: 40px 30px; text-align: center;">
-              <img src="https://itu-r1qa.onrender.com/uploads/ITU%20LOGO.png" alt="ITU Logo" style="max-width: 120px; height: auto; margin-bottom: 20px;" onerror="this.style.display='none'">
+              <img src="https://taekwondounion.com/ITU%20LOGO.png" alt="ITU Logo" style="max-width: 120px; height: auto; margin-bottom: 20px;" onerror="this.style.display='none'">
               <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">
                 🎉 Welcome to ITU!
               </h1>
@@ -1505,7 +1505,7 @@ const mailOptions = {
           <!-- Header with Gradient -->
           <tr>
             <td style="background: linear-gradient(135deg, #0E2A4E 0%, #1a4a7a 100%); padding: 40px 30px; text-align: center;">
-              <img src="https://itu-r1qa.onrender.com/uploads/ITU%20LOGO.png" alt="ITU Logo" style="max-width: 120px; height: auto; margin-bottom: 20px;" onerror="this.style.display='none'">
+              <img src="https://taekwondounion.com/ITU%20LOGO.png" alt="ITU Logo" style="max-width: 120px; height: auto; margin-bottom: 20px;" onerror="this.style.display='none'">
               <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">
                 🎉 Congratulations!
               </h1>
