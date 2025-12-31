@@ -12,7 +12,7 @@ const getResendClient = () => {
     console.error('Please set RESEND_API_KEY in your environment variables');
     return null;
   }
-  
+
   // Always create a new client to ensure we have the latest API key
   // (in case env vars changed after startup)
   try {
@@ -107,11 +107,14 @@ const sendEmail = async (mailOptions) => {
     
     // Send email using Resend
     console.log('Sending email via Resend API...');
-    console.log('From:', fromEmail);
+    console.log('From (before send):', JSON.stringify(fromEmail));
     console.log('To:', toEmails);
     
+    // Ensure fromEmail is a clean string without extra characters
+    const cleanFromEmail = fromEmail.trim();
+    
     const { data, error } = await client.emails.send({
-      from: fromEmail,
+      from: cleanFromEmail,
       to: toEmails,
       subject: mailOptions.subject,
       html: mailOptions.html,
