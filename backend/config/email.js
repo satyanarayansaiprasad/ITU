@@ -35,8 +35,17 @@ console.log('==========================================================\n');
 // Get email from address
 const getEmailFrom = () => {
   // Resend format: "Name <email@domain.com>" or just "email@domain.com"
-  const fromEmail = process.env.RESEND_FROM_EMAIL || process.env.EMAIL_USER || 'satyanarayansaiprasadofficial@gmail.com';
+  let fromEmail = process.env.RESEND_FROM_EMAIL || process.env.EMAIL_USER;
   const fromName = process.env.RESEND_FROM_NAME || 'Indian Taekwondo Union';
+  
+  // Resend doesn't allow Gmail addresses without domain verification
+  // Use Resend's default domain for testing, or verify your own domain
+  if (!fromEmail || fromEmail.includes('@gmail.com') || fromEmail.includes('@yahoo.com') || fromEmail.includes('@hotmail.com')) {
+    // Use Resend's default domain (no verification needed)
+    fromEmail = 'onboarding@resend.dev';
+    console.warn('⚠️  Using Resend default domain (onboarding@resend.dev) because Gmail/Yahoo/Hotmail domains require verification.');
+    console.warn('   To use your own email, verify your domain at: https://resend.com/domains');
+  }
   
   // If email contains @, use it; otherwise format it properly
   if (fromEmail.includes('@')) {
@@ -71,10 +80,23 @@ const sendEmail = async (mailOptions) => {
     // Parse from email - Resend accepts "email@domain.com" or "Name <email@domain.com>"
     let fromEmail = mailOptions.from || getEmailFrom();
     
-    // If it's already in "Name <email>" format, use it; otherwise format it
+    // Check if fromEmail contains Gmail/Yahoo/Hotmail (not allowed without domain verification)
+    // Extract email from "Name <email>" format if needed
+    let emailOnly = fromEmail.replace(/.*<|>.*/g, '').trim() || fromEmail;
+    if (emailOnly.includes('@gmail.com') || emailOnly.includes('@yahoo.com') || emailOnly.includes('@hotmail.com')) {
+      // Use Resend's default domain instead
+      emailOnly = 'onboarding@resend.dev';
+      console.warn('⚠️  Gmail/Yahoo/Hotmail addresses require domain verification. Using Resend default domain.');
+    }
+    
+    // Format properly
     if (!fromEmail.includes('<')) {
       const fromName = process.env.RESEND_FROM_NAME || 'Indian Taekwondo Union';
-      const emailOnly = fromEmail.replace(/.*<|>.*/g, '').trim() || fromEmail;
+      fromEmail = `${fromName} <${emailOnly}>`;
+    } else {
+      // Replace the email part in "Name <email>" format
+      const nameMatch = fromEmail.match(/^(.+?)\s*</);
+      const fromName = nameMatch ? nameMatch[1].trim() : (process.env.RESEND_FROM_NAME || 'Indian Taekwondo Union');
       fromEmail = `${fromName} <${emailOnly}>`;
     }
     
