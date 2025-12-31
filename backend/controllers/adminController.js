@@ -2073,7 +2073,7 @@ exports.testEmail = async (req, res) => {
     }
 
     const mailOptions = {
-      from: `"Indian Taekwondo Union" <${emailFrom}>`,
+      from: emailFrom,
       to: email,
       subject: "🧪 Test Email - ITU System",
       html: `
