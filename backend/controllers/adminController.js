@@ -2104,20 +2104,18 @@ exports.testEmail = async (req, res) => {
     console.log('\n--- Email Configuration Check ---');
     console.log('EMAIL_USER:', process.env.EMAIL_USER ? '***configured***' : '❌ NOT SET');
     console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? '***configured***' : '❌ NOT SET');
-    console.log('EMAIL_SERVICE:', process.env.EMAIL_SERVICE || 'gmail (default)');
-    console.log('EMAIL_HOST:', process.env.EMAIL_HOST || 'smtp.gmail.com (default)');
-    console.log('EMAIL_PORT:', process.env.EMAIL_PORT || '465 (default)');
+    console.log('EMAIL_FROM:', process.env.EMAIL_FROM || process.env.EMAIL_USER || 'not set');
     console.log('Email From:', emailFrom);
-    console.log('Transporter:', transporter ? '✅ Available' : '❌ Not Available');
+    console.log('Gmail Transporter:', transporter ? '✅ Available' : '❌ Not Available');
     
     if (!transporter) {
       return res.status(500).json({
         success: false,
-        error: "Email transporter is not configured",
+        error: "Gmail SMTP transporter is not configured",
         details: {
           EMAIL_USER: process.env.EMAIL_USER ? 'set' : 'NOT SET',
           EMAIL_PASS: process.env.EMAIL_PASS ? 'set' : 'NOT SET',
-          EMAIL_SERVICE: process.env.EMAIL_SERVICE || 'gmail (default)'
+          EMAIL_FROM: process.env.EMAIL_FROM || process.env.EMAIL_USER || 'not set'
         }
       });
     }
