@@ -1228,11 +1228,22 @@ exports.deletePlayers = async (req, res) => {
 exports.approveForm = async (req, res) => {
   console.log('\n\n🔥🔥🔥 APPROVE FORM FUNCTION CALLED 🔥🔥🔥');
   console.log('Timestamp:', new Date().toISOString());
-  console.log('Request Body:', JSON.stringify(req.body, null, 2));
+  console.log('📥 REQUEST RECEIVED FROM FRONTEND:');
+  console.log('   Headers:', JSON.stringify(req.headers, null, 2));
+  console.log('   Body:', JSON.stringify(req.body, null, 2));
+  console.log('   Method:', req.method);
+  console.log('   URL:', req.url);
   console.log('===========================================\n');
   
   try {
     const { formId, email, password } = req.body;
+    
+    // 📧 LOG: Extracted data
+    console.log('\n📋 EXTRACTED DATA FROM REQUEST:');
+    console.log('   formId:', formId);
+    console.log('   email:', email);
+    console.log('   password:', password ? '***' + password.substring(password.length - 4) : 'NOT SET');
+    console.log('');
 
     // Validate required fields
     if (!formId) {
@@ -1267,9 +1278,13 @@ exports.approveForm = async (req, res) => {
     }
 
     // 2. Send welcome email automatically after approval
-    console.log(`📧 Preparing to send approval email to: ${email}`);
-    console.log(`📧 Form ID: ${formId}`);
-    console.log(`📧 Password: ${password ? '***set***' : 'NOT SET'}`);
+    console.log('\n📧📧📧 PREPARING EMAIL TO SEND TO USER 📧📧📧');
+    console.log('   Recipient Email:', email);
+    console.log('   Form ID:', formId);
+    console.log('   User Name:', updatedForm.name);
+    console.log('   Password:', password ? '***' + password.substring(password.length - 4) : 'NOT SET');
+    console.log('');
+    
 const mailOptions = {
   from: getEmailFrom(),
   to: email,
@@ -1315,6 +1330,15 @@ const mailOptions = {
         </div>
   `
 };
+
+    // 📧 LOG: Email data being sent
+    console.log('\n📧📧📧 EMAIL DATA TO BE SENT 📧📧📧');
+    console.log('   From:', mailOptions.from);
+    console.log('   To:', mailOptions.to);
+    console.log('   Subject:', mailOptions.subject);
+    console.log('   HTML Length:', mailOptions.html.length, 'characters');
+    console.log('   Email Content Preview:', mailOptions.html.substring(0, 200) + '...');
+    console.log('');
 
     // Use the sendEmail helper function for reliable email sending
     console.log(`\n📧📧📧 CALLING sendEmail FUNCTION 📧📧📧`);
