@@ -1,63 +1,168 @@
-const { Resend } = require('resend');
+const nodemailer = require("nodemailer");
 require('dotenv').config();
 
-let resendClient = null;
+let cachedTransporter = null;
+let lastConfigHash = null;
 
-// Initialize Resend client
-const getResendClient = () => {
-  const apiKey = process.env.RESEND_API_KEY;
-  
-  if (!apiKey) {
-    console.error('❌ RESEND_API_KEY is not set in environment variables');
-    console.error('Please set RESEND_API_KEY in your environment variables');
+// Create a hash of the current email configuration
+const getConfigHash = () => {
+  return `${process.env.EMAIL_USER || ''}_${process.env.EMAIL_PASS || ''}_${process.env.EMAIL_SERVICE || ''}_${process.env.EMAIL_HOST || ''}_${process.env.EMAIL_PORT || ''}`;
+};
+
+// Create and configure email transporter
+const createTransporter = () => {
+  const emailService = process.env.EMAIL_SERVICE || 'gmail';
+  const emailHost = process.env.EMAIL_HOST;
+  const emailPort = process.env.EMAIL_PORT ? parseInt(process.env.EMAIL_PORT) : null;
+  const emailUser = process.env.EMAIL_USER;
+  const emailPass = process.env.EMAIL_PASS;
+  const emailFrom = process.env.EMAIL_FROM || emailUser;
+
+  if (!emailUser || !emailPass) {
+    console.error('❌ Email configuration missing: EMAIL_USER and EMAIL_PASS are required');
+    console.error('Current EMAIL_USER:', emailUser ? '***set***' : 'NOT SET');
+    console.error('Current EMAIL_PASS:', emailPass ? '***set***' : 'NOT SET');
     return null;
   }
 
-  // Always create a new client to ensure we have the latest API key
-  // (in case env vars changed after startup)
+  // Gmail SMTP configuration
+  if (emailService === 'gmail' || emailService.toLowerCase() === 'gmail' || !emailHost) {
+    // Try port 465 first (SSL - most reliable)
+    const gmailConfig = {
+      host: 'smtp.gmail.com',
+      port: emailPort || 465,
+      secure: true, // true for 465, false for other ports
+      auth: {
+        user: emailUser,
+        pass: emailPass
+      },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 10000,
+      tls: {
+        rejectUnauthorized: false // Allow self-signed certificates for Render
+      }
+    };
+
+    // If port 587 is specified, use STARTTLS instead
+    if (emailPort === 587) {
+      gmailConfig.port = 587;
+      gmailConfig.secure = false;
+      gmailConfig.requireTLS = true;
+    }
+
+    try {
+      const transporter = nodemailer.createTransport(gmailConfig);
+      console.log('✅ Gmail transporter created successfully');
+      console.log('   Host: smtp.gmail.com');
+      console.log('   Port:', gmailConfig.port);
+      console.log('   Secure:', gmailConfig.secure);
+      return transporter;
+    } catch (error) {
+      console.error('❌ Error creating Gmail transporter:', error.message);
+      return null;
+    }
+  }
+
+  // Custom SMTP server configuration
+  if (emailHost) {
+    const config = {
+      host: emailHost,
+      port: emailPort || 587,
+      secure: emailPort === 465,
+      auth: {
+        user: emailUser,
+        pass: emailPass
+      },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 10000
+    };
+
+    if (emailPort === 465) {
+      config.secure = true;
+    } else {
+      config.secure = false;
+      config.requireTLS = true;
+    }
+
+    try {
+      const transporter = nodemailer.createTransport(config);
+      console.log(`✅ Email transporter created with custom host: ${emailHost}`);
+      return transporter;
+    } catch (error) {
+      console.error('❌ Error creating transporter with custom host:', error.message);
+      return null;
+    }
+  }
+
+  // Service-based configuration (fallback)
   try {
-    resendClient = new Resend(apiKey);
-    console.log('✅ Resend client initialized/refreshed');
-    return resendClient;
+    const transporter = nodemailer.createTransport({
+      service: emailService,
+      auth: {
+        user: emailUser,
+        pass: emailPass
+      },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 10000
+    });
+    console.log(`✅ Email transporter created with service: ${emailService}`);
+    return transporter;
   } catch (error) {
-    console.error('❌ Error creating Resend client:', error.message);
+    console.error('❌ Error creating transporter:', error.message);
     return null;
   }
 };
 
+// Get transporter - recreate if config changed
+const getTransporter = () => {
+  const currentConfigHash = getConfigHash();
+  
+  if (!cachedTransporter || lastConfigHash !== currentConfigHash) {
+    console.log('📧 Recreating email transporter...');
+    cachedTransporter = createTransporter();
+    lastConfigHash = currentConfigHash;
+    
+    if (cachedTransporter) {
+      console.log('✅ Email transporter ready');
+    } else {
+      console.error('❌ Email transporter creation failed');
+    }
+  }
+  
+  return cachedTransporter;
+};
+
+// Initialize transporter on module load
+const transporter = createTransporter();
+cachedTransporter = transporter;
+lastConfigHash = getConfigHash();
+
 // Log email configuration status on startup
-console.log('\n📧 ========== EMAIL CONFIGURATION STATUS (RESEND) ==========');
-console.log('  RESEND_API_KEY:', process.env.RESEND_API_KEY ? '***configured***' : '❌ NOT SET');
-console.log('  RESEND_FROM_EMAIL:', process.env.RESEND_FROM_EMAIL || 'not set (will use default)');
-console.log('  Resend Client:', getResendClient() ? '✅ Initialized' : '❌ Failed');
+console.log('\n📧 ========== EMAIL CONFIGURATION STATUS (GMAIL SMTP) ==========');
+console.log('  EMAIL_USER:', process.env.EMAIL_USER ? '***configured***' : '❌ NOT SET');
+console.log('  EMAIL_PASS:', process.env.EMAIL_PASS ? '***configured***' : '❌ NOT SET');
+console.log('  EMAIL_SERVICE:', process.env.EMAIL_SERVICE || 'gmail (default)');
+console.log('  EMAIL_HOST:', process.env.EMAIL_HOST || 'smtp.gmail.com (default)');
+console.log('  EMAIL_PORT:', process.env.EMAIL_PORT || '465 (default)');
+console.log('  EMAIL_FROM:', process.env.EMAIL_FROM || process.env.EMAIL_USER || 'not set');
+console.log('  Transporter Status:', transporter ? '✅ Created' : '❌ Failed to create');
 console.log('==========================================================\n');
 
 // Get email from address
 const getEmailFrom = () => {
-  // Resend format: "Name <email@domain.com>" or just "email@domain.com"
-  let fromEmail = process.env.RESEND_FROM_EMAIL || process.env.EMAIL_USER;
-  const fromName = process.env.RESEND_FROM_NAME || 'Indian Taekwondo Union';
-  
-  // Resend doesn't allow Gmail addresses without domain verification
-  // Use Resend's default domain for testing, or verify your own domain
-  if (!fromEmail || fromEmail.includes('@gmail.com') || fromEmail.includes('@yahoo.com') || fromEmail.includes('@hotmail.com')) {
-    // Use Resend's default domain (no verification needed)
-    fromEmail = 'onboarding@resend.dev';
-    console.warn('⚠️  Using Resend default domain (onboarding@resend.dev) because Gmail/Yahoo/Hotmail domains require verification.');
-    console.warn('   To use your own email, verify your domain at: https://resend.com/domains');
-  }
-  
-  // If email contains @, use it; otherwise format it properly
-  if (fromEmail.includes('@')) {
-    return `${fromName} <${fromEmail}>`;
-  }
-  return fromEmail;
+  return process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@example.com';
 };
 
-// Helper function to send email using Resend
-const sendEmail = async (mailOptions) => {
-  console.log('\n\n🚀🚀🚀 SEND EMAIL FUNCTION CALLED (RESEND) 🚀🚀🚀');
+// Helper function to send email with retry logic
+const sendEmail = async (mailOptions, retryCount = 0) => {
+  const maxRetries = 2;
+  
+  console.log('\n\n🚀🚀🚀 SEND EMAIL FUNCTION CALLED (GMAIL SMTP) 🚀🚀🚀');
   console.log('Timestamp:', new Date().toISOString());
+  console.log('Attempt:', retryCount + 1);
   
   try {
     console.log('\n========== EMAIL SENDING ATTEMPT ==========');
@@ -65,115 +170,93 @@ const sendEmail = async (mailOptions) => {
     console.log('Subject:', mailOptions.subject);
     console.log('From:', mailOptions.from || getEmailFrom());
     
-    const client = getResendClient();
+    // Reset transporter cache on retry
+    if (retryCount > 0) {
+      console.log('🔄 Resetting transporter cache for retry...');
+      cachedTransporter = null;
+    }
     
-    if (!client) {
-      const errorMsg = 'Resend API key is not configured. Please set RESEND_API_KEY environment variable.';
+    let transporter = getTransporter();
+    
+    if (!transporter) {
+      console.log('⚠️  Transporter is null, attempting to recreate...');
+      cachedTransporter = null;
+      transporter = createTransporter();
+      cachedTransporter = transporter;
+    }
+    
+    if (!transporter) {
+      const errorMsg = 'Email transporter is not configured. Please check EMAIL_USER and EMAIL_PASS environment variables.';
       console.error('\n========== EMAIL ERROR DETAILS ==========');
-      console.error('ERROR TYPE: Resend Not Configured');
+      console.error('ERROR TYPE: Transporter Not Configured');
       console.error('ERROR MESSAGE:', errorMsg);
-      console.error('RESEND_API_KEY:', process.env.RESEND_API_KEY ? '***set***' : '❌ NOT SET');
+      console.error('EMAIL_USER:', process.env.EMAIL_USER ? '***set***' : '❌ NOT SET');
+      console.error('EMAIL_PASS:', process.env.EMAIL_PASS ? '***set***' : '❌ NOT SET');
+      console.error('EMAIL_SERVICE:', process.env.EMAIL_SERVICE || 'gmail (default)');
+      console.error('EMAIL_HOST:', process.env.EMAIL_HOST || 'not set');
+      console.error('EMAIL_PORT:', process.env.EMAIL_PORT || 'not set');
       console.error('=========================================\n');
       throw new Error(errorMsg);
     }
     
-    // Parse from email - Resend accepts "email@domain.com" or "Name <email@domain.com>"
-    let fromEmail = mailOptions.from || getEmailFrom();
-    
-    // Check if fromEmail contains Gmail/Yahoo/Hotmail (not allowed without domain verification)
-    // Extract email from "Name <email>" format if needed
-    let emailOnly = fromEmail.replace(/.*<|>.*/g, '').trim() || fromEmail;
-    if (emailOnly.includes('@gmail.com') || emailOnly.includes('@yahoo.com') || emailOnly.includes('@hotmail.com')) {
-      // Use Resend's default domain instead
-      emailOnly = 'onboarding@resend.dev';
-      console.warn('⚠️  Gmail/Yahoo/Hotmail addresses require domain verification. Using Resend default domain.');
-    }
-    
-    // Format properly - Resend requires "Name <email@domain.com>" format
-    const fromName = process.env.RESEND_FROM_NAME || 'Indian Taekwondo Union';
-    
-    // Always format as "Name <email@domain.com>"
-    fromEmail = `${fromName} <${emailOnly}>`;
-    
-    // Validate format
-    const emailFormatRegex = /^.+?\s*<[^\s<>]+@[^\s<>]+>$/;
-    if (!emailFormatRegex.test(fromEmail)) {
-      console.error('❌ Invalid email format:', fromEmail);
-      throw new Error(`Invalid from email format: ${fromEmail}. Must be "Name <email@domain.com>"`);
-    }
-    
-    // Ensure 'to' is an array
-    const toEmails = Array.isArray(mailOptions.to) ? mailOptions.to : [mailOptions.to];
-    
-    // Send email using Resend
-    console.log('Sending email via Resend API...');
-    console.log('From (before send):', JSON.stringify(fromEmail));
-    console.log('To:', toEmails);
-    
-    // Ensure fromEmail is a clean string without extra characters
-    const cleanFromEmail = fromEmail.trim();
-    
-    const { data, error } = await client.emails.send({
-      from: cleanFromEmail,
-      to: toEmails,
-      subject: mailOptions.subject,
-      html: mailOptions.html,
-      text: mailOptions.text || (mailOptions.html ? mailOptions.html.replace(/<[^>]*>/g, '') : undefined)
+    // Log transporter configuration
+    const transporterOptions = transporter.options || {};
+    console.log('SMTP Config:', {
+      host: transporterOptions.host || 'service-based',
+      port: transporterOptions.port || 'service-based',
+      secure: transporterOptions.secure,
+      service: transporterOptions.service
     });
     
-    if (error) {
-      console.error('\n========== RESEND API ERROR ==========');
-      console.error('ERROR:', JSON.stringify(error, null, 2));
-      console.error('=====================================\n');
-      throw new Error(error.message || 'Resend API error');
-    }
+    // Send email with timeout
+    console.log('Attempting to send email...');
+    const sendPromise = transporter.sendMail(mailOptions);
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Email send timeout after 20 seconds')), 20000);
+    });
+    
+    const info = await Promise.race([sendPromise, timeoutPromise]);
     
     console.log('\n========== ✅ EMAIL SENT SUCCESSFULLY ==========');
-    console.log('Message ID:', data?.id);
+    console.log('Message ID:', info.messageId);
     console.log('To:', mailOptions.to);
     console.log('Subject:', mailOptions.subject);
-    console.log('Resend Response:', JSON.stringify(data, null, 2));
+    console.log('Response:', info.response || 'N/A');
+    console.log('Accepted:', info.accepted || 'N/A');
+    console.log('Rejected:', info.rejected || 'N/A');
     console.log('=============================================\n');
     
-    return { 
-      success: true, 
-      info: {
-        messageId: data?.id,
-        response: 'Email sent via Resend',
-        accepted: [mailOptions.to],
-        rejected: []
-      }
-    };
+    return { success: true, info };
   } catch (error) {
     console.error('\n========== ❌ EMAIL ERROR DETAILS ==========');
     console.error('ERROR TYPE:', error.name || 'Unknown');
     console.error('ERROR MESSAGE:', error.message);
-    console.error('ERROR STACK:', error.stack || 'N/A');
+    console.error('ERROR CODE:', error.code || 'N/A');
+    console.error('ERROR COMMAND:', error.command || 'N/A');
+    console.error('ERROR RESPONSE:', error.response || 'N/A');
     console.error('\n--- Email Details ---');
     console.error('To:', mailOptions.to);
     console.error('Subject:', mailOptions.subject);
     console.error('From:', mailOptions.from || getEmailFrom());
     console.error('\n--- Configuration Check ---');
-    console.error('RESEND_API_KEY:', process.env.RESEND_API_KEY ? '***configured***' : '❌ NOT SET');
-    console.error('RESEND_FROM_EMAIL:', process.env.RESEND_FROM_EMAIL || 'not set');
+    console.error('EMAIL_USER:', process.env.EMAIL_USER ? '***configured***' : '❌ NOT SET');
+    console.error('EMAIL_PASS:', process.env.EMAIL_PASS ? '***configured***' : '❌ NOT SET');
+    console.error('EMAIL_SERVICE:', process.env.EMAIL_SERVICE || 'gmail (default)');
+    console.error('EMAIL_HOST:', process.env.EMAIL_HOST || 'not set');
+    console.error('EMAIL_PORT:', process.env.EMAIL_PORT || 'not set');
     console.error('===========================================\n');
+    
+    // Retry logic
+    if (retryCount < maxRetries && (error.code === 'ETIMEDOUT' || error.code === 'ECONNREFUSED' || error.message.includes('timeout'))) {
+      console.log(`⏳ Retrying email send (${retryCount + 1}/${maxRetries})...`);
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+      return sendEmail(mailOptions, retryCount + 1);
+    }
     
     console.error('FULL ERROR OBJECT:', JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
     
     return { success: false, error: error.message, fullError: error };
   }
-};
-
-// Legacy transporter getter for backward compatibility (returns null, use sendEmail instead)
-const getTransporter = () => {
-  console.warn('⚠️  getTransporter() called - Resend doesn\'t use transporters. Use sendEmail() instead.');
-  return null;
-};
-
-// Legacy createTransporter for backward compatibility
-const createTransporter = () => {
-  console.warn('⚠️  createTransporter() called - Resend doesn\'t use transporters. Use sendEmail() instead.');
-  return null;
 };
 
 module.exports = {
@@ -182,6 +265,5 @@ module.exports = {
   },
   getEmailFrom,
   createTransporter,
-  sendEmail,
-  getResendClient
+  sendEmail
 };

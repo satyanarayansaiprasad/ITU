@@ -2099,23 +2099,25 @@ exports.testEmail = async (req, res) => {
     // Check email configuration
     const emailConfig = require('../config/email');
     const emailFrom = emailConfig.getEmailFrom();
-    const resendClient = emailConfig.getResendClient();
+    const transporter = emailConfig.transporter;
     
     console.log('\n--- Email Configuration Check ---');
-    console.log('RESEND_API_KEY:', process.env.RESEND_API_KEY ? '***configured***' : '❌ NOT SET');
-    console.log('RESEND_FROM_EMAIL:', process.env.RESEND_FROM_EMAIL || 'not set (using default)');
-    console.log('RESEND_FROM_NAME:', process.env.RESEND_FROM_NAME || 'not set (using default)');
+    console.log('EMAIL_USER:', process.env.EMAIL_USER ? '***configured***' : '❌ NOT SET');
+    console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? '***configured***' : '❌ NOT SET');
+    console.log('EMAIL_SERVICE:', process.env.EMAIL_SERVICE || 'gmail (default)');
+    console.log('EMAIL_HOST:', process.env.EMAIL_HOST || 'smtp.gmail.com (default)');
+    console.log('EMAIL_PORT:', process.env.EMAIL_PORT || '465 (default)');
     console.log('Email From:', emailFrom);
-    console.log('Resend Client:', resendClient ? '✅ Available' : '❌ Not Available');
+    console.log('Transporter:', transporter ? '✅ Available' : '❌ Not Available');
     
-    if (!resendClient) {
+    if (!transporter) {
       return res.status(500).json({
         success: false,
-        error: "Resend email client is not configured",
+        error: "Email transporter is not configured",
         details: {
-          RESEND_API_KEY: process.env.RESEND_API_KEY ? 'set' : 'NOT SET',
-          RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL || 'not set',
-          RESEND_FROM_NAME: process.env.RESEND_FROM_NAME || 'not set'
+          EMAIL_USER: process.env.EMAIL_USER ? 'set' : 'NOT SET',
+          EMAIL_PASS: process.env.EMAIL_PASS ? 'set' : 'NOT SET',
+          EMAIL_SERVICE: process.env.EMAIL_SERVICE || 'gmail (default)'
         }
       });
     }
