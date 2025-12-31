@@ -137,7 +137,7 @@ app.post('/test-email', async (req, res) => {
     const { sendEmail, getEmailFrom } = require('./config/email');
     
     const mailOptions = {
-      from: `"Indian Taekwondo Union" <${getEmailFrom()}>`,
+      from: getEmailFrom(), // getEmailFrom() already returns formatted "Name <email@domain.com>"
       to: email,
       subject: "🧪 Test Email - ITU System",
       html: `
