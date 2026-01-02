@@ -1104,7 +1104,7 @@ exports.approvePlayers = async (req, res) => {
                     <label style="color: #cbd5e1; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 5px;">Player ID</label>
                     <div style="background-color: #ffffff; border-radius: 6px; padding: 12px 15px; font-family: 'Courier New', monospace; font-size: 16px; color: #0E2A4E; font-weight: 600;">
                       ${player.playerId}
-                    </div>
+              </div>
                   </div>
                   <div style="margin-bottom: 15px;">
                     <label style="color: #cbd5e1; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 5px;">Email Address</label>
@@ -1221,7 +1221,7 @@ exports.approvePlayers = async (req, res) => {
                   <li style="margin-bottom: 12px; line-height: 1.6;">
                     <strong style="color: #0E2A4E;">View your ID card</strong> - Check out your digital player ID card
                   </li>
-                </ol>
+              </ol>
               </div>
             </td>
           </tr>
@@ -1255,14 +1255,14 @@ exports.approvePlayers = async (req, res) => {
               </p>
               <div style="border-top: 1px solid rgba(255, 255, 255, 0.2); padding-top: 20px; margin-top: 20px;">
                 <p style="color: #94a3b8; margin: 0; font-size: 12px;">
-                  Best regards,<br/>
+                Best regards,<br/>
                   <strong style="color: #ffffff; font-size: 14px;">Indian Taekwondo Union</strong><br/>
-                  System Administrator
-                </p>
+                System Administrator
+              </p>
                 <p style="color: #64748b; margin: 15px 0 0 0; font-size: 11px;">
                   This is an automated email. Please do not reply to this message.
                 </p>
-              </div>
+            </div>
             </td>
           </tr>
 
