@@ -113,20 +113,6 @@ const sendEmail = async (mailOptions) => {
     // Ensure fromEmail is a clean string without extra characters
     const cleanFromEmail = fromEmail.trim();
     
-    // Validate HTML content
-    if (!mailOptions.html || mailOptions.html.trim().length === 0) {
-      const errorMsg = 'Email HTML content is empty or undefined';
-      console.error('\n========== EMAIL ERROR DETAILS ==========');
-      console.error('ERROR TYPE: Empty HTML Content');
-      console.error('ERROR MESSAGE:', errorMsg);
-      console.error('HTML Length:', mailOptions.html ? mailOptions.html.length : 'undefined');
-      console.error('=========================================\n');
-      throw new Error(errorMsg);
-    }
-    
-    console.log('HTML Content Length:', mailOptions.html.length);
-    console.log('HTML Content Preview:', mailOptions.html.substring(0, 300) + '...');
-    
     const { data, error } = await client.emails.send({
       from: cleanFromEmail,
       to: toEmails,

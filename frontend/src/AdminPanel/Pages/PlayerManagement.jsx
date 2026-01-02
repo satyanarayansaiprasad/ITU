@@ -26,7 +26,6 @@ const PlayerManagement = () => {
   const [loading, setLoading] = useState(true);
   const [selectedPlayers, setSelectedPlayers] = useState([]);
   const [approving, setApproving] = useState(false);
-  const [resendingEmail, setResendingEmail] = useState(null);
   const [filter, setFilter] = useState("all"); // all, pending, approved, rejected
 
   useEffect(() => {
@@ -153,46 +152,6 @@ const PlayerManagement = () => {
       toast.error(error.response?.data?.error || "Failed to approve player");
     } finally {
       setApproving(false);
-    }
-  };
-
-  const handleResendEmail = async (playerId) => {
-    if (!window.confirm("Are you sure you want to resend the welcome email to this player?")) {
-      return;
-    }
-
-    try {
-      setResendingEmail(playerId);
-      const response = await axios.post(API_ENDPOINTS.RESEND_PLAYER_EMAIL(playerId));
-
-      if (response.data.success) {
-        toast.success("Welcome email resent successfully!", {
-          autoClose: 3000
-        });
-        
-        // Update local state
-        setPlayers(prevPlayers => 
-          prevPlayers.map(player => 
-            player._id === playerId 
-              ? { 
-                  ...player, 
-                  emailSent: response.data.emailSent || true,
-                  emailSentAt: response.data.emailSentAt || new Date()
-                }
-              : player
-          )
-        );
-        
-        // Fetch fresh data
-        await fetchPlayers();
-      } else {
-        toast.error(response.data.error || "Failed to resend email");
-      }
-    } catch (error) {
-      console.error("Error resending email:", error);
-      toast.error(error.response?.data?.error || "Failed to resend email");
-    } finally {
-      setResendingEmail(null);
     }
   };
 
@@ -415,23 +374,6 @@ const PlayerManagement = () => {
                           >
                             <XCircle size={16} />
                             Reject
-                          </button>
-                        </div>
-                      )}
-                      {player.status === "approved" && (
-                        <div className="flex items-center gap-2 ml-4">
-                          <button
-                            onClick={() => handleResendEmail(player._id)}
-                            disabled={resendingEmail === player._id}
-                            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="Resend welcome email with login credentials"
-                          >
-                            {resendingEmail === player._id ? (
-                              <Loader className="animate-spin" size={16} />
-                            ) : (
-                              <Mail size={16} />
-                            )}
-                            Resend Email
                           </button>
                         </div>
                       )}

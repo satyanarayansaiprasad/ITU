@@ -33,7 +33,6 @@ const ModernFormSubmissions = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [approvingId, setApprovingId] = useState(null);
   const [rejectingId, setRejectingId] = useState(null);
-  const [resendingEmailId, setResendingEmailId] = useState(null);
   const [selectedForm, setSelectedForm] = useState(null);
   const [notification, setNotification] = useState(null);
   const [showPasswordModal, setShowPasswordModal] = useState(null);
@@ -231,55 +230,6 @@ const ModernFormSubmissions = () => {
       showNotification(error.response?.data?.error || "Failed to reject form", "error");
     } finally {
       setRejectingId(null);
-    }
-  };
-
-  const handleResendEmail = async (formId, email) => {
-    if (!window.confirm(`Are you sure you want to resend the welcome email to ${email}?`)) {
-      return;
-    }
-
-    try {
-      setResendingEmailId(formId);
-      const response = await axios.post(API_ENDPOINTS.RESEND_FORM_EMAIL(formId));
-
-      if (response.data.success) {
-        showNotification(`✅ Welcome email resent successfully to ${email}`, "success");
-        
-        // Update local state
-        setForms(prevForms => 
-          prevForms.map(form => 
-            form._id === formId 
-              ? { 
-                  ...form, 
-                  emailSent: response.data.emailSent || true,
-                  emailSentAt: response.data.emailSentAt || new Date(),
-                  emailError: null
-                }
-              : form
-          )
-        );
-        
-        // Update selected form if it's the one being resent
-        if (selectedForm && selectedForm._id === formId) {
-          setSelectedForm({ 
-            ...selectedForm, 
-            emailSent: response.data.emailSent || true,
-            emailSentAt: response.data.emailSentAt || new Date(),
-            emailError: null
-          });
-        }
-        
-        // Fetch fresh data
-        await fetchForms();
-      } else {
-        showNotification(response.data.error || "Failed to resend email", "error");
-      }
-    } catch (error) {
-      console.error("Error resending email:", error);
-      showNotification(error.response?.data?.error || "Failed to resend email", "error");
-    } finally {
-      setResendingEmailId(null);
     }
   };
 
@@ -631,40 +581,22 @@ const ModernFormSubmissions = () => {
                       )}
 
                       {(form.status === 'approved' || form.status === 'reject' || form.status === 'rejected') && (
-                        <>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleResendEmail(form._id, form.email);
-                            }}
-                            disabled={resendingEmailId === form._id}
-                            className="flex items-center gap-1 px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 text-sm"
-                            title="Resend welcome email with login credentials"
-                          >
-                            {resendingEmailId === form._id ? (
-                              <Loader size={14} className="animate-spin" />
-                            ) : (
-                              <Mail size={14} />
-                            )}
-                            Resend Email
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDelete(form._id, form.email, form.name);
-                            }}
-                            disabled={deletingId === form._id}
-                            className="flex items-center gap-1 px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 text-sm"
-                            title="Delete user completely from all databases"
-                          >
-                            {deletingId === form._id ? (
-                              <Loader size={14} className="animate-spin" />
-                            ) : (
-                              <Trash2 size={14} />
-                            )}
-                            Delete
-                          </button>
-                        </>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(form._id, form.email, form.name);
+                          }}
+                          disabled={deletingId === form._id}
+                          className="flex items-center gap-1 px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 text-sm"
+                          title="Delete user completely from all databases"
+                        >
+                          {deletingId === form._id ? (
+                            <Loader size={14} className="animate-spin" />
+                          ) : (
+                            <Trash2 size={14} />
+                          )}
+                          Delete
+                        </button>
                       )}
 
                       <button
