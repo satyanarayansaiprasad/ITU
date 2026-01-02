@@ -61,6 +61,8 @@ router.post('/approvePlayers', adminController.approvePlayers);
 router.post('/rejectPlayers', adminController.rejectPlayers);
 router.delete('/deletePlayers', adminController.deletePlayers);
 router.get('/organizations/:stateName', adminController.getOrganizationsByState);
+router.post('/resend-player-email/:playerId', adminController.resendPlayerEmail);
+router.post('/resend-form-email/:formId', adminController.resendFormEmail);
 // router.put('/rejectForm',adminController.rejectForm)
 
 // ========== BLOG ROUTES ==========

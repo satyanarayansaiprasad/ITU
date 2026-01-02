@@ -65,6 +65,8 @@ export const API_ENDPOINTS = {
   APPROVE_PLAYERS: `${API_BASE_URL}/api/admin/approvePlayers`,
   REJECT_PLAYERS: `${API_BASE_URL}/api/admin/rejectPlayers`,
   DELETE_PLAYERS: `${API_BASE_URL}/api/admin/deletePlayers`,
+  RESEND_PLAYER_EMAIL: (playerId) => `${API_BASE_URL}/api/admin/resend-player-email/${playerId}`,
+  RESEND_FORM_EMAIL: (formId) => `${API_BASE_URL}/api/admin/resend-form-email/${formId}`,
   
   // Blog endpoints
   BLOG_POSTS: `${API_BASE_URL}/api/admin/blog/posts`,

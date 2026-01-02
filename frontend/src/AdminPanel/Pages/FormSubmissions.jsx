@@ -8,6 +8,7 @@ const FormSubmissions = () => {
   const [forms, setForms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [approvingId, setApprovingId] = useState(null);
+  const [resendingEmailId, setResendingEmailId] = useState(null);
 
   useEffect(() => {
     fetchForms();
@@ -29,6 +30,50 @@ const FormSubmissions = () => {
   const generatePassword = (state) => {
     const cleanStateName = state.replace(/\s+/g, '').toLowerCase();
     return `${cleanStateName}ITU@540720`;
+  };
+
+  const handleResendEmail = async (formId, email) => {
+    if (!window.confirm(`Are you sure you want to resend the welcome email to ${email}?`)) {
+      return;
+    }
+
+    try {
+      setResendingEmailId(formId);
+      const response = await axios.post(API_ENDPOINTS.RESEND_FORM_EMAIL(formId));
+
+      if (response.data.success) {
+        toast.success(`✅ Welcome email resent successfully to ${email}`, {
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+        });
+        
+        // Update local state
+        setForms(prevForms => 
+          prevForms.map(form => 
+            form._id === formId 
+              ? { 
+                  ...form, 
+                  emailSent: response.data.emailSent || true,
+                  emailSentAt: response.data.emailSentAt || new Date(),
+                  emailError: null
+                }
+              : form
+          )
+        );
+        
+        // Fetch fresh data
+        await fetchForms();
+      } else {
+        toast.error(response.data.error || "Failed to resend email");
+      }
+    } catch (error) {
+      console.error("Error resending email:", error);
+      toast.error(error.response?.data?.error || "Failed to resend email");
+    } finally {
+      setResendingEmailId(null);
+    }
   };
 
   const handleApprove = async (formId, email, state) => {
@@ -206,7 +251,31 @@ const FormSubmissions = () => {
                         )}
                       </button>
                     ) : (
-                      <span className="text-green-600">✓ Approved</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-green-600">✓ Approved</span>
+                        <button
+                          onClick={() => handleResendEmail(form._id, form.email)}
+                          disabled={resendingEmailId === form._id}
+                          className={`px-3 py-1 rounded text-xs transition ${
+                            resendingEmailId === form._id
+                              ? 'bg-gray-400 cursor-not-allowed text-white'
+                              : 'bg-blue-500 hover:bg-blue-600 text-white'
+                          }`}
+                          title="Resend welcome email with login credentials"
+                        >
+                          {resendingEmailId === form._id ? (
+                            <>
+                              <svg className="animate-spin -ml-1 mr-1 h-3 w-3 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                              Sending...
+                            </>
+                          ) : (
+                            '📧 Resend Email'
+                          )}
+                        </button>
+                      </div>
                     )}
                   </td>
                 </tr>
