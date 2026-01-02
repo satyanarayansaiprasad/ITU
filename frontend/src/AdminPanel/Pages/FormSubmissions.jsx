@@ -198,21 +198,94 @@ const FormSubmissions = () => {
                   </td>
                   <td className="px-4 py-3 text-sm">
                     {form.password ? (
-                      form.emailSent ? (
-                        <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-2">
+                        {form.emailSent ? (
+                          <>
+                            <div className="flex items-center gap-2">
+                              <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+                                ✅ Email Sent
+                              </span>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleResendEmail(form._id, form.email);
+                                }}
+                                disabled={resendingEmailId === form._id}
+                                className={`px-2 py-1 rounded text-xs transition ${
+                                  resendingEmailId === form._id
+                                    ? 'bg-gray-300 cursor-not-allowed text-gray-600'
+                                    : 'bg-blue-500 hover:bg-blue-600 text-white'
+                                }`}
+                                title="Resend welcome email"
+                              >
+                                {resendingEmailId === form._id ? (
+                                  <svg className="animate-spin h-3 w-3 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                  </svg>
+                                ) : (
+                                  '↻ Resend'
+                                )}
+                              </button>
+                            </div>
+                            {form.emailSentAt && (
+                              <span className="text-xs text-gray-500">
+                                Sent: {new Date(form.emailSentAt).toLocaleString()}
+                              </span>
+                            )}
+                          </>
+                        ) : form.emailError ? (
+                          <>
+                            <div className="flex items-center gap-2">
+                              <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
+                                ❌ Email Failed
+                              </span>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleResendEmail(form._id, form.email);
+                                }}
+                                disabled={resendingEmailId === form._id}
+                                className={`px-2 py-1 rounded text-xs transition ${
+                                  resendingEmailId === form._id
+                                    ? 'bg-gray-300 cursor-not-allowed text-gray-600'
+                                    : 'bg-blue-500 hover:bg-blue-600 text-white'
+                                }`}
+                                title="Resend welcome email"
+                              >
+                                {resendingEmailId === form._id ? (
+                                  <svg className="animate-spin h-3 w-3 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                  </svg>
+                                ) : (
+                                  '↻ Retry'
+                                )}
+                              </button>
+                            </div>
+                            {form.emailError && (
+                              <span className="text-xs text-red-600" title={form.emailError}>
+                                {form.emailError.length > 40 ? form.emailError.substring(0, 40) + '...' : form.emailError}
+                              </span>
+                            )}
+                          </>
+                        ) : (
                           <div className="flex items-center gap-2">
-                            <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
-                              ✅ Email Sent
+                            <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
+                              ⚠️ Not Sent Yet
                             </span>
                             <button
-                              onClick={() => handleResendEmail(form._id, form.email)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleResendEmail(form._id, form.email);
+                              }}
                               disabled={resendingEmailId === form._id}
                               className={`px-2 py-1 rounded text-xs transition ${
                                 resendingEmailId === form._id
                                   ? 'bg-gray-300 cursor-not-allowed text-gray-600'
                                   : 'bg-blue-500 hover:bg-blue-600 text-white'
                               }`}
-                              title="Resend welcome email"
+                              title="Send welcome email"
                             >
                               {resendingEmailId === form._id ? (
                                 <svg className="animate-spin h-3 w-3 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -220,49 +293,12 @@ const FormSubmissions = () => {
                                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
                               ) : (
-                                '↻ Resend'
+                                '📧 Send Email'
                               )}
                             </button>
                           </div>
-                          {form.emailSentAt && (
-                            <span className="text-xs text-gray-500">
-                              Sent: {new Date(form.emailSentAt).toLocaleString()}
-                            </span>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="flex flex-col gap-2">
-                          <div className="flex items-center gap-2">
-                            <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
-                              ❌ Email Failed
-                            </span>
-                            <button
-                              onClick={() => handleResendEmail(form._id, form.email)}
-                              disabled={resendingEmailId === form._id}
-                              className={`px-2 py-1 rounded text-xs transition ${
-                                resendingEmailId === form._id
-                                  ? 'bg-gray-300 cursor-not-allowed text-gray-600'
-                                  : 'bg-blue-500 hover:bg-blue-600 text-white'
-                              }`}
-                              title="Resend welcome email"
-                            >
-                              {resendingEmailId === form._id ? (
-                                <svg className="animate-spin h-3 w-3 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                              ) : (
-                                '↻ Retry'
-                              )}
-                            </button>
-                          </div>
-                          {form.emailError && (
-                            <span className="text-xs text-red-600" title={form.emailError}>
-                              {form.emailError.length > 40 ? form.emailError.substring(0, 40) + '...' : form.emailError}
-                            </span>
-                          )}
-                        </div>
-                      )
+                        )}
+                      </div>
                     ) : (
                       <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
                         Not Sent
@@ -293,28 +329,36 @@ const FormSubmissions = () => {
                         )}
                       </button>
                     ) : (
-                      <div className="flex items-center gap-2">
-                        <span className="text-green-600">✓ Approved</span>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-green-600 text-xs">✓ Approved</span>
                         <button
-                          onClick={() => handleResendEmail(form._id, form.email)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleResendEmail(form._id, form.email);
+                          }}
                           disabled={resendingEmailId === form._id}
-                          className={`px-3 py-1 rounded text-xs transition ${
+                          className={`px-3 py-1.5 rounded text-sm font-medium transition flex items-center gap-1 ${
                             resendingEmailId === form._id
                               ? 'bg-gray-400 cursor-not-allowed text-white'
-                              : 'bg-blue-500 hover:bg-blue-600 text-white'
+                              : 'bg-blue-500 hover:bg-blue-600 text-white shadow-sm'
                           }`}
                           title="Resend welcome email with login credentials"
                         >
                           {resendingEmailId === form._id ? (
                             <>
-                              <svg className="animate-spin -ml-1 mr-1 h-3 w-3 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <svg className="animate-spin h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                               </svg>
                               Sending...
                             </>
                           ) : (
-                            '📧 Resend Email'
+                            <>
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                              </svg>
+                              Resend Email
+                            </>
                           )}
                         </button>
                       </div>
