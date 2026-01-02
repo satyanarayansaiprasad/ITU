@@ -1261,7 +1261,7 @@ exports.approvePlayers = async (req, res) => {
               </p>
                 <p style="color: #64748b; margin: 15px 0 0 0; font-size: 11px;">
                   This is an automated email. Please do not reply to this message.
-                </p>
+              </p>
             </div>
             </td>
           </tr>
@@ -1652,6 +1652,10 @@ exports.resendPlayerEmail = async (req, res) => {
       `
     };
 
+    // Debug: Log email content length to verify template is complete
+    console.log(`📧 Email HTML content length: ${mailOptions.html.length} characters`);
+    console.log(`📧 Email HTML preview (first 200 chars): ${mailOptions.html.substring(0, 200)}...`);
+    
     const emailResult = await sendEmail(mailOptions);
     if (emailResult.success) {
       player.emailSent = true;
