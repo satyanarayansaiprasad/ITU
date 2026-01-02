@@ -2009,6 +2009,10 @@ exports.resendFormEmail = async (req, res) => {
       `
     };
 
+    // Debug: Log email content length to verify template is complete
+    console.log(`📧 Email HTML content length: ${mailOptions.html.length} characters`);
+    console.log(`📧 Email HTML preview (first 200 chars): ${mailOptions.html.substring(0, 200)}...`);
+    
     const emailResult = await sendEmail(mailOptions);
     if (emailResult.success) {
       form.emailSent = true;
