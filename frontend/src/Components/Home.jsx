@@ -5,8 +5,8 @@ import axios from "axios";
 import { API_ENDPOINTS, GET_UPLOAD_URL } from "../config/api";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-
-const textContainerVariants = {
+{}
+const textContainerVariants = {}
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
