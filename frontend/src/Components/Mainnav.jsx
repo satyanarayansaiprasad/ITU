@@ -1,4 +1,4 @@
-import { Home, Menu, X, MoreHorizontal, Shield, Info, Phone, Activity, Newspaper, Image, Users, User, Lock, UserCog, UserPlus } from "lucide-react";
+import { Home, Menu, X, MoreHorizontal, Shield, Info, Phone, Activity, Newspaper, Image, Users, User, Lock, UserCog, UserPlus, ChevronDown } from "lucide-react";
 import React, { useState } from "react";
 import { Link } from "react-router-dom"; // Make sure this import is at the top
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,6 +11,7 @@ export default function Mainnav() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [loginType, setLoginType] = useState(null);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
 
   // Navigation handlers
   const handleNavigation = (path) => {
@@ -428,17 +429,16 @@ export default function Mainnav() {
             {/* Mobile Menu Content */}
             <div className="flex-1 overflow-y-auto p-6">
               <nav className="space-y-2">
+
+                {/* ── Regular flat items ── */}
                 {[
                   { icon: <Home size={22} />, title: "Home", path: "/", desc: "Welcome to ITU" },
-                  { icon: <Info size={22} />, title: "About", path: "/about", desc: "Learn about us" },
                   { icon: <Shield size={22} />, title: "State Union", path: "/state-union", desc: "Regional offices" },
                   { icon: <Phone size={22} />, title: "Contact", path: "/contact", desc: "Get in touch" },
                   { icon: <Activity size={22} />, title: "Self Defence", path: "/self-defence", desc: "Protection & martial arts" },
                   { icon: <Newspaper size={22} />, title: "Blog", path: "/news", desc: "Latest articles & insights" },
                   { icon: <Image size={22} />, title: "Gallery", path: "/gallery", desc: "Photo gallery" },
                   { icon: <User size={22} />, title: "Forms", path: "/forms", desc: "Registration forms" },
-                  { icon: <Info size={22} />, title: "History of Taekwondo", path: "/about/history", desc: "Origins & evolution" },
-                  { icon: <Info size={22} />, title: "Our Ambition", path: "/about/ambition", desc: "Vision & mission" },
                 ].map((item, index) => (
                   <motion.div
                     key={index}
@@ -473,6 +473,86 @@ export default function Mainnav() {
                     </div>
                   </motion.div>
                 ))}
+
+                {/* ── About Accordion ── */}
+                <motion.div
+                  className="group"
+                  variants={menuItemVariants}
+                  initial="closed"
+                  animate="open"
+                  custom={1}
+                >
+                  {/* Accordion header */}
+                  <div
+                    className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/10 cursor-pointer transition-all duration-300 touch-friendly"
+                    onClick={() => setMobileAboutOpen(!mobileAboutOpen)}
+                  >
+                    <div className="flex-shrink-0 w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center group-hover:bg-orange-500/20 transition-colors">
+                      <div className="text-white group-hover:text-orange-300 transition-colors">
+                        <Info size={22} />
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-white font-semibold text-lg group-hover:text-orange-300 transition-colors">
+                        About
+                      </h3>
+                      <p className="text-gray-400 text-sm group-hover:text-orange-200 transition-colors">
+                        Learn about ITU
+                      </p>
+                    </div>
+                    {/* Rotating chevron */}
+                    <motion.div
+                      animate={{ rotate: mobileAboutOpen ? 180 : 0 }}
+                      transition={{ duration: 0.25 }}
+                      className="text-white/50 group-hover:text-orange-300 transition-colors"
+                    >
+                      <ChevronDown size={20} />
+                    </motion.div>
+                  </div>
+
+                  {/* Accordion sub-items */}
+                  <AnimatePresence initial={false}>
+                    {mobileAboutOpen && (
+                      <motion.div
+                        key="about-submenu"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        className="overflow-hidden pl-4"
+                      >
+                        <div className="ml-4 border-l-2 border-orange-400/40 pl-4 space-y-1 py-1">
+                          {[
+                            { title: "About ITU", path: "/about", desc: "Our story & foundation" },
+                            { title: "Union Of Directors", path: "/about/directors", desc: "Union leadership" },
+                            { title: "Referee & Instructors", path: "/about/referees", desc: "Officials & coaches" },
+                            { title: "History of Taekwondo", path: "/about/history", desc: "Origins & evolution" },
+                            { title: "Our Ambition", path: "/about/ambition", desc: "Vision & mission" },
+                          ].map((sub, si) => (
+                            <motion.div
+                              key={si}
+                              initial={{ x: -10, opacity: 0 }}
+                              animate={{ x: 0, opacity: 1 }}
+                              transition={{ delay: si * 0.05 }}
+                              className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 cursor-pointer transition-all duration-200 touch-friendly"
+                              onClick={() => {
+                                setMobileAboutOpen(false);
+                                handleNavigation(sub.path);
+                              }}
+                            >
+                              <div className="w-2 h-2 rounded-full bg-orange-400 flex-shrink-0" />
+                              <div>
+                                <div className="text-white font-medium text-base">{sub.title}</div>
+                                <div className="text-gray-400 text-xs">{sub.desc}</div>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+
               </nav>
             </div>
 
