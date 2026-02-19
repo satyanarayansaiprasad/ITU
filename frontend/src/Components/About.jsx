@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FaBullseye, FaHistory, FaUsers, FaTrophy, FaGlobeAsia, FaFlag, FaMedal, FaFire, FaFistRaised } from 'react-icons/fa';
+import { FaBullseye, FaHistory, FaUsers, FaTrophy, FaFlag, FaMedal, FaFire, FaFistRaised } from 'react-icons/fa';
 
 const About = () => {
   // Animation variants
@@ -94,23 +94,7 @@ const About = () => {
     }
   ];
 
-  const ambitions = [
-    {
-      icon: <FaUsers className="text-4xl text-[#FF9933]" />,
-      title: "Community Growth",
-      description: "Provide a platform for players, instructors and referees at national and international levels"
-    },
-    {
-      icon: <FaTrophy className="text-4xl text-[#FFFFFF]" />,
-      title: "Championship Goals",
-      description: "Develop players who can represent India at World Championships and Olympic Games"
-    },
-    {
-      icon: <FaGlobeAsia className="text-4xl text-[#138808]" />,
-      title: "Youth Development",
-      description: "Attract youth to Taekwondo to keep them away from drugs and crime through sports"
-    }
-  ];
+
 
   // Animated background elements
   const AnimatedBackgroundElements = () => (
@@ -197,14 +181,14 @@ const About = () => {
       >
         {/* Flag color bars */}
         <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#FF9933] via-[#FFFFFF] to-[#138808] rounded-full"></div>
-        
-        <motion.div 
+
+        <motion.div
           variants={itemVariants}
           className="mt-8 flex justify-center items-center mb-4 relative"
         >
           {/* Saffron Flag */}
           <FaFlag className="text-4xl text-[#FF9933] mr-2" />
-          
+
           {/* White Flag with Ashoka Chakra */}
           <div className="relative mr-2">
             <FaFlag className="text-4xl text-[#FFFFFF]" />
@@ -214,7 +198,7 @@ const About = () => {
                 {/* 24 spokes - simplified version */}
                 <div className="relative w-full h-full">
                   {[...Array(24)].map((_, i) => (
-                    <div 
+                    <div
                       key={i}
                       className="absolute w-[1px] h-3 bg-[#000080] origin-center"
                       style={{
@@ -225,7 +209,7 @@ const About = () => {
                     />
                   ))}
                   {/* Center dot */}
-                  <div className="absolute w-1 h-1 bg-[#000080] rounded-full" 
+                  <div className="absolute w-1 h-1 bg-[#000080] rounded-full"
                     style={{
                       left: '50%',
                       top: '50%',
@@ -236,19 +220,19 @@ const About = () => {
               </div>
             </div>
           </div>
-          
+
           {/* Green Flag */}
           <FaFlag className="text-4xl text-[#138808]" />
         </motion.div>
-        
-        <motion.h1 
-          variants={itemVariants} 
+
+        <motion.h1
+          variants={itemVariants}
           className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#FF9933] via-[#0B2545] to-[#138808] bg-clip-text text-transparent mb-4"
         >
           About Indian Taekwondo Union - Official ITU
         </motion.h1>
-        <motion.p 
-          variants={itemVariants} 
+        <motion.p
+          variants={itemVariants}
           className="text-lg md:text-xl text-gray-700 max-w-3xl mx-auto"
         >
           India's leading Taekwondo organization empowering 50,000+ students through martial arts training, self-defense education, and competitive excellence since 2017. Discover our mission to elevate Taekwondo in India.
@@ -273,14 +257,14 @@ const About = () => {
       </motion.section>
 
       {/* Introduction with Flag-colored accent */}
-      <motion.section 
+      <motion.section
         className="max-w-7xl mx-auto mb-20 relative z-10"
         initial="offscreen"
         whileInView="onscreen"
         viewport={{ once: true, amount: 0.3 }}
       >
-        <motion.div 
-          variants={cardVariants} 
+        <motion.div
+          variants={cardVariants}
           className="bg-white rounded-xl shadow-lg p-8 md:p-10 border-t-4 border-[#FF9933] relative overflow-hidden"
         >
           {/* Animated corner decorations */}
@@ -301,52 +285,52 @@ const About = () => {
           </motion.div>
 
           <h2 className="text-3xl font-bold text-[#0B2545] mb-6 relative z-10 text-center">
-          Our Foundation - Indian Taekwondo Union History
-  <div className="w-24 h-1 mx-auto mt-2 bg-gradient-to-r from-[#FF9933] via-white to-[#138808] rounded-full"></div>
-</h2>
+            Our Foundation - Indian Taekwondo Union History
+            <div className="w-24 h-1 mx-auto mt-2 bg-gradient-to-r from-[#FF9933] via-white to-[#138808] rounded-full"></div>
+          </h2>
           <p className="text-lg text-gray-700 mb-6 relative z-10">
-            The Indian Taekwondo Union (ITU) was founded by Master Mukesh Kumar Sahoo with the vision to establish 
-            a national-level organization where Taekwondo players, instructors, and referees could receive the honor 
-            and respect they deserve. As the official ITU, ITU has been at the forefront of 
+            The Indian Taekwondo Union (ITU) was founded by Master Mukesh Kumar Sahoo with the vision to establish
+            a national-level organization where Taekwondo players, instructors, and referees could receive the honor
+            and respect they deserve. As the official ITU, ITU has been at the forefront of
             promoting martial arts education, self-defense training, and competitive Taekwondo across the nation.
           </p>
           <p className="text-lg text-gray-700 mb-6 relative z-10">
-            Registered under the Govt. of Odisha, ITU quickly gained recognition at both national and international levels, 
-            committed to fulfilling the dreams of Taekwondo practitioners across India by providing them with proper platforms 
-            to showcase their skills and dedication. Today, ITU serves as India's premier martial arts organization with 
+            Registered under the Govt. of Odisha, ITU quickly gained recognition at both national and international levels,
+            committed to fulfilling the dreams of Taekwondo practitioners across India by providing them with proper platforms
+            to showcase their skills and dedication. Today, ITU serves as India's premier martial arts organization with
             over 50,000 students and 500+ certified instructors.
           </p>
           <p className="text-lg text-gray-700 relative z-10">
-            Our mission extends beyond just training - we aim to develop world-class athletes who can represent India 
-            at international competitions, Olympic Games, and World Championships. Through structured Taekwondo programs, 
+            Our mission extends beyond just training - we aim to develop world-class athletes who can represent India
+            at international competitions, Olympic Games, and World Championships. Through structured Taekwondo programs,
             we instill discipline, respect, and excellence in every practitioner.
           </p>
         </motion.div>
       </motion.section>
 
       {/* Our Purpose Section */}
-      <motion.section 
+      <motion.section
         className="max-w-7xl mx-auto mb-20 relative z-10"
         initial="offscreen"
         whileInView="onscreen"
         viewport={{ once: true, amount: 0.3 }}
       >
-        <motion.div 
-          variants={cardVariants} 
+        <motion.div
+          variants={cardVariants}
           className="bg-white rounded-xl shadow-lg p-8 md:p-10 border-t-4 border-[#0B2545] relative overflow-hidden"
         >
           <h2 className="text-3xl font-bold text-[#0B2545] mb-6 relative z-10 text-center">
-  Our Purpose
-  <div className="w-24 h-1 mx-auto mt-2 bg-gradient-to-r from-[#FF9933] via-white to-[#138808] rounded-full"></div>
-</h2>
+            Our Purpose
+            <div className="w-24 h-1 mx-auto mt-2 bg-gradient-to-r from-[#FF9933] via-white to-[#138808] rounded-full"></div>
+          </h2>
           <div className="space-y-6 relative z-10">
             <p className="text-lg text-gray-700">
-              Indian Taekwondo Union was established to address the shortcomings in how Taekwondo was being promoted in India. 
-              While other organizations treated Taekwondo as a business, ITU was founded with the pure intention of uplifting 
+              Indian Taekwondo Union was established to address the shortcomings in how Taekwondo was being promoted in India.
+              While other organizations treated Taekwondo as a business, ITU was founded with the pure intention of uplifting
               the sport to its rightful status.
             </p>
             <p className="text-lg text-gray-700">
-              Taekwondo has been practiced in India for a long time but never received the recognition it deserved due to 
+              Taekwondo has been practiced in India for a long time but never received the recognition it deserved due to
               organizational politics. ITU aims to change this by:
             </p>
             <ul className="list-disc pl-6 space-y-2 text-gray-700">
@@ -359,61 +343,9 @@ const About = () => {
         </motion.div>
       </motion.section>
 
-      {/* Our Ambitions with Flag-colored cards */}
-      <motion.section 
-        className="max-w-7xl mx-auto mb-20 relative z-10"
-        initial="offscreen"
-        whileInView="onscreen"
-        viewport={{ once: true, amount: 0.2 }}
-      >
-        <motion.div variants={cardVariants}>
-          <h2 className="text-3xl font-bold text-[#0B2545] mb-10 text-center relative">
-            Our Ambitions
-            <div className="w-24 h-1 mx-auto mt-2 bg-gradient-to-r from-[#FF9933] via-[#ffffff] to-[#138808] rounded-full"></div>
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {ambitions.map((item, index) => (
-              <motion.div
-                key={index}
-                whileHover={{ y: -10 }}
-                className={`rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-all duration-300 relative overflow-hidden ${
-                  index === 0 ? 'bg-gradient-to-br from-[#FF993322] to-white' :
-                  index === 1 ? 'bg-white border-2 border-[#0B2545]' :
-                  'bg-gradient-to-br from-white to-[#13880822]'
-                }`}
-              >
-                {/* Floating medal in card */}
-                <motion.div
-                  variants={floatVariants}
-                  animate="float"
-                  className="absolute -bottom-5 -right-5 opacity-10"
-                >
-                  <FaMedal className={`text-8xl ${
-                    index === 0 ? 'text-[#FF9933]' :
-                    index === 1 ? 'text-[#0B2545]' :
-                    'text-[#138808]'
-                  }`} />
-                </motion.div>
-
-                <div className="flex justify-center mb-4 relative z-10">
-                  {item.icon}
-                </div>
-                <h3 className={`text-xl font-semibold mb-3 relative z-10 ${
-                  index === 0 ? 'text-[#FF9933]' :
-                  index === 1 ? 'text-[#0B2545]' :
-                  'text-[#138808]'
-                }`}>
-                  {item.title}
-                </h3>
-                <p className="text-gray-600 relative z-10">{item.description}</p>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-      </motion.section>
 
       {/* History of ITU with Flag-inspired timeline */}
-      <motion.section 
+      <motion.section
         className="max-w-7xl mx-auto mb-20 relative z-10"
         initial="offscreen"
         whileInView="onscreen"
@@ -427,7 +359,7 @@ const About = () => {
           <div className="relative">
             {/* Timeline line with flag colors */}
             <div className="hidden md:block absolute left-1/2 h-full w-1 bg-gradient-to-b from-[#FF9933] via-[#FFFFFF] to-[#138808] transform -translate-x-1/2"></div>
-            
+
             {/* Timeline items */}
             <div className="space-y-8 md:space-y-16">
               {historyTimeline.map((item, index) => (
@@ -440,46 +372,41 @@ const About = () => {
                   className={`relative flex flex-col md:flex-row ${index % 2 === 0 ? 'md:flex-row-reverse' : ''}`}
                 >
                   {/* Timeline dot with alternating flag colors */}
-                  <div className={`hidden md:flex absolute left-1/2 h-5 w-5 rounded-full transform -translate-x-1/2 -translate-y-1/2 top-1/2 ${
-                    index % 3 === 0 ? 'bg-[#FF9933]' :
+                  <div className={`hidden md:flex absolute left-1/2 h-5 w-5 rounded-full transform -translate-x-1/2 -translate-y-1/2 top-1/2 ${index % 3 === 0 ? 'bg-[#FF9933]' :
                     index % 3 === 1 ? 'bg-[#FFFFFF] border-2 border-[#0B2545]' :
-                    'bg-[#138808]'
-                  }`}></div>
-                  
+                      'bg-[#138808]'
+                    }`}></div>
+
                   {/* Content */}
                   <div className={`md:w-5/12 ${index % 2 === 0 ? 'md:pr-8' : 'md:pl-8'}`}>
-                    <motion.div 
+                    <motion.div
                       whileHover={{ scale: 1.02 }}
-                      className={`bg-white p-6 rounded-xl shadow-lg border-t-2 relative overflow-hidden ${
-                        index % 3 === 0 ? 'border-[#FF9933]' :
+                      className={`bg-white p-6 rounded-xl shadow-lg border-t-2 relative overflow-hidden ${index % 3 === 0 ? 'border-[#FF9933]' :
                         index % 3 === 1 ? 'border-[#0B2545]' :
-                        'border-[#138808]'
-                      }`}
+                          'border-[#138808]'
+                        }`}
                     >
                       {/* Animated background element */}
                       <motion.div
                         variants={pulseVariants}
                         animate="pulse"
-                        className={`absolute -bottom-10 -right-10 opacity-10 ${
-                          index % 3 === 0 ? 'text-[#FF9933]' :
+                        className={`absolute -bottom-10 -right-10 opacity-10 ${index % 3 === 0 ? 'text-[#FF9933]' :
                           index % 3 === 1 ? 'text-[#0B2545]' :
-                          'text-[#138808]'
-                        }`}
+                            'text-[#138808]'
+                          }`}
                       >
                         <FaMedal className="text-12xl" />
                       </motion.div>
 
                       <div className="flex items-center mb-2 relative z-10">
-                        <FaHistory className={`mr-2 ${
-                          index % 3 === 0 ? 'text-[#FF9933]' :
+                        <FaHistory className={`mr-2 ${index % 3 === 0 ? 'text-[#FF9933]' :
                           index % 3 === 1 ? 'text-[#0B2545]' :
-                          'text-[#138808]'
-                        }`} />
-                        <span className={`font-bold ${
-                          index % 3 === 0 ? 'text-[#FF9933]' :
+                            'text-[#138808]'
+                          }`} />
+                        <span className={`font-bold ${index % 3 === 0 ? 'text-[#FF9933]' :
                           index % 3 === 1 ? 'text-[#0B2545]' :
-                          'text-[#138808]'
-                        }`}>{item.year}</span>
+                            'text-[#138808]'
+                          }`}>{item.year}</span>
                       </div>
                       <h3 className="text-xl font-semibold mb-2 relative z-10">{item.title}</h3>
                       <p className="text-gray-600 relative z-10">{item.description}</p>
@@ -493,14 +420,14 @@ const About = () => {
       </motion.section>
 
       {/* Taekwon! Mission Section */}
-      <motion.section 
+      <motion.section
         className="max-w-7xl mx-auto mb-20 relative z-10"
         initial="offscreen"
         whileInView="onscreen"
         viewport={{ once: true, amount: 0.3 }}
       >
-        <motion.div 
-          variants={cardVariants} 
+        <motion.div
+          variants={cardVariants}
           className="bg-gradient-to-br from-[#0B2545] to-[#1E3A8A] rounded-xl shadow-lg p-8 md:p-10 relative overflow-hidden"
         >
           {/* Animated elements */}
@@ -521,13 +448,13 @@ const About = () => {
           </motion.div>
 
           <h2 className="text-3xl font-bold text-white mb-6 relative z-10">
-             Our Mission
+            Our Mission
             <div className="w-24 h-1 mt-2 bg-gradient-to-r from-[#FF9933] via-[#FFFFFF] to-[#138808] rounded-full"></div>
           </h2>
-          
+
           <div className="space-y-6 text-white relative z-10">
             <p className="text-lg">
-              Indian Taekwondo Union's ambition is not to run a business, but to uplift Taekwondo sport not only in India 
+              Indian Taekwondo Union's ambition is not to run a business, but to uplift Taekwondo sport not only in India
               but at the world level. Our mission is to:
             </p>
             <ul className="list-disc pl-6 space-y-3">
@@ -538,7 +465,7 @@ const About = () => {
               <li>See our young practitioners hold the National Flag high at international competitions</li>
             </ul>
             <p className="text-lg font-medium">
-              It would be our greatest honor if our efforts help any Indian player reach the top level of World Championship 
+              It would be our greatest honor if our efforts help any Indian player reach the top level of World Championship
               and Olympic Games. The success of even a single child through ITU would validate all our hard work and dedication.
             </p>
           </div>
@@ -546,14 +473,14 @@ const About = () => {
       </motion.section>
 
       {/* Values Section with Flag-inspired design */}
-      <motion.section 
+      <motion.section
         className="max-w-7xl mx-auto relative z-10"
         initial="offscreen"
         whileInView="onscreen"
         viewport={{ once: true, amount: 0.2 }}
       >
-        <motion.div 
-          variants={cardVariants} 
+        <motion.div
+          variants={cardVariants}
           className="rounded-xl shadow-lg overflow-hidden"
         >
           <div className="h-2 bg-gradient-to-r from-[#FF9933] via-[#FFFFFF] to-[#138808]"></div>
@@ -581,26 +508,26 @@ const About = () => {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
               {[
-                { 
-                  title: "Discipline", 
+                {
+                  title: "Discipline",
                   description: "Cultivating self-control and dedication in all practitioners",
                   color: "from-[#FF9933] to-[#FF993366]",
                   icon: <FaFistRaised className="text-4xl mb-3" />
                 },
-                { 
-                  title: "Respect", 
+                {
+                  title: "Respect",
                   description: "Honoring traditions, instructors, and fellow students",
                   color: "from-[#FFFFFF] to-[#FFFFFF66]",
                   icon: <FaMedal className="text-4xl mb-3" />
                 },
-                { 
-                  title: "Excellence", 
+                {
+                  title: "Excellence",
                   description: "Striving for the highest standards in training and competition",
                   color: "from-[#138808] to-[#13880866]",
                   icon: <FaTrophy className="text-4xl mb-3" />
                 },
               ].map((value, index) => (
-                <motion.div 
+                <motion.div
                   key={index}
                   whileHover={{ scale: 1.05 }}
                   className={`bg-gradient-to-br ${value.color} p-5 rounded-lg`}
@@ -622,7 +549,7 @@ const About = () => {
       </motion.section>
 
       {/* Animated decorative footer */}
-      <motion.div 
+      <motion.div
         className="mt-20 text-center relative z-10"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
@@ -633,13 +560,13 @@ const About = () => {
           animate="pulse"
           className="mx-auto w-24 h-1 bg-gradient-to-r from-[#FF9933] via-[#FFFFFF] to-[#138808] rounded-full mb-6"
         ></motion.div>
-        <motion.h3 
+        <motion.h3
           className="text-2xl font-bold text-[#0B2545] mb-4"
           whileHover={{ scale: 1.02 }}
         >
           जय हिंद, जय भारत
         </motion.h3>
-        <motion.p 
+        <motion.p
           className="text-gray-600 max-w-2xl mx-auto"
           whileHover={{ scale: 1.01 }}
         >
