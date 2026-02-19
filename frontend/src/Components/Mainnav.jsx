@@ -118,7 +118,7 @@ export default function Mainnav() {
                     className="flex flex-col items-center px-3 py-2 cursor-pointer rounded-lg hover:bg-white/10 transition-all duration-300"
                     whileHover={{ y: -1 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => !item.hasDropdown && handleNavigation(item.path)}
+                    onClick={() => item.path !== "#" && handleNavigation(item.path)}
                   >
                     <div className="flex items-center gap-2">
                       <div className="text-white group-hover:text-orange-300 transition-colors">
