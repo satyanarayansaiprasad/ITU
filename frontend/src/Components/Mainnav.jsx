@@ -1,6 +1,6 @@
 import { Home, Menu, X, MoreHorizontal, Shield, Info, Phone, Activity, Newspaper, Image, Users, User, Lock, UserCog, UserPlus } from "lucide-react";
 import React, { useState } from "react";
-  import { Link } from "react-router-dom"; // Make sure this import is at the top
+import { Link } from "react-router-dom"; // Make sure this import is at the top
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom"; // Added for navigation
 
@@ -36,12 +36,12 @@ export default function Mainnav() {
   };
 
   const modalVariants = {
-    hidden: { 
+    hidden: {
       opacity: 0,
       scale: 0.8,
       y: -20
     },
-    visible: { 
+    visible: {
       opacity: 1,
       scale: 1,
       y: 0,
@@ -60,16 +60,16 @@ export default function Mainnav() {
 
   return (
     <>
-      <motion.header 
+      <motion.header
         className="sticky top-0 left-0 w-full h-auto z-50 bg-[#0B2545]/95 backdrop-blur-md shadow-lg border-b border-white/10"
         initial="hidden"
         animate="visible"
       >
         <div className="container-responsive">
           <div className="flex items-center justify-between py-3 sm:py-4">
-            
+
             {/* Logo Section - Enhanced */}
-            <motion.div 
+            <motion.div
               className="flex items-center gap-3 cursor-pointer touch-friendly"
               onClick={() => handleNavigation("/")}
               whileHover={{ scale: 1.02 }}
@@ -101,8 +101,8 @@ export default function Mainnav() {
                 { icon: <Activity size={20} />, title: "SELF DEFENCE", path: "/self-defence", desc: "Protection Skills" },
                 { icon: <MoreHorizontal size={20} />, title: "MORE", path: "#", desc: "Others", hasDropdown: true }
               ].map((item, index) => (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   className="relative group"
                   onMouseEnter={() => {
                     if (item.title === "ABOUT") setAboutOpen(true);
@@ -113,7 +113,7 @@ export default function Mainnav() {
                     if (item.title === "MORE") setOthersOpen(false);
                   }}
                 >
-                  <motion.div 
+                  <motion.div
                     className="flex flex-col items-center px-3 py-2 cursor-pointer rounded-lg hover:bg-white/10 transition-all duration-300"
                     whileHover={{ y: -1 }}
                     whileTap={{ scale: 0.98 }}
@@ -133,7 +133,7 @@ export default function Mainnav() {
                       </div>
                     </div>
                   </motion.div>
-                  
+
                   {/* Dropdown Menus */}
                   {item.title === "ABOUT" && (
                     <AnimatePresence>
@@ -147,9 +147,11 @@ export default function Mainnav() {
                         >
                           {[
                             { title: "Union Of Directors", path: "/about/directors" },
-                            { title: "Referee & Instructors", path: "/about/referees" }
+                            { title: "Referee & Instructors", path: "/about/referees" },
+                            { title: "History of Taekwondo", path: "/about/history" },
+                            { title: "Our Ambition", path: "/about/ambition" }
                           ].map((subItem, subIndex) => (
-                            <motion.div 
+                            <motion.div
                               key={subIndex}
                               className="px-4 py-3 text-sm text-gray-700 hover:bg-orange-50 cursor-pointer transition-colors border-l-4 border-transparent hover:border-orange-400 touch-friendly relative z-[70]"
                               whileHover={{ x: 4 }}
@@ -167,7 +169,7 @@ export default function Mainnav() {
                       )}
                     </AnimatePresence>
                   )}
-                  
+
                   {item.title === "MORE" && (
                     <AnimatePresence>
                       {othersOpen && (
@@ -183,7 +185,7 @@ export default function Mainnav() {
                             { icon: <Image size={16} />, title: "Gallery", path: "/gallery" },
                             { icon: <User size={16} />, title: "Forms", path: "/forms" }
                           ].map((subItem, subIndex) => (
-                            <motion.div 
+                            <motion.div
                               key={subIndex}
                               className="px-4 py-3 text-sm text-gray-700 hover:bg-orange-50 cursor-pointer transition-colors flex items-center gap-3 touch-friendly relative z-[70]"
                               whileHover={{ x: 4 }}
@@ -204,10 +206,10 @@ export default function Mainnav() {
                   )}
                 </div>
               ))}
-              
+
               {/* Enhanced Login Button */}
               <Link to="/login">
-                <motion.button 
+                <motion.button
                   className="ml-4 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-lg font-bold text-base hover:shadow-lg transition-all duration-300 flex items-center gap-2 focus-custom"
                   whileHover={{ scale: 1.05, y: -1 }}
                   whileTap={{ scale: 0.98 }}
@@ -219,8 +221,8 @@ export default function Mainnav() {
             </nav>
 
             {/* Mobile Menu Button - Enhanced */}
-            <button 
-              onClick={() => setIsOpen(!isOpen)} 
+            <button
+              onClick={() => setIsOpen(!isOpen)}
               className="lg:hidden text-white p-2 rounded-lg hover:bg-white/10 transition-colors touch-friendly focus-custom"
               aria-label="Toggle menu"
             >
@@ -435,6 +437,8 @@ export default function Mainnav() {
                   { icon: <Newspaper size={22} />, title: "Blog", path: "/news", desc: "Latest articles & insights" },
                   { icon: <Image size={22} />, title: "Gallery", path: "/gallery", desc: "Photo gallery" },
                   { icon: <User size={22} />, title: "Forms", path: "/forms", desc: "Registration forms" },
+                  { icon: <Info size={22} />, title: "History of Taekwondo", path: "/about/history", desc: "Origins & evolution" },
+                  { icon: <Info size={22} />, title: "Our Ambition", path: "/about/ambition", desc: "Vision & mission" },
                 ].map((item, index) => (
                   <motion.div
                     key={index}
@@ -487,7 +491,7 @@ export default function Mainnav() {
                   </div>
                 </motion.button>
               </Link>
-              
+
               {/* Social Links */}
               <div className="flex items-center justify-center gap-4 mt-4">
                 <div className="text-gray-400 text-sm">Follow us:</div>

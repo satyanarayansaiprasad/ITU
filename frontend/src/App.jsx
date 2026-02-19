@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom'; // ✅ useLocation added
-import "./index.css"; 
+import "./index.css";
 import TopNav from './Components/TopNav';
 import Home from './Components/Home';
 import Mainnav from './Components/Mainnav';
@@ -37,14 +37,16 @@ import AdminLayout from './AdminPanel/Pages/AdminLayout';
 import StateUnionDashboard from './StateUnionpanel/StateUnionDashboard';
 import PlayerDashboard from './PlayerPanel/PlayerDashboard';
 import SelfDefence from './Components/SelfDefence';
+import HistoryOfTaekwondo from './Components/HistoryOfTaekwondo';
+import OurAmbition from './Components/OurAmbition';
 
 const App = () => {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin') || location.pathname === '/admindashboard';
-  const isDashboardRoute = isAdminRoute || 
-                          location.pathname === '/playerdashboard' || 
-                          location.pathname === '/stateuniondashboard' ||
-                          location.pathname === '/login';
+  const isDashboardRoute = isAdminRoute ||
+    location.pathname === '/playerdashboard' ||
+    location.pathname === '/stateuniondashboard' ||
+    location.pathname === '/login';
 
   return (
     <>
@@ -73,25 +75,27 @@ const App = () => {
         <Route path="/forms" element={<Form />} />
         <Route path="/self-defence" element={<SelfDefence />} />
         <Route path="/about/directors" element={<UnionAbout />} />
-            <Route path="/login" element={<LoginPage />} />
-             <Route path="/stateuniondashboard" element={<StateUnionDashboard />} />
-             <Route path="/playerdashboard" element={<PlayerDashboard />} />
+        <Route path="/about/history" element={<HistoryOfTaekwondo />} />
+        <Route path="/about/ambition" element={<OurAmbition />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/stateuniondashboard" element={<StateUnionDashboard />} />
+        <Route path="/playerdashboard" element={<PlayerDashboard />} />
         {/* ✅ Admin Routes - No Header/Footer */}
-       <Route element={<AdminLayout />}>
-  <Route path="/admindashboard" element={<ModernAdminDash />} />
-  <Route path="/admin/view-contacts" element={<ModernViewContact />} />
-  <Route path="/admin/blogs" element={<ModernNewsManager />} />
-  <Route path="/admin/slider-management" element={<ModernSliderManager />} />
-  <Route path="/admin/self-defence-slider" element={<SelfDefenceSliderManager />} />
-  <Route path="/admin/category-slider" element={<CategorySliderManager />} />
-  <Route path="/admin/gallery" element={<ModernGalleryMng />} />
-  <Route path="/admin/form-submissions" element={<ModernFormSubmissions />} />
-      <Route path="/admin/states-districts" element={<ModernStatesDistrictsManager />} />
-      <Route path="/admin/heads-management" element={<HeadsManagement />} />
-      <Route path="/admin/player-management" element={<PlayerManagement />} />
-      <Route path="/admin/belt-promotion" element={<BeltPromotionManagement />} />
-      <Route path="/admin/competition-registrations" element={<CompetitionManagement />} />
-</Route>
+        <Route element={<AdminLayout />}>
+          <Route path="/admindashboard" element={<ModernAdminDash />} />
+          <Route path="/admin/view-contacts" element={<ModernViewContact />} />
+          <Route path="/admin/blogs" element={<ModernNewsManager />} />
+          <Route path="/admin/slider-management" element={<ModernSliderManager />} />
+          <Route path="/admin/self-defence-slider" element={<SelfDefenceSliderManager />} />
+          <Route path="/admin/category-slider" element={<CategorySliderManager />} />
+          <Route path="/admin/gallery" element={<ModernGalleryMng />} />
+          <Route path="/admin/form-submissions" element={<ModernFormSubmissions />} />
+          <Route path="/admin/states-districts" element={<ModernStatesDistrictsManager />} />
+          <Route path="/admin/heads-management" element={<HeadsManagement />} />
+          <Route path="/admin/player-management" element={<PlayerManagement />} />
+          <Route path="/admin/belt-promotion" element={<BeltPromotionManagement />} />
+          <Route path="/admin/competition-registrations" element={<CompetitionManagement />} />
+        </Route>
       </Routes>
 
       {!isDashboardRoute && <Footer />}
