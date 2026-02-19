@@ -1,14 +1,14 @@
 const adminService = require('../services/adminService');
-const News =require('../models/News')
- const Contact =require('../models/Contact')
- const Slider = require('../models/Slider');
- const Gallery=require('../models/Gallery')
- const SelfDefenceSlider = require('../models/SelfDefenceSlider');
- const CategorySlider = require('../models/CategorySlider');
- const Player = require('../models/Players');
- const path=require("path")
- const multer = require('multer');
- const fs = require('fs');
+const News = require('../models/News')
+const Contact = require('../models/Contact')
+const Slider = require('../models/Slider');
+const Gallery = require('../models/Gallery')
+const SelfDefenceSlider = require('../models/SelfDefenceSlider');
+const CategorySlider = require('../models/CategorySlider');
+const Player = require('../models/Players');
+const path = require("path")
+const multer = require('multer');
+const fs = require('fs');
 const emailConfig = require('../config/email');
 const { sendEmail } = require('../config/email');
 const getEmailFrom = emailConfig.getEmailFrom;
@@ -20,7 +20,7 @@ const { generateTokens } = require('../utils/jwt');
 exports.login = async (req, res) => {
   try {
     const admin = await adminService.loginAdmin(req.body);
-    
+
     // Generate JWT tokens
     const tokens = generateTokens({
       userId: admin._id.toString(),
@@ -56,7 +56,7 @@ exports.logout = (req, res) => {
         error: 'Failed to logout'
       });
     }
-    
+
     res.status(200).json({
       success: true,
       message: 'Logged out successfully'
@@ -80,26 +80,26 @@ exports.deleteContact = async (req, res) => {
   try {
     const { id } = req.params;
     const contact = await Contact.findById(id);
-    
+
     if (!contact) {
-      return res.status(404).json({ 
-        success: false, 
-        error: "Contact not found" 
+      return res.status(404).json({
+        success: false,
+        error: "Contact not found"
       });
     }
 
     await Contact.findByIdAndDelete(id);
-    res.status(200).json({ 
-      success: true, 
-      message: "Contact deleted successfully" 
+    res.status(200).json({
+      success: true,
+      message: "Contact deleted successfully"
     });
-    
+
   } catch (error) {
     console.error("Error deleting contact:", error);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
       error: "Failed to delete contact",
-      details: error.message 
+      details: error.message
     });
   }
 };
@@ -123,17 +123,17 @@ exports.createNews = async (req, res) => {
       });
     }
 
-    const { 
-      title, 
-      content, 
-      moreContent, 
-      author, 
-      category, 
-      tags, 
-      featured, 
-      published, 
+    const {
+      title,
+      content,
+      moreContent,
+      author,
+      category,
+      tags,
+      featured,
+      published,
       readTime,
-      metaDescription 
+      metaDescription
     } = req.body;
 
     if (!title || !content || !moreContent) {
@@ -159,7 +159,7 @@ exports.createNews = async (req, res) => {
         'itu/blog-posts',
         `blog-${Date.now()}`
       );
-      
+
       if (!cloudinaryResult || !cloudinaryResult.url) {
         throw new Error('Cloudinary upload failed - no URL returned');
       }
@@ -225,12 +225,12 @@ exports.getAllNews = async (req, res) => {
 
     const updatedNews = news.map(item => {
       let imageUrl = "/default-image.png"; // Default fallback
-      
+
       if (item.image) {
         // If image is already a full URL (Cloudinary, http/https, or data URI), use it directly
         if (/^(https?|data):/i.test(item.image)) {
           imageUrl = item.image;
-        } 
+        }
         // Legacy: If it's a relative path or local filename, construct URL (for backward compatibility)
         else {
           const baseUrl = `${req.protocol}://${req.get("host")}/`;
@@ -264,24 +264,24 @@ exports.getAllNews = async (req, res) => {
 exports.editNews = async (req, res) => {
   try {
     const { id } = req.params;
-    const { 
-      title, 
-      content, 
-      moreContent, 
-      author, 
-      category, 
-      tags, 
-      featured, 
-      published, 
+    const {
+      title,
+      content,
+      moreContent,
+      author,
+      category,
+      tags,
+      featured,
+      published,
       readTime,
-      metaDescription 
+      metaDescription
     } = req.body;
 
     const news = await News.findById(id);
     if (!news) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "News not found" 
+      return res.status(404).json({
+        success: false,
+        message: "News not found"
       });
     }
 
@@ -293,7 +293,7 @@ exports.editNews = async (req, res) => {
     if (category) news.category = category;
     if (readTime) news.readTime = parseInt(readTime);
     if (metaDescription !== undefined) news.metaDescription = metaDescription;
-    
+
     // Handle boolean fields
     if (featured !== undefined) {
       news.featured = featured === 'true' || featured === true;
@@ -339,11 +339,11 @@ exports.editNews = async (req, res) => {
           'itu/blog-posts',
           `blog-${Date.now()}`
         );
-        
+
         if (!cloudinaryResult || !cloudinaryResult.url) {
           throw new Error('Cloudinary upload failed - no URL returned');
         }
-        
+
         news.image = cloudinaryResult.url;
         news.cloudinaryPublicId = cloudinaryResult.public_id;
       } catch (cloudinaryError) {
@@ -357,17 +357,17 @@ exports.editNews = async (req, res) => {
     }
 
     await news.save();
-    res.status(200).json({ 
-      success: true, 
-      message: "News updated successfully", 
-      news 
+    res.status(200).json({
+      success: true,
+      message: "News updated successfully",
+      news
     });
   } catch (err) {
     console.error("Edit News Error:", err);
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       message: "Update failed",
-      error: err.message 
+      error: err.message
     });
   }
 };
@@ -377,7 +377,7 @@ exports.deleteNews = async (req, res) => {
   try {
     const { id } = req.params;
     const news = await News.findById(id);
-    
+
     if (!news) {
       return res.status(404).json({ success: false, message: "News not found" });
     }
@@ -394,11 +394,11 @@ exports.deleteNews = async (req, res) => {
 
     await News.findByIdAndDelete(id);
     res.status(200).json({ success: true, message: "News deleted successfully" });
-    
+
   } catch (err) {
     console.error("Delete News Error:", err);
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       message: "Delete failed",
       error: err.message // Send detailed error in development
     });
@@ -430,27 +430,27 @@ exports.createSlider = async (req, res) => {
     );
 
     // Save Cloudinary URL to database
-      const newSlider = new Slider({
+    const newSlider = new Slider({
       filename: cloudinaryResult.url, // Store Cloudinary URL instead of filename
       cloudinaryPublicId: cloudinaryResult.public_id, // Store public_id for deletion
-        uploadedAt: new Date()
-      });
+      uploadedAt: new Date()
+    });
 
-      await newSlider.save();
+    await newSlider.save();
 
-      res.status(201).json({
-        success: true,
+    res.status(201).json({
+      success: true,
       message: "Slider uploaded successfully to Cloudinary",
-        slider: newSlider
-      });
-    } catch (error) {
+      slider: newSlider
+    });
+  } catch (error) {
     console.error("Slider upload error:", error);
-      res.status(500).json({
-        success: false,
+    res.status(500).json({
+      success: false,
       message: "Failed to upload slider",
       error: error.message
-      });
-    }
+    });
+  }
 };
 
 
@@ -575,28 +575,28 @@ exports.createGallery = async (req, res) => {
     );
 
     // Save Cloudinary URL to database
-      const newGallery = new Gallery({
+    const newGallery = new Gallery({
       filename: cloudinaryResult.url, // Store Cloudinary URL instead of filename
       cloudinaryPublicId: cloudinaryResult.public_id, // Store public_id for deletion
       title: req.body.title || null, // Optional title
-        uploadedAt: new Date()
-      });
+      uploadedAt: new Date()
+    });
 
-      await newGallery.save();
+    await newGallery.save();
 
-      res.status(201).json({
-        success: true,
+    res.status(201).json({
+      success: true,
       message: "Gallery image uploaded successfully to Cloudinary",
-        gallery: newGallery
-      });
-    } catch (error) {
+      gallery: newGallery
+    });
+  } catch (error) {
     console.error("Gallery upload error:", error);
-      res.status(500).json({
-        success: false,
+    res.status(500).json({
+      success: false,
       message: "Failed to upload gallery image",
       error: error.message
-      });
-    }
+    });
+  }
 };
 
 
@@ -904,7 +904,7 @@ exports.updateCategorySlider = async (req, res) => {
     if (text !== undefined) slider.text = text;
     if (order !== undefined) slider.order = parseInt(order);
     slider.uploadedAt = new Date();
-    
+
     await slider.save();
 
     res.status(200).json({ success: true, message: "Category slider updated", slider });
@@ -950,11 +950,11 @@ exports.getPlayers = async (req, res) => {
   try {
     const { status } = req.query;
     const query = status ? { status } : {};
-    
+
     const players = await Player.find(query)
       .sort({ createdAt: -1 })
       .populate('union', 'name email phone');
-    
+
     res.status(200).json({
       success: true,
       data: players,
@@ -981,7 +981,7 @@ exports.approvePlayers = async (req, res) => {
   console.log('Timestamp:', new Date().toISOString());
   console.log('Request Body:', JSON.stringify(req.body, null, 2));
   console.log('===========================================\n');
-  
+
   try {
     const { playerIds } = req.body;
 
@@ -1013,7 +1013,7 @@ exports.approvePlayers = async (req, res) => {
       try {
         // Generate password: playerName + ITU + Union + 540720
         const password = generatePlayerPassword(player.name);
-        
+
         // Generate player ID if not exists
         if (!player.playerId) {
           const timestamp = Date.now().toString().slice(-8);
@@ -1434,10 +1434,10 @@ exports.approveForm = async (req, res) => {
   console.log('   Method:', req.method);
   console.log('   URL:', req.url);
   console.log('===========================================\n');
-  
+
   try {
     const { formId, email, password } = req.body;
-    
+
     // 📧 LOG: Extracted data
     console.log('\n📋 EXTRACTED DATA FROM REQUEST:');
     console.log('   formId:', formId);
@@ -1464,13 +1464,13 @@ exports.approveForm = async (req, res) => {
 
     // 1. Update the form with password
     const updatedForm = await AccelerationForm.findByIdAndUpdate(
-  formId,
-  {
-    password,
-    status: "approved" // ✅ Add this line
-  },
-  { new: true }
-);
+      formId,
+      {
+        password,
+        status: "approved" // ✅ Add this line
+      },
+      { new: true }
+    );
 
 
     if (!updatedForm) {
@@ -1484,12 +1484,12 @@ exports.approveForm = async (req, res) => {
     console.log('   User Name:', updatedForm.name);
     console.log('   Password:', password ? '***' + password.substring(password.length - 4) : 'NOT SET');
     console.log('');
-    
-const mailOptions = {
-  from: getEmailFrom(),
-  to: email,
+
+    const mailOptions = {
+      from: getEmailFrom(),
+      to: email,
       subject: "🎉 Welcome to Indian Taekwondo Union - Your Affiliation Request Has Been Approved!",
-  html: `
+      html: `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1751,7 +1751,7 @@ const mailOptions = {
 </body>
 </html>
   `
-};
+    };
 
     // 📧 LOG: Email data being sent
     console.log('\n📧📧📧 EMAIL DATA TO BE SENT 📧📧📧');
@@ -1766,7 +1766,7 @@ const mailOptions = {
     console.log(`\n📧📧📧 CALLING sendEmail FUNCTION 📧📧📧`);
     const emailResult = await sendEmail(mailOptions);
     console.log(`\n📧📧📧 sendEmail RESULT:`, JSON.stringify(emailResult, null, 2));
-    
+
     if (emailResult && emailResult.success) {
       // Track successful email sending
       updatedForm.emailSent = true;
@@ -1774,13 +1774,13 @@ const mailOptions = {
       updatedForm.emailError = null;
       await updatedForm.save();
       console.log(`✅ Email sent and tracked for form: ${updatedForm.name}`);
-        res.status(200).json({
-          success: true,
+      res.status(200).json({
+        success: true,
         message: "Form approved and email sent successfully",
         emailSent: true,
         emailSentAt: updatedForm.emailSentAt,
-          form: updatedForm
-        });
+        form: updatedForm
+      });
     } else {
       // Track failed email sending
       const errorMessage = emailResult?.error || emailResult?.fullError?.message || 'Unknown error';
@@ -1796,9 +1796,9 @@ const mailOptions = {
         console.error('Full Error Details:', JSON.stringify(emailResult.fullError, Object.getOwnPropertyNames(emailResult.fullError), 2));
       }
       console.error(`\n`);
-        res.status(200).json({
-          success: true,
-          message: "Form approved but email could not be sent",
+      res.status(200).json({
+        success: true,
+        message: "Form approved but email could not be sent",
         emailSent: false,
         emailError: errorMessage,
         form: updatedForm
@@ -1818,7 +1818,7 @@ const mailOptions = {
 exports.setDistrictHead = async (req, res) => {
   try {
     const { organizationId, district, state } = req.body;
-    
+
     if (!organizationId || !district || !state) {
       return res.status(400).json({
         success: false,
@@ -1828,13 +1828,13 @@ exports.setDistrictHead = async (req, res) => {
 
     // First, unset any existing district head for this district
     await AccelerationForm.updateMany(
-      { 
+      {
         district: district,
         state: state,
         isDistrictHead: true
       },
-      { 
-        isDistrictHead: false 
+      {
+        isDistrictHead: false
       }
     );
 
@@ -1872,7 +1872,7 @@ exports.setDistrictHead = async (req, res) => {
 exports.setStateHead = async (req, res) => {
   try {
     const { organizationId, state } = req.body;
-    
+
     if (!organizationId || !state) {
       return res.status(400).json({
         success: false,
@@ -1882,12 +1882,12 @@ exports.setStateHead = async (req, res) => {
 
     // First, unset any existing state head for this state
     await AccelerationForm.updateMany(
-      { 
+      {
         state: state,
         isStateHead: true
       },
-      { 
-        isStateHead: false 
+      {
+        isStateHead: false
       }
     );
 
@@ -1925,7 +1925,7 @@ exports.setStateHead = async (req, res) => {
 exports.removeDistrictHead = async (req, res) => {
   try {
     const { organizationId, district, state } = req.body;
-    
+
     if (!organizationId || !district || !state) {
       return res.status(400).json({
         success: false,
@@ -1967,7 +1967,7 @@ exports.removeDistrictHead = async (req, res) => {
 exports.removeStateHead = async (req, res) => {
   try {
     const { organizationId, state } = req.body;
-    
+
     if (!organizationId || !state) {
       return res.status(400).json({
         success: false,
@@ -2009,15 +2009,15 @@ exports.removeStateHead = async (req, res) => {
 exports.getOrganizationsByState = async (req, res) => {
   try {
     const { stateName } = req.params;
-    
+
     const organizations = await AccelerationForm.find({
       state: stateName,
       status: 'approved'
     }).select('name email phone district headOfficeAddress isDistrictHead isStateHead state secretaryName presidentName generalSecretaryImage establishedDate');
-    
-    res.status(200).json({ 
-      success: true, 
-      data: organizations 
+
+    res.status(200).json({
+      success: true,
+      data: organizations
     });
   } catch (error) {
     console.error('Error fetching organizations:', error);
@@ -2029,7 +2029,7 @@ exports.getOrganizationsByState = async (req, res) => {
 exports.deleteUser = async (req, res) => {
   try {
     const { formId, email } = req.body;
-    
+
     if (!formId && !email) {
       return res.status(400).json({
         success: false,
@@ -2111,16 +2111,16 @@ exports.rejectForm = async (req, res) => {
     const { formId, email, reason } = req.body;
 
     if (!formId || !email) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        error: "Form ID and email are required" 
+        error: "Form ID and email are required"
       });
     }
 
     // Update the form with rejected status
     const updatedForm = await AccelerationForm.findByIdAndUpdate(
       formId,
-      { 
+      {
         status: "reject", // Using "reject" as per schema enum
         rejectionReason: reason || 'Not specified'
       },
@@ -2128,9 +2128,9 @@ exports.rejectForm = async (req, res) => {
     );
 
     if (!updatedForm) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        error: "Form not found" 
+        error: "Form not found"
       });
     }
 
@@ -2154,11 +2154,11 @@ exports.rejectForm = async (req, res) => {
     // Use the sendEmail helper function for reliable email sending
     const emailResult = await sendEmail(mailOptions);
     if (emailResult.success) {
-        res.status(200).json({
-          success: true,
+      res.status(200).json({
+        success: true,
         message: "Form rejected and notification sent successfully",
-          form: updatedForm
-        });
+        form: updatedForm
+      });
     } else {
       console.error(`\n⚠️⚠️⚠️  FAILED TO SEND REJECTION EMAIL ⚠️⚠️⚠️`);
       console.error(`Form: ${updatedForm.name}`);
@@ -2168,9 +2168,9 @@ exports.rejectForm = async (req, res) => {
         console.error('Full Error Details:', JSON.stringify(emailResult.fullError, Object.getOwnPropertyNames(emailResult.fullError), 2));
       }
       console.error(`\n`);
-        res.status(200).json({
-          success: true,
-          message: "Form rejected but email could not be sent",
+      res.status(200).json({
+        success: true,
+        message: "Form rejected but email could not be sent",
         error: emailResult.error,
         form: updatedForm
       });
@@ -2191,14 +2191,14 @@ exports.rejectForm = async (req, res) => {
 // Get blog posts with filtering, pagination, and search
 exports.getBlogPosts = async (req, res) => {
   try {
-    const { 
-      page = 1, 
-      limit = 10, 
-      category, 
-      tags, 
-      search, 
-      featured, 
-      published = true 
+    const {
+      page = 1,
+      limit = 10,
+      category,
+      tags,
+      search,
+      featured,
+      published = true
     } = req.query;
 
     // Build filter object - make published field optional for backward compatibility
@@ -2209,19 +2209,19 @@ exports.getBlogPosts = async (req, res) => {
       filter.published = true;
     }
     // If published is not specified, include all posts
-    
+
     if (category && category !== 'all') {
       filter.category = category;
     }
-    
+
     if (tags) {
       filter.tags = { $in: tags.split(',') };
     }
-    
+
     if (featured !== undefined) {
       filter.featured = featured === 'true';
     }
-    
+
     if (search) {
       filter.$or = [
         { title: { $regex: search, $options: 'i' } },
@@ -2231,7 +2231,7 @@ exports.getBlogPosts = async (req, res) => {
     }
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
-    
+
     const [posts, total] = await Promise.all([
       News.find(filter)
         .sort({ featured: -1, createdAt: -1 })
@@ -2245,8 +2245,8 @@ exports.getBlogPosts = async (req, res) => {
     const updatedPosts = posts.map(post => {
       const postObj = post.toObject();
       if (postObj.image && !postObj.image.startsWith('http')) {
-        const baseUrl = process.env.NODE_ENV === 'production' 
-          ? 'https://itu-r1qa.onrender.com' 
+        const baseUrl = process.env.NODE_ENV === 'production'
+          ? 'https://itu-r1qa.onrender.com'
           : 'http://localhost:3001';
         postObj.image = `${baseUrl}/${postObj.image}`;
       }
@@ -2278,7 +2278,7 @@ exports.getBlogPosts = async (req, res) => {
 exports.getBlogPostBySlug = async (req, res) => {
   try {
     const { slug } = req.params;
-    
+
     const post = await News.findOneAndUpdate(
       { slug },
       { $inc: { views: 1 } }, // Increment view count
@@ -2316,7 +2316,7 @@ exports.getBlogPostBySlug = async (req, res) => {
 exports.getNewsById = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     const post = await News.findByIdAndUpdate(
       id,
       { $inc: { views: 1 } }, // Increment view count
@@ -2333,7 +2333,7 @@ exports.getNewsById = async (req, res) => {
     // Update image URL - handle Cloudinary URLs and local paths
     const postObj = post.toObject();
     let imageUrl = "/default-image.png";
-    
+
     if (postObj.image) {
       // If image is already a full URL (Cloudinary, http/https, or data URI), use it directly
       if (/^(https?|data):/i.test(postObj.image)) {
@@ -2366,7 +2366,7 @@ exports.getNewsById = async (req, res) => {
 exports.getBlogCategories = async (req, res) => {
   try {
     const categories = await News.distinct('category');
-    
+
     // Get post count for each category
     const categoriesWithCount = await Promise.all(
       categories.map(async (category) => {
@@ -2418,7 +2418,7 @@ exports.getBlogTags = async (req, res) => {
 exports.getFeaturedPosts = async (req, res) => {
   try {
     const { limit = 5 } = req.query;
-    
+
     const posts = await News.find({ featured: true })
       .sort({ createdAt: -1 })
       .limit(parseInt(limit))
@@ -2428,8 +2428,8 @@ exports.getFeaturedPosts = async (req, res) => {
     const updatedPosts = posts.map(post => {
       const postObj = post.toObject();
       if (postObj.image && !postObj.image.startsWith('http')) {
-        const baseUrl = process.env.NODE_ENV === 'production' 
-          ? 'https://itu-r1qa.onrender.com' 
+        const baseUrl = process.env.NODE_ENV === 'production'
+          ? 'https://itu-r1qa.onrender.com'
           : 'http://localhost:3001';
         postObj.image = `${baseUrl}/${postObj.image}`;
       }
@@ -2455,7 +2455,7 @@ exports.getRelatedPosts = async (req, res) => {
   try {
     const { slug } = req.params;
     const { limit = 4 } = req.query;
-    
+
     const currentPost = await News.findOne({ slug });
     if (!currentPost) {
       return res.status(404).json({
@@ -2472,16 +2472,16 @@ exports.getRelatedPosts = async (req, res) => {
         { tags: { $in: currentPost.tags || [] } }
       ]
     })
-    .sort({ createdAt: -1 })
-    .limit(parseInt(limit))
-    .select('-moreContent');
+      .sort({ createdAt: -1 })
+      .limit(parseInt(limit))
+      .select('-moreContent');
 
     // Update image URLs
     const updatedPosts = relatedPosts.map(post => {
       const postObj = post.toObject();
       if (postObj.image && !postObj.image.startsWith('http')) {
-        const baseUrl = process.env.NODE_ENV === 'production' 
-          ? 'https://itu-r1qa.onrender.com' 
+        const baseUrl = process.env.NODE_ENV === 'production'
+          ? 'https://itu-r1qa.onrender.com'
           : 'http://localhost:3001';
         postObj.image = `${baseUrl}/${postObj.image}`;
       }
@@ -2507,10 +2507,10 @@ exports.testEmail = async (req, res) => {
   console.log('\n\n🧪🧪🧪 TEST EMAIL ENDPOINT CALLED 🧪🧪🧪');
   console.log('Request Body:', JSON.stringify(req.body, null, 2));
   console.log('Timestamp:', new Date().toISOString());
-  
+
   try {
     const { email } = req.body;
-    
+
     if (!email) {
       return res.status(400).json({
         success: false,
@@ -2522,14 +2522,14 @@ exports.testEmail = async (req, res) => {
     const emailConfig = require('../config/email');
     const emailFrom = emailConfig.getEmailFrom();
     const resendClient = emailConfig.getResendClient();
-    
+
     console.log('\n--- Email Configuration Check ---');
     console.log('RESEND_API_KEY:', process.env.RESEND_API_KEY ? '***configured***' : '❌ NOT SET');
     console.log('RESEND_FROM_EMAIL:', process.env.RESEND_FROM_EMAIL || 'not set (using default)');
     console.log('RESEND_FROM_NAME:', process.env.RESEND_FROM_NAME || 'not set (using default)');
     console.log('Email From:', emailFrom);
     console.log('Resend Client:', resendClient ? '✅ Available' : '❌ Not Available');
-    
+
     if (!resendClient) {
       return res.status(500).json({
         success: false,
@@ -2564,10 +2564,10 @@ exports.testEmail = async (req, res) => {
     console.log('\n--- Sending Test Email ---');
     console.log('To:', email);
     console.log('From:', emailFrom);
-    
+
     const { sendEmail } = require('../config/email');
     const emailResult = await sendEmail(mailOptions);
-    
+
     if (emailResult.success) {
       res.status(200).json({
         success: true,
@@ -2623,18 +2623,18 @@ exports.getDashboardAnalytics = async (req, res) => {
       Gallery.countDocuments(),
       News.find().sort({ createdAt: -1 }).limit(5),
       Contact.countDocuments({
-        createdAt: { 
-          $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) 
+        createdAt: {
+          $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1)
         }
       }),
       AccelerationForm.countDocuments({
-        createdAt: { 
-          $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) 
+        createdAt: {
+          $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1)
         }
       }),
       News.countDocuments({
-        createdAt: { 
-          $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) 
+        createdAt: {
+          $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1)
         }
       }),
       News.aggregate([
@@ -2803,5 +2803,248 @@ exports.getContentPerformance = async (req, res) => {
       message: "Failed to fetch content performance data",
       error: error.message
     });
+  }
+};
+
+// ========== POLICE TRAINING MANAGEMENT ==========
+const PoliceTraining = require('../models/PoliceTraining');
+
+// POST: Create a new police training event
+exports.createPoliceTraining = async (req, res) => {
+  try {
+    const {
+      state, district, policeStation, eventDate, location,
+      description, officerName, officerDesignation, officerDistrict,
+      officerState, officerNote
+    } = req.body;
+
+    if (!state || !district || !policeStation || !eventDate) {
+      return res.status(400).json({
+        success: false,
+        message: 'State, District, Police Station, and Event Date are required'
+      });
+    }
+
+    // Parse photo alt texts (sent as JSON array or comma separated)
+    let altTexts = [];
+    if (req.body.altTexts) {
+      try { altTexts = JSON.parse(req.body.altTexts); } catch { altTexts = []; }
+    }
+
+    // Upload training photos array
+    const photos = [];
+    const photoFiles = req.files && req.files['photos'] ? req.files['photos'] : [];
+    for (let i = 0; i < photoFiles.length; i++) {
+      const file = photoFiles[i];
+      try {
+        const result = await uploadBufferToCloudinary(
+          file.buffer, 'itu/police-training/photos', `police-training-photo-${Date.now()}-${i}`
+        );
+        photos.push({
+          url: result.url,
+          publicId: result.public_id,
+          altText: altTexts[i] || `Self Defence Training - ${policeStation}, ${district}, ${state}`
+        });
+      } catch (err) {
+        console.error('Photo upload error:', err);
+      }
+    }
+
+    // Upload officer photo
+    let officerPhotoData = { url: '', publicId: '' };
+    const officerPhotoFiles = req.files && req.files['officerPhoto'] ? req.files['officerPhoto'] : [];
+    if (officerPhotoFiles.length > 0) {
+      try {
+        const result = await uploadBufferToCloudinary(
+          officerPhotoFiles[0].buffer, 'itu/police-training/officers', `officer-${Date.now()}`
+        );
+        officerPhotoData = { url: result.url, publicId: result.public_id };
+      } catch (err) {
+        console.error('Officer photo upload error:', err);
+      }
+    }
+
+    // Upload momento photo
+    let momentoPhotoData = { url: '', publicId: '' };
+    const momentoFiles = req.files && req.files['momentoPhoto'] ? req.files['momentoPhoto'] : [];
+    if (momentoFiles.length > 0) {
+      try {
+        const result = await uploadBufferToCloudinary(
+          momentoFiles[0].buffer, 'itu/police-training/momentos', `momento-${Date.now()}`
+        );
+        momentoPhotoData = { url: result.url, publicId: result.public_id };
+      } catch (err) {
+        console.error('Momento photo upload error:', err);
+      }
+    }
+
+    const training = new PoliceTraining({
+      state, district, policeStation,
+      eventDate: new Date(eventDate),
+      location: location || '',
+      description: description || '',
+      photos,
+      officerName: officerName || '',
+      officerDesignation: officerDesignation || '',
+      officerDistrict: officerDistrict || '',
+      officerState: officerState || '',
+      officerPhoto: officerPhotoData,
+      momentoPhoto: momentoPhotoData,
+      officerNote: officerNote || ''
+    });
+
+    await training.save();
+    res.status(201).json({ success: true, message: 'Police training event created', training });
+  } catch (error) {
+    console.error('Create Police Training Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to create training event', error: error.message });
+  }
+};
+
+// GET: All police training events (with optional filters)
+exports.getAllPoliceTrainings = async (req, res) => {
+  try {
+    const { state, district, search } = req.query;
+    const query = {};
+    if (state) query.state = new RegExp(state, 'i');
+    if (district) query.district = new RegExp(district, 'i');
+    if (search) {
+      query.$or = [
+        { policeStation: new RegExp(search, 'i') },
+        { location: new RegExp(search, 'i') },
+        { officerName: new RegExp(search, 'i') }
+      ];
+    }
+
+    const trainings = await PoliceTraining.find(query).sort({ eventDate: -1 });
+    res.status(200).json({ success: true, trainings });
+  } catch (error) {
+    console.error('Get Police Trainings Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch training events', error: error.message });
+  }
+};
+
+// GET: Single police training event
+exports.getPoliceTrainingById = async (req, res) => {
+  try {
+    const training = await PoliceTraining.findById(req.params.id);
+    if (!training) return res.status(404).json({ success: false, message: 'Training event not found' });
+    res.status(200).json({ success: true, training });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to fetch training event', error: error.message });
+  }
+};
+
+// PUT: Update a police training event
+exports.updatePoliceTraining = async (req, res) => {
+  try {
+    const training = await PoliceTraining.findById(req.params.id);
+    if (!training) return res.status(404).json({ success: false, message: 'Training event not found' });
+
+    const fields = [
+      'state', 'district', 'policeStation', 'location', 'description',
+      'officerName', 'officerDesignation', 'officerDistrict', 'officerState', 'officerNote'
+    ];
+    fields.forEach(f => { if (req.body[f] !== undefined) training[f] = req.body[f]; });
+    if (req.body.eventDate) training.eventDate = new Date(req.body.eventDate);
+
+    // Append new training photos
+    const newPhotoFiles = req.files && req.files['photos'] ? req.files['photos'] : [];
+    for (let i = 0; i < newPhotoFiles.length; i++) {
+      try {
+        const result = await uploadBufferToCloudinary(
+          newPhotoFiles[i].buffer, 'itu/police-training/photos', `police-training-photo-${Date.now()}-${i}`
+        );
+        training.photos.push({
+          url: result.url, publicId: result.public_id,
+          altText: `Self Defence Training - ${training.policeStation}, ${training.district}`
+        });
+      } catch (err) { console.error('Photo append error:', err); }
+    }
+
+    // Replace officer photo if provided
+    const officerPhotoFiles = req.files && req.files['officerPhoto'] ? req.files['officerPhoto'] : [];
+    if (officerPhotoFiles.length > 0) {
+      if (training.officerPhoto && training.officerPhoto.publicId) {
+        try { await deleteFromCloudinary(training.officerPhoto.publicId); } catch (e) { }
+      }
+      try {
+        const result = await uploadBufferToCloudinary(
+          officerPhotoFiles[0].buffer, 'itu/police-training/officers', `officer-${Date.now()}`
+        );
+        training.officerPhoto = { url: result.url, publicId: result.public_id };
+      } catch (err) { console.error('Officer photo update error:', err); }
+    }
+
+    // Replace momento photo if provided
+    const momentoFiles = req.files && req.files['momentoPhoto'] ? req.files['momentoPhoto'] : [];
+    if (momentoFiles.length > 0) {
+      if (training.momentoPhoto && training.momentoPhoto.publicId) {
+        try { await deleteFromCloudinary(training.momentoPhoto.publicId); } catch (e) { }
+      }
+      try {
+        const result = await uploadBufferToCloudinary(
+          momentoFiles[0].buffer, 'itu/police-training/momentos', `momento-${Date.now()}`
+        );
+        training.momentoPhoto = { url: result.url, publicId: result.public_id };
+      } catch (err) { console.error('Momento photo update error:', err); }
+    }
+
+    await training.save();
+    res.status(200).json({ success: true, message: 'Training event updated', training });
+  } catch (error) {
+    console.error('Update Police Training Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to update training event', error: error.message });
+  }
+};
+
+// DELETE: Delete a police training event and all associated Cloudinary images
+exports.deletePoliceTraining = async (req, res) => {
+  try {
+    const training = await PoliceTraining.findById(req.params.id);
+    if (!training) return res.status(404).json({ success: false, message: 'Training event not found' });
+
+    // Delete all training photos from Cloudinary
+    for (const photo of training.photos) {
+      if (photo.publicId) {
+        try { await deleteFromCloudinary(photo.publicId); } catch (e) { }
+      }
+    }
+    // Delete officer photo
+    if (training.officerPhoto && training.officerPhoto.publicId) {
+      try { await deleteFromCloudinary(training.officerPhoto.publicId); } catch (e) { }
+    }
+    // Delete momento photo
+    if (training.momentoPhoto && training.momentoPhoto.publicId) {
+      try { await deleteFromCloudinary(training.momentoPhoto.publicId); } catch (e) { }
+    }
+
+    await PoliceTraining.findByIdAndDelete(req.params.id);
+    res.status(200).json({ success: true, message: 'Training event deleted successfully' });
+  } catch (error) {
+    console.error('Delete Police Training Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete training event', error: error.message });
+  }
+};
+
+// DELETE: Remove a single photo from a training event
+exports.deletePoliceTrainingPhoto = async (req, res) => {
+  try {
+    const { id, photoId } = req.params;
+    const training = await PoliceTraining.findById(id);
+    if (!training) return res.status(404).json({ success: false, message: 'Training event not found' });
+
+    const photo = training.photos.id(photoId);
+    if (!photo) return res.status(404).json({ success: false, message: 'Photo not found' });
+
+    if (photo.publicId) {
+      try { await deleteFromCloudinary(photo.publicId); } catch (e) { }
+    }
+    training.photos.pull(photoId);
+    await training.save();
+
+    res.status(200).json({ success: true, message: 'Photo deleted', training });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to delete photo', error: error.message });
   }
 };
