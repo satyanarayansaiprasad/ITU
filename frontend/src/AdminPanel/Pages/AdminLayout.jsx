@@ -43,16 +43,17 @@ const AdminLayout = () => {
     { title: "Player Management", icon: <User className="w-5 h-5" />, path: "/admin/player-management" },
     { title: "Belt Promotion Tests", icon: <Award className="w-5 h-5" />, path: "/admin/belt-promotion" },
     { title: "Competition Registrations", icon: <Trophy className="w-5 h-5" />, path: "/admin/competition-registrations" },
+    { title: "Police Training", icon: <Shield className="w-5 h-5" />, path: "/admin/police-training" },
   ];
 
   const handleLogout = async () => {
     try {
       clearAuthData();
-      
+
       // Call backend logout endpoint
-      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ||
         (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-r1qa.onrender.com');
-      
+
       try {
         await axios.get(`${API_BASE_URL}/api/admin/logout`, {
           withCredentials: true
@@ -61,7 +62,7 @@ const AdminLayout = () => {
         // Ignore logout errors
         console.log('Logout endpoint error (ignored):', err);
       }
-      
+
       navigate("/login");
     } catch (error) {
       console.error("Logout error:", error);
@@ -114,10 +115,9 @@ const AdminLayout = () => {
                   key={index}
                   to={item.path}
                   className={`flex items-center p-3 rounded-lg mb-2 transition-all duration-200
-                    ${
-                      location.pathname === item.path
-                        ? "bg-white/10 shadow-md text-blue-200"
-                        : "hover:bg-white/10 text-white"
+                    ${location.pathname === item.path
+                      ? "bg-white/10 shadow-md text-blue-200"
+                      : "hover:bg-white/10 text-white"
                     } hover:scale-[1.03] hover:shadow-lg`}
                   onClick={() => setMobileSidebarOpen(false)}
                 >
@@ -150,8 +150,8 @@ const AdminLayout = () => {
       >
         <div className="p-4 flex justify-between items-center border-b border-blue-900">
           {sidebarOpen && <h1 className="text-xl font-bold text-white">Admin</h1>}
-          <button 
-            onClick={() => setSidebarOpen(!sidebarOpen)} 
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
             className="p-1 rounded hover:bg-blue-800 transition-colors"
             title={sidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
           >
@@ -167,10 +167,9 @@ const AdminLayout = () => {
               key={index}
               to={item.path}
               className={`flex items-center p-3 rounded-lg mb-2 transition-all duration-200 group
-                ${
-                  location.pathname === item.path
-                    ? "bg-white/10 shadow-md text-blue-200"
-                    : "hover:bg-white/10 text-white"
+                ${location.pathname === item.path
+                  ? "bg-white/10 shadow-md text-blue-200"
+                  : "hover:bg-white/10 text-white"
                 } hover:scale-[1.03] hover:shadow-lg`}
               title={!sidebarOpen ? item.title : ""}
             >

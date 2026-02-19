@@ -12,6 +12,8 @@ export default function Mainnav() {
   const [loginType, setLoginType] = useState(null);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [mobileAboutOpen, setMobileAboutOpen] = useState(false);
+  const [selfDefenceOpen, setSelfDefenceOpen] = useState(false);
+  const [mobileSelfDefenceOpen, setMobileSelfDefenceOpen] = useState(false);
 
   // Navigation handlers
   const handleNavigation = (path) => {
@@ -99,7 +101,7 @@ export default function Mainnav() {
                 { icon: <Info size={20} />, title: "ABOUT", path: "/about", desc: "Learn More", hasDropdown: true },
                 { icon: <Shield size={20} />, title: "STATE UNION", path: "/state-union", desc: "Regional" },
                 { icon: <Phone size={20} />, title: "CONTACT", path: "/contact", desc: "Get in Touch" },
-                { icon: <Activity size={20} />, title: "SELF DEFENCE", path: "/self-defence", desc: "Protection Skills" },
+                { icon: <Activity size={20} />, title: "SELF DEFENCE", path: "#", desc: "Training", hasDropdown: true },
                 { icon: <MoreHorizontal size={20} />, title: "MORE", path: "#", desc: "Others", hasDropdown: true }
               ].map((item, index) => (
                 <div
@@ -108,10 +110,12 @@ export default function Mainnav() {
                   onMouseEnter={() => {
                     if (item.title === "ABOUT") setAboutOpen(true);
                     if (item.title === "MORE") setOthersOpen(true);
+                    if (item.title === "SELF DEFENCE") setSelfDefenceOpen(true);
                   }}
                   onMouseLeave={() => {
                     if (item.title === "ABOUT") setAboutOpen(false);
                     if (item.title === "MORE") setOthersOpen(false);
+                    if (item.title === "SELF DEFENCE") setSelfDefenceOpen(false);
                   }}
                 >
                   <motion.div
@@ -171,6 +175,44 @@ export default function Mainnav() {
                     </AnimatePresence>
                   )}
 
+                  {/* Self Defence dropdown */}
+                  {item.title === "SELF DEFENCE" && (
+                    <AnimatePresence>
+                      {selfDefenceOpen && (
+                        <motion.div
+                          className="absolute top-full left-1/2 transform -translate-x-1/2 w-52 bg-white/95 backdrop-blur-md shadow-xl rounded-xl py-3 mt-2 border border-white/20 z-[60]"
+                          initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          {[
+                            { icon: <Activity size={16} />, title: "Self Defence", path: "/self-defence" },
+                            { icon: <Shield size={16} />, title: "Police Training", path: "/police-training" }
+                          ].map((subItem, subIndex) => (
+                            <motion.div
+                              key={subIndex}
+                              className="px-4 py-3 text-sm text-gray-700 hover:bg-orange-50 cursor-pointer transition-colors border-l-4 border-transparent hover:border-orange-400 touch-friendly relative z-[70]"
+                              whileHover={{ x: 4 }}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setSelfDefenceOpen(false);
+                                handleNavigation(subItem.path);
+                              }}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="text-orange-500">{subItem.icon}</div>
+                                {subItem.title}
+                              </div>
+                            </motion.div>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  )}
+
+                  {/* MORE dropdown */}
                   {item.title === "MORE" && (
                     <AnimatePresence>
                       {othersOpen && (
@@ -435,7 +477,6 @@ export default function Mainnav() {
                   { icon: <Home size={22} />, title: "Home", path: "/", desc: "Welcome to ITU" },
                   { icon: <Shield size={22} />, title: "State Union", path: "/state-union", desc: "Regional offices" },
                   { icon: <Phone size={22} />, title: "Contact", path: "/contact", desc: "Get in touch" },
-                  { icon: <Activity size={22} />, title: "Self Defence", path: "/self-defence", desc: "Protection & martial arts" },
                   { icon: <Newspaper size={22} />, title: "Blog", path: "/news", desc: "Latest articles & insights" },
                   { icon: <Image size={22} />, title: "Gallery", path: "/gallery", desc: "Photo gallery" },
                   { icon: <User size={22} />, title: "Forms", path: "/forms", desc: "Registration forms" },
@@ -482,7 +523,6 @@ export default function Mainnav() {
                   animate="open"
                   custom={1}
                 >
-                  {/* Accordion header */}
                   <div
                     className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/10 cursor-pointer transition-all duration-300 touch-friendly"
                     onClick={() => setMobileAboutOpen(!mobileAboutOpen)}
@@ -493,14 +533,9 @@ export default function Mainnav() {
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-white font-semibold text-lg group-hover:text-orange-300 transition-colors">
-                        About
-                      </h3>
-                      <p className="text-gray-400 text-sm group-hover:text-orange-200 transition-colors">
-                        Learn about ITU
-                      </p>
+                      <h3 className="text-white font-semibold text-lg group-hover:text-orange-300 transition-colors">About</h3>
+                      <p className="text-gray-400 text-sm group-hover:text-orange-200 transition-colors">Learn about ITU</p>
                     </div>
-                    {/* Rotating chevron */}
                     <motion.div
                       animate={{ rotate: mobileAboutOpen ? 180 : 0 }}
                       transition={{ duration: 0.25 }}
@@ -509,8 +544,6 @@ export default function Mainnav() {
                       <ChevronDown size={20} />
                     </motion.div>
                   </div>
-
-                  {/* Accordion sub-items */}
                   <AnimatePresence initial={false}>
                     {mobileAboutOpen && (
                       <motion.div
@@ -535,10 +568,72 @@ export default function Mainnav() {
                               animate={{ x: 0, opacity: 1 }}
                               transition={{ delay: si * 0.05 }}
                               className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 cursor-pointer transition-all duration-200 touch-friendly"
-                              onClick={() => {
-                                setMobileAboutOpen(false);
-                                handleNavigation(sub.path);
-                              }}
+                              onClick={() => { setMobileAboutOpen(false); handleNavigation(sub.path); }}
+                            >
+                              <div className="w-2 h-2 rounded-full bg-orange-400 flex-shrink-0" />
+                              <div>
+                                <div className="text-white font-medium text-base">{sub.title}</div>
+                                <div className="text-gray-400 text-xs">{sub.desc}</div>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+
+                {/* ── Self Defence Accordion ── */}
+                <motion.div
+                  className="group"
+                  variants={menuItemVariants}
+                  initial="closed"
+                  animate="open"
+                  custom={2}
+                >
+                  <div
+                    className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/10 cursor-pointer transition-all duration-300 touch-friendly"
+                    onClick={() => setMobileSelfDefenceOpen(!mobileSelfDefenceOpen)}
+                  >
+                    <div className="flex-shrink-0 w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center group-hover:bg-orange-500/20 transition-colors">
+                      <div className="text-white group-hover:text-orange-300 transition-colors">
+                        <Activity size={22} />
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-white font-semibold text-lg group-hover:text-orange-300 transition-colors">Self Defence</h3>
+                      <p className="text-gray-400 text-sm group-hover:text-orange-200 transition-colors">Training programmes</p>
+                    </div>
+                    <motion.div
+                      animate={{ rotate: mobileSelfDefenceOpen ? 180 : 0 }}
+                      transition={{ duration: 0.25 }}
+                      className="text-white/50 group-hover:text-orange-300 transition-colors"
+                    >
+                      <ChevronDown size={20} />
+                    </motion.div>
+                  </div>
+                  <AnimatePresence initial={false}>
+                    {mobileSelfDefenceOpen && (
+                      <motion.div
+                        key="selfdefence-submenu"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        className="overflow-hidden pl-4"
+                      >
+                        <div className="ml-4 border-l-2 border-orange-400/40 pl-4 space-y-1 py-1">
+                          {[
+                            { title: "Self Defence", path: "/self-defence", desc: "Taekwondo-based training" },
+                            { title: "Police Training", path: "/police-training", desc: "District-wise police programme" },
+                          ].map((sub, si) => (
+                            <motion.div
+                              key={si}
+                              initial={{ x: -10, opacity: 0 }}
+                              animate={{ x: 0, opacity: 1 }}
+                              transition={{ delay: si * 0.05 }}
+                              className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 cursor-pointer transition-all duration-200 touch-friendly"
+                              onClick={() => { setMobileSelfDefenceOpen(false); handleNavigation(sub.path); }}
                             >
                               <div className="w-2 h-2 rounded-full bg-orange-400 flex-shrink-0" />
                               <div>

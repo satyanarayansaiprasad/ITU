@@ -39,6 +39,8 @@ import PlayerDashboard from './PlayerPanel/PlayerDashboard';
 import SelfDefence from './Components/SelfDefence';
 import HistoryOfTaekwondo from './Components/HistoryOfTaekwondo';
 import OurAmbition from './Components/OurAmbition';
+import PoliceTraining from './Components/PoliceTraining';
+import PoliceTrainingManagement from './AdminPanel/Pages/PoliceTrainingManagement';
 
 const App = () => {
   const location = useLocation();
@@ -74,6 +76,7 @@ const App = () => {
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/forms" element={<Form />} />
         <Route path="/self-defence" element={<SelfDefence />} />
+        <Route path="/police-training" element={<PoliceTraining />} />
         <Route path="/about/directors" element={<UnionAbout />} />
         <Route path="/about/history" element={<HistoryOfTaekwondo />} />
         <Route path="/about/ambition" element={<OurAmbition />} />
@@ -95,6 +98,7 @@ const App = () => {
           <Route path="/admin/player-management" element={<PlayerManagement />} />
           <Route path="/admin/belt-promotion" element={<BeltPromotionManagement />} />
           <Route path="/admin/competition-registrations" element={<CompetitionManagement />} />
+          <Route path="/admin/police-training" element={<PoliceTrainingManagement />} />
         </Route>
       </Routes>
 

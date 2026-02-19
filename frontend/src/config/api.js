@@ -46,12 +46,12 @@ export const API_ENDPOINTS = {
   REMOVE_DISTRICT_HEAD: `${API_BASE_URL}/api/admin/remove-district-head`,
   REMOVE_STATE_HEAD: `${API_BASE_URL}/api/admin/remove-state-head`,
   GET_ORGANIZATIONS_BY_STATE: (stateName) => `${API_BASE_URL}/api/admin/organizations/${encodeURIComponent(stateName)}`,
-  
+
   // User endpoints
   CONTACT_US: `${API_BASE_URL}/api/user/contactus`,
   SUBMIT_FORM: (endpoint) => `${API_BASE_URL}/api/user/${endpoint}`,
   STATE_UNION_LOGIN: `${API_BASE_URL}/api/user/stateunionlogin`,
-  
+
   // Player endpoints
   PLAYER_LOGIN: `${API_BASE_URL}/api/user/player/login`,
   REGISTER_PLAYERS: `${API_BASE_URL}/api/user/playerregistration`,
@@ -59,13 +59,13 @@ export const API_ENDPOINTS = {
   UPDATE_PLAYER_PROFILE: (id) => `${API_BASE_URL}/api/user/players/${id}`,
   UPLOAD_PLAYER_PHOTO: (id) => `${API_BASE_URL}/api/user/players/${id}/photo`,
   GET_PLAYERS_BY_UNION: (unionId) => `${API_BASE_URL}/api/user/unions/${unionId}/players`,
-  
+
   // Admin player endpoints
   GET_PLAYERS: `${API_BASE_URL}/api/admin/getPlayers`,
   APPROVE_PLAYERS: `${API_BASE_URL}/api/admin/approvePlayers`,
   REJECT_PLAYERS: `${API_BASE_URL}/api/admin/rejectPlayers`,
   DELETE_PLAYERS: `${API_BASE_URL}/api/admin/deletePlayers`,
-  
+
   // Blog endpoints
   BLOG_POSTS: `${API_BASE_URL}/api/admin/blog/posts`,
   BLOG_FEATURED: `${API_BASE_URL}/api/admin/blog/featured`,
@@ -73,15 +73,15 @@ export const API_ENDPOINTS = {
   BLOG_TAGS: `${API_BASE_URL}/api/admin/blog/tags`,
   BLOG_POST: (slug) => `${API_BASE_URL}/api/admin/blog/post/${slug}`,
   BLOG_RELATED: (slug) => `${API_BASE_URL}/api/admin/blog/related/${slug}`,
-  
+
   // Analytics endpoints
   DASHBOARD_ANALYTICS: `${API_BASE_URL}/api/admin/analytics/dashboard`,
   ENGAGEMENT_ANALYTICS: `${API_BASE_URL}/api/admin/analytics/engagement`,
   CONTENT_ANALYTICS: `${API_BASE_URL}/api/admin/analytics/content`,
-  
+
   // Uploads
   UPLOADS: `${API_BASE_URL}/uploads`,
-  
+
   // States and Districts endpoints
   GET_ALL_STATES: `${API_BASE_URL}/api/states`,
   GET_STATES_ONLY: `${API_BASE_URL}/api/states/states-only`,
@@ -92,12 +92,20 @@ export const API_ENDPOINTS = {
   UPDATE_STATE_STATUS: (stateName) => `${API_BASE_URL}/api/states/${encodeURIComponent(stateName)}/status`,
   UPDATE_DISTRICTS: (stateName) => `${API_BASE_URL}/api/states/${encodeURIComponent(stateName)}/districts`,
   DELETE_STATE: (stateName) => `${API_BASE_URL}/api/states/${encodeURIComponent(stateName)}`,
-  
+
   // Organization endpoints
   GET_ORGANIZATIONS_BY_DISTRICT: (stateName, districtName) => `${API_BASE_URL}/api/user/organizations/${encodeURIComponent(stateName)}/${encodeURIComponent(districtName)}`,
   GET_STATE_UNION: (id) => `${API_BASE_URL}/api/user/stateunions/${id}`,
   UPDATE_STATE_UNION: (id) => `${API_BASE_URL}/api/user/stateunions/${id}`,
   UPLOAD_GENERAL_SECRETARY_IMAGE: (id) => `${API_BASE_URL}/api/user/stateunions/${id}/general-secretary-image`,
+
+  // Police Training endpoints
+  GET_POLICE_TRAININGS: `${API_BASE_URL}/api/admin/police-training`,
+  CREATE_POLICE_TRAINING: `${API_BASE_URL}/api/admin/police-training`,
+  GET_POLICE_TRAINING_BY_ID: (id) => `${API_BASE_URL}/api/admin/police-training/${id}`,
+  UPDATE_POLICE_TRAINING: (id) => `${API_BASE_URL}/api/admin/police-training/${id}`,
+  DELETE_POLICE_TRAINING: (id) => `${API_BASE_URL}/api/admin/police-training/${id}`,
+  DELETE_POLICE_TRAINING_PHOTO: (id, photoId) => `${API_BASE_URL}/api/admin/police-training/${id}/photos/${photoId}`,
 };
 
 // Helper function for upload URLs
