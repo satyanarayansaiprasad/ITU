@@ -228,53 +228,7 @@ const OurAmbition = () => {
                 <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#FF9933] via-white to-[#138808]" />
             </section>
 
-            {/* ── Core Mission Statement ── */}
-            <motion.section
-                className="max-w-5xl mx-auto px-4 sm:px-6 mt-14 mb-16 relative z-10"
-                initial="offscreen"
-                whileInView="onscreen"
-                viewport={{ once: true, amount: 0.2 }}
-            >
-                <motion.div
-                    variants={cardVariants}
-                    className="bg-white rounded-2xl shadow-xl p-8 md:p-10 border-t-4 border-[#FF9933] relative overflow-hidden"
-                >
-                    {/* Watermark */}
-                    <motion.div
-                        variants={pulseVariants}
-                        animate="pulse"
-                        className="absolute -bottom-10 -right-10 text-[#FF9933]"
-                        style={{ fontSize: '16rem', opacity: 0.04 }}
-                    >
-                        <FaBullseye />
-                    </motion.div>
 
-                    <h2 className="text-2xl md:text-3xl font-bold text-[#0B2545] mb-2 text-center">
-                        Our Core Mission
-                    </h2>
-                    <div className="w-20 h-1 mx-auto mb-7 rounded-full bg-gradient-to-r from-[#FF9933] via-white to-[#138808]" />
-
-                    <div className="space-y-5 relative z-10">
-                        <p className="text-lg text-gray-700 leading-relaxed">
-                            The ambition of the <strong className="text-[#0B2545]">Indian Taekwondo Union</strong> is
-                            not to run a business organization, but to{' '}
-                            <strong className="text-[#FF9933]">promote and uplift the sport of Taekwondo</strong>{' '}
-                            not only in India but also at the world level.
-                        </p>
-                        <p className="text-lg text-gray-700 leading-relaxed">
-                            The Union is dedicated to providing a strong and respected platform for players,
-                            instructors, and referees at both national and international levels within the global
-                            sports community.
-                        </p>
-                        <p className="text-lg text-gray-700 leading-relaxed">
-                            Our mission is to bring <strong className="text-[#138808]">name, fame, and honor</strong>{' '}
-                            to players, instructors, and referees in the sports world and among the general public.
-                            We aim to build discipline, confidence, courage, and leadership qualities through
-                            Taekwondo training.
-                        </p>
-                    </div>
-                </motion.div>
-            </motion.section>
 
             {/* ── Pillars Grid ── */}
             <motion.section
