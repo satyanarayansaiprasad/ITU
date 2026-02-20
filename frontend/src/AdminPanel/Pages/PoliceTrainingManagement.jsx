@@ -36,10 +36,10 @@ const Toast = ({ notification }) => (
                 animate={{ opacity: 1, y: 0, x: 0 }}
                 exit={{ opacity: 0, y: -50, x: 50 }}
                 className={`fixed top-6 right-6 z-[9999] p-4 rounded-2xl shadow-2xl flex items-center gap-3 min-w-[280px] ${notification.type === 'success'
-                        ? 'bg-green-500 text-white'
-                        : notification.type === 'error'
-                            ? 'bg-red-500 text-white'
-                            : 'bg-blue-500 text-white'
+                    ? 'bg-green-500 text-white'
+                    : notification.type === 'error'
+                        ? 'bg-red-500 text-white'
+                        : 'bg-blue-500 text-white'
                     }`}
             >
                 {notification.type === 'success' ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
@@ -619,12 +619,12 @@ const DetailModal = ({ training, onClose }) => {
 /* ────────────────────────────────────────────
    Training Table Row
 ──────────────────────────────────────────── */
-const TrainingRow = ({ training, idx, onView, onEdit, onDelete, deleting }) => (
+const TrainingRow = ({ training, idx, onView, onEdit, onDelete, deleting, confirmDeleteId, setConfirmDeleteId }) => (
     <motion.tr
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: idx * 0.04 }}
-        className="hover:bg-gray-50 transition-colors group"
+        className="hover:bg-gray-50 transition-colors"
     >
         <td className="px-5 py-4 whitespace-nowrap">
             <div className="flex items-center gap-3">
@@ -662,20 +662,43 @@ const TrainingRow = ({ training, idx, onView, onEdit, onDelete, deleting }) => (
             </span>
         </td>
         <td className="px-5 py-4 whitespace-nowrap">
-            <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button onClick={() => onView(training)}
-                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="View">
-                    <Eye size={15} />
-                </button>
-                <button onClick={() => onEdit(training)}
-                    className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Edit">
-                    <Edit3 size={15} />
-                </button>
-                <button onClick={() => onDelete(training._id)} disabled={deleting === training._id}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50" title="Delete">
-                    {deleting === training._id ? <Loader size={15} className="animate-spin" /> : <Trash2 size={15} />}
-                </button>
-            </div>
+            {confirmDeleteId === training._id ? (
+                /* Inline confirm */
+                <div className="flex items-center gap-1.5">
+                    <span className="text-xs text-red-600 font-semibold">Sure?</span>
+                    <button
+                        onClick={() => onDelete(training._id)}
+                        disabled={deleting === training._id}
+                        className="px-2.5 py-1 bg-red-500 hover:bg-red-600 text-white text-xs font-bold rounded-lg transition-colors disabled:opacity-50"
+                    >
+                        {deleting === training._id ? <Loader size={12} className="animate-spin" /> : 'Yes, Delete'}
+                    </button>
+                    <button
+                        onClick={() => setConfirmDeleteId(null)}
+                        className="px-2.5 py-1 border border-gray-200 text-gray-600 text-xs font-semibold rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                        Cancel
+                    </button>
+                </div>
+            ) : (
+                /* Normal actions — always visible */
+                <div className="flex items-center gap-1.5">
+                    <button onClick={() => onView(training)}
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="View">
+                        <Eye size={15} />
+                    </button>
+                    <button onClick={() => onEdit(training)}
+                        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Edit">
+                        <Edit3 size={15} />
+                    </button>
+                    <button
+                        onClick={() => setConfirmDeleteId(training._id)}
+                        disabled={deleting === training._id}
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50" title="Delete">
+                        {deleting === training._id ? <Loader size={15} className="animate-spin" /> : <Trash2 size={15} />}
+                    </button>
+                </div>
+            )}
         </td>
     </motion.tr>
 );
@@ -699,6 +722,7 @@ const PoliceTrainingManagement = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterState, setFilterState] = useState('');
     const [stateList, setStateList] = useState([]);
+    const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
     /* ── Fetch ── */
     const fetchTrainings = useCallback(async () => {
@@ -724,14 +748,15 @@ const PoliceTrainingManagement = () => {
 
     /* ── Delete ── */
     const handleDelete = async (id) => {
-        if (!window.confirm('Delete this training event and all its photos? This cannot be undone.')) return;
         try {
             setDeleting(id);
+            setConfirmDeleteId(null);
             await axios.delete(API_ENDPOINTS.DELETE_POLICE_TRAINING(id));
             notify(setNotification, 'Training event deleted.');
             fetchTrainings();
-        } catch {
-            notify(setNotification, 'Delete failed.', 'error');
+        } catch (err) {
+            console.error('Delete error:', err.response?.data || err.message);
+            notify(setNotification, `Delete failed: ${err.response?.data?.message || err.message}`, 'error');
         } finally {
             setDeleting(null);
         }
@@ -886,6 +911,8 @@ const PoliceTrainingManagement = () => {
                                             onEdit={openEdit}
                                             onDelete={handleDelete}
                                             deleting={deleting}
+                                            confirmDeleteId={confirmDeleteId}
+                                            setConfirmDeleteId={setConfirmDeleteId}
                                         />
                                     ))}
                                 </tbody>

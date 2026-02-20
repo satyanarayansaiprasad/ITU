@@ -385,7 +385,7 @@ const HeroBanner = () => (
                 transition={{ duration: 0.65, delay: 0.1 }}
                 className="text-4xl sm:text-6xl font-black mb-5 leading-tight tracking-tight"
             >
-                Police Self-Defence{' '}
+                Police Tactical{' '}
                 <span className="bg-gradient-to-r from-orange-400 to-yellow-300 bg-clip-text text-transparent">
                     Training
                 </span>
@@ -397,7 +397,7 @@ const HeroBanner = () => (
                 transition={{ duration: 0.65, delay: 0.2 }}
                 className="text-base sm:text-lg text-white/65 max-w-2xl mx-auto"
             >
-                Empowering India's law enforcement with certified Taekwondo-based self-defence — district by district.
+                Empowering India's law enforcement with certified Taekwondo-based tactical training — district by district.
             </motion.p>
 
             {/* Stats strip */}
@@ -591,7 +591,7 @@ const PoliceTraining = () => {
                     >
                         <h3 className="text-2xl sm:text-3xl font-black mb-3">Want ITU Training in Your District?</h3>
                         <p className="text-white/60 text-sm mb-7 max-w-xl mx-auto">
-                            Contact the Indian Taekwondo Union to organise a certified self-defence programme for police personnel in your district.
+                            Contact the Indian Taekwondo Union to organise a certified tactical training programme for police personnel in your district.
                         </p>
                         <a href="/contact"
                             className="inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold px-10 py-4 rounded-full text-sm shadow-lg transition-colors">
