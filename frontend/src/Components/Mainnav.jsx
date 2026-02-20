@@ -152,7 +152,6 @@ export default function Mainnav() {
                         >
                           {[
                             { title: "Union Of Directors", path: "/about/directors" },
-                            { title: "Referee & Instructors", path: "/about/referees" },
                             { title: "History of Taekwondo", path: "/about/history" },
                             { title: "Our Ambition", path: "/about/ambition" }
                           ].map((subItem, subIndex) => (
@@ -558,7 +557,6 @@ export default function Mainnav() {
                           {[
                             { title: "About ITU", path: "/about", desc: "Our story & foundation" },
                             { title: "Union Of Directors", path: "/about/directors", desc: "Union leadership" },
-                            { title: "Referee & Instructors", path: "/about/referees", desc: "Officials & coaches" },
                             { title: "History of Taekwondo", path: "/about/history", desc: "Origins & evolution" },
                             { title: "Our Ambition", path: "/about/ambition", desc: "Vision & mission" },
                           ].map((sub, si) => (
