@@ -44,6 +44,7 @@ const AdminLayout = () => {
     { title: "Belt Promotion Tests", icon: <Award className="w-5 h-5" />, path: "/admin/belt-promotion" },
     { title: "Competition Registrations", icon: <Trophy className="w-5 h-5" />, path: "/admin/competition-registrations" },
     { title: "Police Training", icon: <Shield className="w-5 h-5" />, path: "/admin/police-training" },
+    { title: "Taekwondo Test Mgmt", icon: <Award className="w-5 h-5" />, path: "/admin/taekwondo-test" },
   ];
 
   const handleLogout = async () => {

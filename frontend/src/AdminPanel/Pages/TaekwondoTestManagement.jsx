@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { 
@@ -15,6 +16,7 @@ import {
 } from 'lucide-react';
 
 const TaekwondoTestManagement = () => {
+  const navigate = useNavigate();
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searching, setSearching] = useState(false);
