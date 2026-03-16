@@ -22,9 +22,12 @@ const RegistrationForm = () => {
     venue: 'GM-49, 1st Floor, Pratima Bhawan, Near BSNL Chowk, Chhend, Rourkela.'
   });
 
-  const API_BASE_URL = window.location.hostname === 'localhost' 
-    ? 'http://localhost:3001' 
-    : (import.meta.env.VITE_API_BASE_URL || 'https://itu-r1qa.onrender.com');
+  const getBaseUrl = () => {
+    if (window.location.hostname === 'localhost') return 'http://localhost:3001';
+    const envUrl = import.meta.env.VITE_API_BASE_URL || 'https://itu-r1qa.onrender.com';
+    return envUrl.endsWith('/') ? envUrl.slice(0, -1) : envUrl;
+  };
+  const API_BASE_URL = getBaseUrl();
 
   const beltOptions = [
     { label: "1. WHITE TO - YELLOW 600", value: "WHITE TO YELLOW - 600" },
@@ -74,8 +77,9 @@ const RegistrationForm = () => {
         });
       }
     } catch (error) {
-      console.error('Error submitting form:', error);
-      toast.error(error.response?.data?.error || 'Failed to submit registration');
+      console.error('Submission error details:', error);
+      const errorMsg = error.response?.data?.error || error.message || 'Failed to connect to server';
+      toast.error(`Registration Error: ${errorMsg}`);
     } finally {
       setLoading(false);
     }

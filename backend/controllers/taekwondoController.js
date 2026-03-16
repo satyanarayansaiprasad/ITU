@@ -1,8 +1,19 @@
-const fs = require('fs');
-const path = require('path');
+const DATA_DIR = path.join(__dirname, '../data/taekwondo-test');
+const SETTINGS_PATH = path.join(DATA_DIR, 'settings.json');
+const CSV_PATH = path.join(DATA_DIR, 'registrations.csv');
 
-const SETTINGS_PATH = path.join(__dirname, '../data/taekwondo-test/settings.json');
-const CSV_PATH = path.join(__dirname, '../data/taekwondo-test/registrations.csv');
+// Ensure directory exists
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+}
+
+// Default settings if missing
+const defaultSettings = {
+  isActive: true,
+  testDate: "29th March, 2026 (Sunday)",
+  time: "9:30 Am to 1:30 Pm",
+  venue: "GM-49, 1st Floor, Pratima Bhawan, Near BSNL Chowk, Chhend, Rourkela."
+};
 
 // Helper to escape CSV values
 const escapeCSV = (val) => {
@@ -17,11 +28,14 @@ const escapeCSV = (val) => {
 // Get settings
 exports.getSettings = (req, res) => {
   try {
+    if (!fs.existsSync(SETTINGS_PATH)) {
+      return res.status(200).json({ success: true, data: defaultSettings });
+    }
     const settings = JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf8'));
     res.status(200).json({ success: true, data: settings });
   } catch (error) {
     console.error('Error reading settings:', error);
-    res.status(500).json({ success: false, error: 'Failed to read settings' });
+    res.status(200).json({ success: true, data: defaultSettings }); // Fallback
   }
 };
 
@@ -84,8 +98,14 @@ exports.submitRegistration = (req, res) => {
 // Get registrations (Admin)
 exports.getRegistrations = (req, res) => {
   try {
+    if (!fs.existsSync(CSV_PATH)) {
+      return res.status(200).json({ success: true, data: [] });
+    }
     const data = fs.readFileSync(CSV_PATH, 'utf8');
     const lines = data.trim().split('\n');
+    if (lines.length <= 1) {
+      return res.status(200).json({ success: true, data: [] });
+    }
     const headers = lines[0].split(',');
     
     // Improved CSV parsing to handle quoted values

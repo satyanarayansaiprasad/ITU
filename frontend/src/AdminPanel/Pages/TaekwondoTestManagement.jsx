@@ -27,9 +27,12 @@ const TaekwondoTestManagement = () => {
   });
   const [savingSettings, setSavingSettings] = useState(false);
 
-  const API_BASE_URL = window.location.hostname === 'localhost' 
-    ? 'http://localhost:3001' 
-    : (import.meta.env.VITE_API_BASE_URL || 'https://itu-r1qa.onrender.com');
+  const getBaseUrl = () => {
+    if (window.location.hostname === 'localhost') return 'http://localhost:3001';
+    const envUrl = import.meta.env.VITE_API_BASE_URL || 'https://itu-r1qa.onrender.com';
+    return envUrl.endsWith('/') ? envUrl.slice(0, -1) : envUrl;
+  };
+  const API_BASE_URL = getBaseUrl();
 
   const authHeader = {
     headers: {
