@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+
 const DATA_DIR = path.join(__dirname, '../data/taekwondo-test');
 const SETTINGS_PATH = path.join(DATA_DIR, 'settings.json');
 const CSV_PATH = path.join(DATA_DIR, 'registrations.csv');
