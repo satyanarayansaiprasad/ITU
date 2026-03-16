@@ -9,6 +9,7 @@ exports.authenticate = (req, res, next) => {
     const authHeader = req.headers.authorization;
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.warn('Auth failed: No Bearer token provided');
       return res.status(401).json({
         success: false,
         error: 'No token provided. Please login.'
@@ -18,15 +19,23 @@ exports.authenticate = (req, res, next) => {
     const token = authHeader.substring(7); // Remove 'Bearer ' prefix
 
     // Verify token
-    const decoded = verifyAccessToken(token);
-    
-    // Attach user info to request
-    req.user = decoded;
-    next();
+    try {
+      const decoded = verifyAccessToken(token);
+      // Attach user info to request
+      req.user = decoded;
+      next();
+    } catch (verifyError) {
+      console.warn('Auth failed: Token verification failed:', verifyError.message);
+      return res.status(401).json({
+        success: false,
+        error: verifyError.message || 'Invalid or expired token'
+      });
+    }
   } catch (error) {
-    return res.status(401).json({
+    console.error('Unexpected auth middleware error:', error);
+    return res.status(500).json({
       success: false,
-      error: error.message || 'Invalid or expired token'
+      error: 'Internal server error during authentication'
     });
   }
 };

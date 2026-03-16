@@ -34,10 +34,13 @@ const TaekwondoTestManagement = () => {
   };
   const API_BASE_URL = getBaseUrl();
 
-  const authHeader = {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('accessToken')}`
-    }
+  const getAuthHeader = () => {
+    const token = localStorage.getItem('accessToken');
+    return {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    };
   };
 
   useEffect(() => {
@@ -60,29 +63,36 @@ const TaekwondoTestManagement = () => {
   const fetchRegistrations = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_BASE_URL}/api/taekwondo-test/admin/registrations`, authHeader);
+      const header = getAuthHeader();
+      if (!localStorage.getItem('accessToken')) {
+        toast.error('Session expired. Please login again.');
+        navigate('/login');
+        return;
+      }
+      const response = await axios.get(`${API_BASE_URL}/api/taekwondo-test/admin/registrations`, header);
       if (response.data.success) {
         setRegistrations(response.data.data);
       }
     } catch (error) {
       console.error('Error fetching registrations:', error);
-      toast.error('Failed to load registrations');
+      const errorMsg = error.response?.data?.error || error.message || 'Failed to load registrations';
+      toast.error(`Error: ${errorMsg}`);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleUpdateSettings = async (e) => {
-    e.preventDefault();
-    setSavingSettings(true);
+  const handleSaveSettings = async () => {
     try {
-      const response = await axios.put(`${API_BASE_URL}/api/taekwondo-test/admin/settings`, settings, authHeader);
+      setSavingSettings(true);
+      const response = await axios.put(`${API_BASE_URL}/api/taekwondo-test/admin/settings`, settings, getAuthHeader());
       if (response.data.success) {
         toast.success('Settings updated successfully');
       }
     } catch (error) {
-      console.error('Error updating settings:', error);
-      toast.error('Failed to update settings');
+      console.error('Error saving settings:', error);
+      const errorMsg = error.response?.data?.error || error.message || 'Failed to update settings';
+      toast.error(`Error: ${errorMsg}`);
     } finally {
       setSavingSettings(false);
     }
@@ -93,7 +103,7 @@ const TaekwondoTestManagement = () => {
       const response = await axios.get(
         `${API_BASE_URL}/api/taekwondo-test/admin/download`,
         {
-          ...authHeader,
+          ...getAuthHeader(),
           responseType: 'blob'
         }
       );
