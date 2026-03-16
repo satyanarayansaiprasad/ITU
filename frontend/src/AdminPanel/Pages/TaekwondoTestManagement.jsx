@@ -65,20 +65,17 @@ const TaekwondoTestManagement = () => {
   const fetchRegistrations = async () => {
     try {
       setLoading(true);
-      const header = getAuthHeader();
-      if (!localStorage.getItem('accessToken')) {
-        toast.error('Session expired. Please login again.');
-        navigate('/login');
-        return;
-      }
-      const response = await axios.get(`${API_BASE_URL}/api/taekwondo-test/admin/registrations`, header);
+      const response = await axios.get(`${API_BASE_URL}/api/taekwondo-test/admin/registrations`, getAuthHeader());
       if (response.data.success) {
         setRegistrations(response.data.data);
       }
     } catch (error) {
       console.error('Error fetching registrations:', error);
-      const errorMsg = error.response?.data?.error || error.message || 'Failed to load registrations';
-      toast.error(`Error: ${errorMsg}`);
+      if (error.response?.status === 401) {
+        toast.error('Authentication failed. Please re-login.');
+      } else {
+        toast.error(error.response?.data?.error || error.message || 'Failed to load registrations');
+      }
     } finally {
       setLoading(false);
     }

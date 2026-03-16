@@ -4,8 +4,8 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-i
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'your-super-secret-refresh-key-change-in-production';
 
 // Token expiration times
-const ACCESS_TOKEN_EXPIRY = '15m'; // 15 minutes
-const REFRESH_TOKEN_EXPIRY = '7d'; // 7 days
+const ACCESS_TOKEN_EXPIRY = '7d'; // 7 days (extended for admin usability)
+const REFRESH_TOKEN_EXPIRY = '30d'; // 30 days
 
 /**
  * Generate access token
