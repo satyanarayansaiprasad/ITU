@@ -242,7 +242,7 @@ const RegistrationForm = () => {
             <div className="flex flex-col md:flex-row items-center gap-8 bg-gray-50 p-6 rounded-xl border border-dashed border-gray-300">
               <div className="w-48 h-48 bg-white p-2 rounded-lg shadow-sm border border-gray-200">
                 <img 
-                  src="/payment-qr.jpg" 
+                  src="/qr_code.jpeg" 
                   alt="Payment QR Code" 
                   className="w-full h-full object-contain"
                   onError={(e) => {
