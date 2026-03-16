@@ -182,6 +182,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/belt-promotion', require('./routes/beltPromotionRoutes'));
 app.use('/api/competition', require('./routes/competitionRoutes'));
+app.use('/api/taekwondo-test', require('./routes/taekwondoRoutes'));
 // Firebase routes disabled - project deleted
 // app.use('/api/firebase', firebaseRoutes);
 app.use('/api/states', statesRoutes); // States and Districts routes (uses static data)

@@ -41,6 +41,8 @@ import HistoryOfTaekwondo from './Components/HistoryOfTaekwondo';
 import OurAmbition from './Components/OurAmbition';
 import PoliceTraining from './Components/PoliceTraining';
 import PoliceTrainingManagement from './AdminPanel/Pages/PoliceTrainingManagement';
+import RegistrationForm from './Components/TaekwondoTest/RegistrationForm';
+import TaekwondoTestManagement from './AdminPanel/Pages/TaekwondoTestManagement';
 
 const App = () => {
   const location = useLocation();
@@ -99,7 +101,9 @@ const App = () => {
           <Route path="/admin/belt-promotion" element={<BeltPromotionManagement />} />
           <Route path="/admin/competition-registrations" element={<CompetitionManagement />} />
           <Route path="/admin/police-training" element={<PoliceTrainingManagement />} />
+          <Route path="/admin/taekwondo-test" element={<TaekwondoTestManagement />} />
         </Route>
+        <Route path="/taekwondo-belt-test" element={<RegistrationForm />} />
       </Routes>
 
       {!isDashboardRoute && <Footer />}
