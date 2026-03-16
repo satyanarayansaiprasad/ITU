@@ -27,8 +27,9 @@ const TaekwondoTestManagement = () => {
   });
   const [savingSettings, setSavingSettings] = useState(false);
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
-    (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-r1qa.onrender.com');
+  const API_BASE_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:3001' 
+    : (import.meta.env.VITE_API_BASE_URL || 'https://itu-r1qa.onrender.com');
 
   const authHeader = {
     headers: {

@@ -41,15 +41,19 @@ exports.updateSettings = (req, res) => {
 // Submit registration
 exports.submitRegistration = (req, res) => {
   try {
+    console.log('Incoming registration request:', req.body);
     const { playerName, fatherName, academyName, address, phoneNumber, dob, beltTest, transactionId } = req.body;
 
     // Read settings to check if form is active
     const settings = JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf8'));
+    console.log('Current settings:', settings);
     if (!settings.isActive) {
+      console.warn('Registration attempt on disabled form');
       return res.status(403).json({ success: false, error: 'Registration is currently disabled.' });
     }
 
     if (!playerName || !fatherName || !academyName || !address || !phoneNumber || !dob || !beltTest || !transactionId) {
+      console.warn('Missing required fields:', { playerName, fatherName, academyName, address, phoneNumber, dob, beltTest, transactionId });
       return res.status(400).json({ success: false, error: 'All fields are required' });
     }
 
@@ -66,7 +70,9 @@ exports.submitRegistration = (req, res) => {
       submittedAt
     ].map(escapeCSV).join(',') + '\n';
 
+    console.log('Appending row to CSV:', row);
     fs.appendFileSync(CSV_PATH, row);
+    console.log('Registration saved successfully');
 
     res.status(201).json({ success: true, message: 'Registration submitted successfully' });
   } catch (error) {

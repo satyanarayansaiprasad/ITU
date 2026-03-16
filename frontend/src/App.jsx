@@ -1,5 +1,7 @@
 import React from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom'; // ✅ useLocation added
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import "./index.css";
 import TopNav from './Components/TopNav';
 import Home from './Components/Home';
@@ -107,6 +109,7 @@ const App = () => {
       </Routes>
 
       {!isDashboardRoute && <Footer />}
+      <ToastContainer position="top-right" autoClose={3000} />
     </>
   );
 };

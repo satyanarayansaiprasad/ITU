@@ -22,8 +22,9 @@ const RegistrationForm = () => {
     venue: 'GM-49, 1st Floor, Pratima Bhawan, Near BSNL Chowk, Chhend, Rourkela.'
   });
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
-    (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-r1qa.onrender.com');
+  const API_BASE_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:3001' 
+    : (import.meta.env.VITE_API_BASE_URL || 'https://itu-r1qa.onrender.com');
 
   const beltOptions = [
     { label: "1. WHITE TO - YELLOW 600", value: "WHITE TO YELLOW - 600" },
