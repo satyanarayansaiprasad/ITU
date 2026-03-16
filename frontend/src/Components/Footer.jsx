@@ -92,7 +92,7 @@ const Footer = () => {
             <ul className="mt-2 text-[#D2E3FB] font-semibold space-y-2">
               <li>
                 {" "}
-                Address : 1st Floor, HH-18, Civil Township, Rourkela, Odisha
+                Address :  HH-18, 1st Floor, Civil Township, Rourkela, Odisha
                 769004
               </li>
             </ul>
@@ -117,22 +117,46 @@ const Footer = () => {
           {/* Social Media (Full Width Below) */}
           <div className="col-span-3 sm:col-span-3 md:col-span-1 flex flex-col items-center md:items-start">
             <div className="flex space-x-4 sm:space-x-6">
-              <Facebook
-                size={24}
-                className="cursor-pointer hover:text-blue-400"
-              />
-              <Instagram
-                size={24}
-                className="cursor-pointer hover:text-pink-400"
-              />
-              <Twitter
-                size={24}
-                className="cursor-pointer hover:text-blue-300"
-              />
-              <Youtube
-                size={24}
-                className="cursor-pointer hover:text-red-500"
-              />
+              <a
+                href="https://www.facebook.com/share/16Kxqfx9wp/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Facebook
+                  size={24}
+                  className="cursor-pointer hover:text-blue-400"
+                />
+              </a>
+              <a
+                href="https://www.instagram.com/indian_taekwondo_union_"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Instagram
+                  size={24}
+                  className="cursor-pointer hover:text-pink-400"
+                />
+              </a>
+              <a
+                href="https://x.com/taekwondo_union"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Twitter
+                  size={24}
+                  className="cursor-pointer hover:text-blue-300"
+                />
+              </a>
+              <a
+                href="https://youtube.com/@indiantaekwondounion6210?si=l3n62Z7QLTqYWR6m"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Youtube
+                  size={24}
+                  className="cursor-pointer hover:text-red-500"
+                />
+              </a>
             </div>
             <p className="text-sm font-semibold text-[#D2E3FB] mt-6 text-center md:text-left">
               Join the Taekwondo Tribe & Keep Up with the Latest!

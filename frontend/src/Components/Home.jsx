@@ -131,7 +131,7 @@ const Home = () => {
               variants={textVariants}
             >
               <span className="text-responsive-sm text-orange-300 font-medium">
-                🥋 Official Taekwondo Union
+                🥋 Certified Organisation
               </span>
             </motion.div>
             

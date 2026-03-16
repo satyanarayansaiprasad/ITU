@@ -116,13 +116,13 @@ const Contact = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pt-[130px] sm:pt-[135px] md:pt-[140px] pb-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Indian-Themed Header */}
-        <motion.div 
+        <motion.div
           className="text-center mb-16"
           initial={{ y: -30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6 }}
         >
-          <motion.h1 
+          <motion.h1
             className="text-3xl md:text-4xl font-serif text-gray-900 mb-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -130,7 +130,7 @@ const Contact = () => {
           >
             <span className="text-orange-500">Namaste 🙏</span>, <span className="text-green-600">Contact Indian Taekwondo Union</span>
           </motion.h1>
-          <motion.p 
+          <motion.p
             className="text-lg text-gray-600 max-w-2xl mx-auto"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -150,7 +150,7 @@ const Contact = () => {
             whileHover={{ y: -5 }}
           >
             {/* Indian-themed decorative elements */}
-            <motion.div 
+            <motion.div
               className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-orange-400/10"
               animate={{
                 y: [0, 15, 0],
@@ -162,7 +162,7 @@ const Contact = () => {
                 ease: "easeInOut"
               }}
             />
-            <motion.div 
+            <motion.div
               className="absolute -bottom-8 -left-8 w-24 h-24 rounded-full bg-green-600/10"
               animate={{
                 y: [0, -15, 0],
@@ -175,8 +175,8 @@ const Contact = () => {
                 delay: 2
               }}
             />
-            
-            <motion.div 
+
+            <motion.div
               className="absolute top-4 left-4 text-orange-500 opacity-20"
               animate={{
                 rotate: [0, 360]
@@ -189,14 +189,14 @@ const Contact = () => {
             >
               <GiTigerHead className="text-6xl" />
             </motion.div>
-            
+
             <motion.h2 variants={item} className="text-2xl font-semibold text-gray-800 mb-8 relative z-10">
               <BsFillChatSquareQuoteFill className="inline-block mr-2 text-orange-500" />
               Send us a message
             </motion.h2>
 
             {error && (
-              <motion.div 
+              <motion.div
                 className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -206,7 +206,7 @@ const Contact = () => {
             )}
 
             {success && (
-              <motion.div 
+              <motion.div
                 className="mb-4 p-3 bg-green-100 text-green-700 rounded-lg"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -280,7 +280,7 @@ const Contact = () => {
                 <motion.button
                   type="submit"
                   className="w-full bg-gradient-to-r from-orange-500 to-green-600 text-white font-medium py-3 px-6 rounded-xl hover:from-orange-600 hover:to-green-700 transition-all shadow-md flex items-center justify-center gap-2"
-                  whileHover={{ 
+                  whileHover={{
                     scale: 1.02,
                     background: ["linear-gradient(to right, #f97316, #16a34a)", "linear-gradient(to right, #ea580c, #15803d)"]
                   }}
@@ -303,13 +303,13 @@ const Contact = () => {
               whileHover="hover"
               className="bg-white/80 backdrop-blur-lg p-6 rounded-3xl shadow-sm border border-white/20 relative overflow-hidden"
             >
-              <motion.div 
+              <motion.div
                 className="flex items-center gap-3 mb-6 relative z-10"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.6 }}
               >
-                <motion.div 
+                <motion.div
                   className="p-3 rounded-lg bg-orange-500/10 text-orange-500"
                   variants={kickAnimation}
                 >
@@ -335,13 +335,13 @@ const Contact = () => {
                 ></iframe>
               </motion.div>
 
-              <motion.div 
+              <motion.div
                 className="p-4 bg-green-50/50 rounded-xl flex items-start gap-4 border border-green-100/50 relative z-10"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 1 }}
               >
-                <motion.div 
+                <motion.div
                   className="p-2 rounded-full bg-orange-500/10 text-orange-500"
                   whileHover={{ rotate: 15 }}
                 >
@@ -349,7 +349,7 @@ const Contact = () => {
                 </motion.div>
                 <div>
                   <p className="font-medium text-gray-800">Head Office</p>
-                  <p className="text-gray-600">HH-18, Civil Township</p>
+                  <p className="text-gray-600">HH-18, 1st Floor, Civil Township</p>
                   <p className="text-gray-600">Rourkela, Odisha 769004</p>
                 </div>
               </motion.div>
@@ -363,7 +363,7 @@ const Contact = () => {
               whileHover={{ y: -5 }}
               className="bg-white/80 backdrop-blur-lg p-8 rounded-3xl shadow-sm border border-white/20 relative overflow-hidden"
             >
-              <motion.h2 
+              <motion.h2
                 className="text-2xl font-semibold text-gray-800 mb-6 relative z-10"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -372,7 +372,7 @@ const Contact = () => {
                 <GiLotus className="inline-block mr-2 text-green-600" />
                 Follow Us
               </motion.h2>
-              <motion.p 
+              <motion.p
                 className="text-gray-600 mb-8 relative z-10"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -383,23 +383,23 @@ const Contact = () => {
 
               <motion.div className="flex justify-center gap-4 relative z-10">
                 {[
-                  { 
-                    icon: <FaFacebook />, 
+                  {
+                    icon: <FaFacebook />,
                     color: 'bg-orange-500 hover:bg-orange-600',
-                    url: 'https://www.facebook.com/yourpage'
-                  },
-                  { 
-                    icon: <FaTwitter />, 
-                    color: 'bg-blue-400 hover:bg-blue-500',
                     url: 'https://www.facebook.com/share/16Kxqfx9wp/'
                   },
-                  { 
-                    icon: <FaInstagram />, 
+                  {
+                    icon: <FaTwitter />,
+                    color: 'bg-blue-400 hover:bg-blue-500',
+                    url: 'https://x.com/taekwondo_union'
+                  },
+                  {
+                    icon: <FaInstagram />,
                     color: 'bg-gradient-to-r from-orange-500 via-pink-500 to-purple-500 hover:from-orange-600 hover:via-pink-600 hover:to-purple-600',
                     url: 'https://www.instagram.com/indian_taekwondo_union_?igsh=MXgxejB3NDN6Y2Jhdw=='
                   },
-                  { 
-                    icon: <FaYoutube />, 
+                  {
+                    icon: <FaYoutube />,
                     color: 'bg-red-500 hover:bg-red-600',
                     url: 'https://youtube.com/@indiantaekwondounion6210?si=l3n62Z7QLTqYWR6m'
                   }
@@ -410,7 +410,7 @@ const Contact = () => {
                     target="_blank"
                     rel="noopener noreferrer"
                     className={`${social.color} text-white p-4 rounded-full shadow-md transition-all`}
-                    whileHover={{ 
+                    whileHover={{
                       y: -8,
                       scale: 1.1,
                       transition: { type: "spring", stiffness: 400 }
@@ -426,24 +426,24 @@ const Contact = () => {
         </div>
 
         {/* Footer with Indian theme */}
-        <motion.div 
+        <motion.div
           className="mt-16 text-center text-gray-600"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.6 }}
         >
           <div className="flex justify-center gap-2 mb-4">
-            <motion.div 
+            <motion.div
               className="w-8 h-1 bg-orange-500 rounded-full"
               animate={{ scaleX: [1, 1.5, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
             />
-            <motion.div 
+            <motion.div
               className="w-8 h-1 bg-white rounded-full"
               animate={{ scaleX: [1, 1.5, 1] }}
               transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
             />
-            <motion.div 
+            <motion.div
               className="w-8 h-1 bg-green-500 rounded-full"
               animate={{ scaleX: [1, 1.5, 1] }}
               transition={{ duration: 2, repeat: Infinity, delay: 1 }}

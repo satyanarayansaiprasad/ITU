@@ -763,9 +763,21 @@ exports.getPlayersByUnion = async (req, res) => {
       .populate('union', 'name email phone')
       .lean();
 
+    // Regenerate plain-text passwords for display in union dashboard
+    // Passwords may have been auto-hashed (bcrypt) when players logged in,
+    // so we regenerate the original plain-text password from the player's name
+    const playersWithPassword = players.map(player => {
+      if (player.password && player.password.startsWith('$2b$')) {
+        // Password was hashed - regenerate original plain-text password
+        const cleanName = player.name.replace(/\s+/g, '').toUpperCase();
+        player.password = `${cleanName}ITUUnion540720`;
+      }
+      return player;
+    });
+
     res.status(200).json({
       success: true,
-      data: players,
+      data: playersWithPassword,
       pagination: {
         currentPage: pageNum,
         totalPages: Math.ceil(total / limitNum),
