@@ -12,7 +12,8 @@ import {
   ToggleLeft, 
   ToggleRight, 
   Search,
-  RefreshCcw
+  RefreshCcw,
+  Trash2
 } from 'lucide-react';
 
 const TaekwondoTestManagement = () => {
@@ -28,6 +29,8 @@ const TaekwondoTestManagement = () => {
     venue: ''
   });
   const [savingSettings, setSavingSettings] = useState(false);
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [deleting, setDeleting] = useState(false);
 
   const getBaseUrl = () => {
     if (window.location.hostname === 'localhost') return 'http://localhost:3001';
@@ -131,6 +134,42 @@ const TaekwondoTestManagement = () => {
     reg.transactionId?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const toggleSelect = (id) => {
+    setSelectedIds(prev => 
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === filteredRegistrations.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredRegistrations.map(r => r._id));
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedIds.length === 0) return;
+    if (!window.confirm(`Are you sure you want to delete ${selectedIds.length} registration(s)?`)) return;
+    try {
+      setDeleting(true);
+      const response = await axios.delete(
+        `${API_BASE_URL}/api/taekwondo-test/admin/registrations`,
+        { data: { ids: selectedIds } }
+      );
+      if (response.data.success) {
+        toast.success(response.data.message);
+        setSelectedIds([]);
+        fetchRegistrations();
+      }
+    } catch (error) {
+      console.error('Error deleting registrations:', error);
+      toast.error(error.response?.data?.error || 'Failed to delete registrations');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className="space-y-8 p-4">
       {/* Header section */}
@@ -142,13 +181,25 @@ const TaekwondoTestManagement = () => {
           </h2>
           <p className="text-gray-500 mt-1">Manage event settings and view student registrations.</p>
         </div>
-        <button
-          onClick={handleDownloadCSV}
-          className="flex items-center justify-center gap-2 px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all shadow-md hover:shadow-green-100 font-semibold"
-        >
-          <Download size={20} />
-          Download CSV
-        </button>
+        <div className="flex items-center gap-3">
+          {selectedIds.length > 0 && (
+            <button
+              onClick={handleDeleteSelected}
+              disabled={deleting}
+              className="flex items-center gap-2 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all shadow-md font-semibold disabled:bg-red-300"
+            >
+              <Trash2 size={18} />
+              {deleting ? 'Deleting...' : `Delete (${selectedIds.length})`}
+            </button>
+          )}
+          <button
+            onClick={handleDownloadCSV}
+            className="flex items-center justify-center gap-2 px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all shadow-md hover:shadow-green-100 font-semibold"
+          >
+            <Download size={20} />
+            Download CSV
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -263,6 +314,14 @@ const TaekwondoTestManagement = () => {
                 <table className="w-full text-left">
                   <thead className="bg-gray-50 text-gray-600 text-xs font-bold uppercase tracking-wider">
                     <tr>
+                      <th className="px-4 py-4 w-10">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.length === filteredRegistrations.length && filteredRegistrations.length > 0}
+                          onChange={toggleSelectAll}
+                          className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                      </th>
                       <th className="px-6 py-4">Player Details</th>
                       <th className="px-6 py-4">Belt Test</th>
                       <th className="px-6 py-4">Transaction Details</th>
@@ -271,7 +330,15 @@ const TaekwondoTestManagement = () => {
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {filteredRegistrations.map((reg, idx) => (
-                      <tr key={idx} className="hover:bg-blue-50/30 transition-colors">
+                      <tr key={reg._id || idx} className={`hover:bg-blue-50/30 transition-colors ${selectedIds.includes(reg._id) ? 'bg-blue-50' : ''}`}>
+                        <td className="px-4 py-4 w-10">
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.includes(reg._id)}
+                            onChange={() => toggleSelect(reg._id)}
+                            className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                        </td>
                         <td className="px-6 py-4">
                           <div className="font-bold text-gray-800">{reg.playerName}</div>
                           <div className="text-sm text-gray-500">{reg.academyName}</div>

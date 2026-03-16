@@ -115,3 +115,60 @@ exports.downloadCSV = async (req, res) => {
     res.status(500).json({ success: false, error: 'Failed to download CSV' });
   }
 };
+
+// DELETE /api/taekwondo-test/admin/registrations — delete selected registrations
+exports.deleteRegistrations = async (req, res) => {
+  try {
+    const { ids } = req.body;
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ success: false, error: 'No registration IDs provided' });
+    }
+    const result = await TaekwondoRegistration.deleteMany({ _id: { $in: ids } });
+    res.status(200).json({
+      success: true,
+      message: `${result.deletedCount} registration(s) deleted successfully`
+    });
+  } catch (error) {
+    console.error('Error deleting registrations:', error);
+    res.status(500).json({ success: false, error: 'Failed to delete registrations' });
+  }
+};
+
+// Auto-cleanup: delete registrations older than 1 month after the test date
+// Runs once when the server starts, then every 24 hours
+const runAutoCleanup = async () => {
+  try {
+    const settings = await TaekwondoSettings.findOne({ key: 'main' });
+    if (!settings || !settings.testDate) return;
+
+    // Try to parse the test date from the string (e.g. "29th March, 2026 (Sunday)")
+    const dateStr = settings.testDate
+      .replace(/(\d+)(st|nd|rd|th)/, '$1')  // remove ordinal suffix
+      .replace(/\(.*\)/, '')                  // remove day name in parentheses
+      .trim();
+    const testDate = new Date(dateStr);
+    if (isNaN(testDate.getTime())) {
+      console.log('Auto-cleanup: Could not parse test date:', settings.testDate);
+      return;
+    }
+
+    const oneMonthAfter = new Date(testDate);
+    oneMonthAfter.setMonth(oneMonthAfter.getMonth() + 1);
+
+    if (new Date() > oneMonthAfter) {
+      const result = await TaekwondoRegistration.deleteMany({
+        createdAt: { $lte: oneMonthAfter }
+      });
+      if (result.deletedCount > 0) {
+        console.log(`Auto-cleanup: Deleted ${result.deletedCount} old taekwondo registrations`);
+      }
+    }
+  } catch (error) {
+    console.error('Auto-cleanup error:', error);
+  }
+};
+
+// Run cleanup on server start (after short delay for DB connection)
+setTimeout(runAutoCleanup, 10000);
+// Run cleanup every 24 hours
+setInterval(runAutoCleanup, 24 * 60 * 60 * 1000);

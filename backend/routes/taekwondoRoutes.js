@@ -11,5 +11,6 @@ router.post('/submit', taekwondoController.submitRegistration);
 router.get('/admin/registrations', taekwondoController.getRegistrations);
 router.get('/admin/download', taekwondoController.downloadCSV);
 router.put('/admin/settings', taekwondoController.updateSettings);
+router.delete('/admin/registrations', taekwondoController.deleteRegistrations);
 
 module.exports = router;
