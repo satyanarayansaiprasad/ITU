@@ -10,6 +10,13 @@ if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
+const CSV_HEADERS = "Player Name,Father's Name,Academy Name,Address,Phone Number,DOB,Belt Test,Transaction ID,Submitted At\n";
+
+// Initialize CSV with headers if missing
+if (!fs.existsSync(CSV_PATH)) {
+  fs.writeFileSync(CSV_PATH, CSV_HEADERS);
+}
+
 // Default settings if missing
 const defaultSettings = {
   isActive: true,
