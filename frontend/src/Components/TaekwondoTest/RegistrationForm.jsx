@@ -30,13 +30,13 @@ const RegistrationForm = () => {
   const API_BASE_URL = getBaseUrl();
 
   const beltOptions = [
-    { label: "1. WHITE TO - YELLOW 600", value: "WHITE TO YELLOW - 600" },
-    { label: "2. YELLOW TO GREEN - 700", value: "YELLOW TO GREEN - 700" },
-    { label: "3. GREEN TO GREEN ONE - 800", value: "GREEN TO GREEN ONE - 800" },
-    { label: "4. GREEN ONE TO BLUE - 900", value: "GREEN ONE TO BLUE - 900" },
-    { label: "5. BLUE TO BLUE ONE - 1000", value: "BLUE TO BLUE ONE - 1000" },
-    { label: "6. BLUE ONE TO RED - 1100", value: "BLUE ONE TO RED - 1100" },
-    { label: "7. RED TO RED ONE - 1200", value: "RED TO RED ONE - 1200" }
+    { label: "WHITE TO YELLOW - RS-600", value: "WHITE TO YELLOW - RS-600" },
+    { label: "YELLOW TO GREEN - RS-700", value: "YELLOW TO GREEN - RS-700" },
+    { label: "GREEN TO GREEN ONE - RS-800", value: "GREEN TO GREEN ONE - RS-800" },
+    { label: "GREEN ONE TO BLUE - RS-900", value: "GREEN ONE TO BLUE - RS-900" },
+    { label: "BLUE TO BLUE ONE - RS-1000", value: "BLUE TO BLUE ONE - RS-1000" },
+    { label: "BLUE ONE TO RED - RS-1100", value: "BLUE ONE TO RED - RS-1100" },
+    { label: "RED TO RED ONE - RS-1200", value: "RED TO RED ONE - RS-1200" }
   ];
 
   useEffect(() => {
