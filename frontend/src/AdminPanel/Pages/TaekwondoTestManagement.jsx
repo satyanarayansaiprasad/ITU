@@ -36,14 +36,11 @@ const TaekwondoTestManagement = () => {
   };
   const API_BASE_URL = getBaseUrl();
 
-  const getAuthHeader = () => {
-    const token = localStorage.getItem('accessToken');
-    return {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    };
-  };
+  const getAuthHeader = () => ({
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('accessToken')}`
+    }
+  });
 
   useEffect(() => {
     fetchSettings();
@@ -65,7 +62,10 @@ const TaekwondoTestManagement = () => {
   const fetchRegistrations = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_BASE_URL}/api/taekwondo-test/admin/registrations`, getAuthHeader());
+      const response = await axios.get(
+        `${API_BASE_URL}/api/taekwondo-test/admin/registrations`,
+        { headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` } }
+      );
       if (response.data.success) {
         setRegistrations(response.data.data);
       }
@@ -85,14 +85,17 @@ const TaekwondoTestManagement = () => {
     if (e) e.preventDefault();
     try {
       setSavingSettings(true);
-      const response = await axios.put(`${API_BASE_URL}/api/taekwondo-test/admin/settings`, settings, getAuthHeader());
+      const response = await axios.put(
+        `${API_BASE_URL}/api/taekwondo-test/admin/settings`,
+        settings,
+        { headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` } }
+      );
       if (response.data.success) {
         toast.success('Settings updated successfully');
       }
     } catch (error) {
       console.error('Error saving settings:', error);
-      const errorMsg = error.response?.data?.error || error.message || 'Failed to update settings';
-      toast.error(`Error: ${errorMsg}`);
+      toast.error(error.response?.data?.error || error.message || 'Failed to update settings');
     } finally {
       setSavingSettings(false);
     }
@@ -103,8 +106,8 @@ const TaekwondoTestManagement = () => {
       const response = await axios.get(
         `${API_BASE_URL}/api/taekwondo-test/admin/download`,
         {
-          ...getAuthHeader(),
-          responseType: 'blob'
+          responseType: 'blob',
+          headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
         }
       );
 
