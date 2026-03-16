@@ -126,9 +126,9 @@ const TaekwondoTestManagement = () => {
   };
 
   const filteredRegistrations = registrations.filter(reg => 
-    reg['Player Name']?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    reg['Academy Name']?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    reg['Transaction ID']?.toLowerCase().includes(searchTerm.toLowerCase())
+    reg.playerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    reg.academyName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    reg.transactionId?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -273,27 +273,27 @@ const TaekwondoTestManagement = () => {
                     {filteredRegistrations.map((reg, idx) => (
                       <tr key={idx} className="hover:bg-blue-50/30 transition-colors">
                         <td className="px-6 py-4">
-                          <div className="font-bold text-gray-800">{reg['Player Name']}</div>
-                          <div className="text-sm text-gray-500">{reg['Academy Name']}</div>
-                          <div className="text-xs text-gray-400 mt-1 flex items-center gap-1">
-                            <Phone size={10} /> {reg['Phone Number']}
+                          <div className="font-bold text-gray-800">{reg.playerName}</div>
+                          <div className="text-sm text-gray-500">{reg.academyName}</div>
+                          <div className="text-xs text-gray-400 mt-1">
+                            {reg.phoneNumber}
                           </div>
                         </td>
                         <td className="px-6 py-4">
                           <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold">
-                            {reg['Belt Test']}
+                            {reg.beltTest}
                           </span>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="text-sm font-mono text-gray-600">{reg['Transaction ID']}</div>
-                          <div className="text-xs text-gray-400">DOB: {reg['DOB']}</div>
+                          <div className="text-sm font-mono text-gray-600">{reg.transactionId}</div>
+                          <div className="text-xs text-gray-400">DOB: {reg.dob}</div>
                         </td>
                         <td className="px-6 py-4 text-right">
                           <div className="text-sm text-gray-600">
-                            {reg['Submitted At'] ? new Date(reg['Submitted At']).toLocaleDateString() : 'N/A'}
+                            {reg.createdAt ? new Date(reg.createdAt).toLocaleDateString() : 'N/A'}
                           </div>
                           <div className="text-xs text-gray-400">
-                            {reg['Submitted At'] ? new Date(reg['Submitted At']).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                            {reg.createdAt ? new Date(reg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                           </div>
                         </td>
                       </tr>
