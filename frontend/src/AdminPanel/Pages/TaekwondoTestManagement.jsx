@@ -82,7 +82,8 @@ const TaekwondoTestManagement = () => {
     }
   };
 
-  const handleSaveSettings = async () => {
+  const handleUpdateSettings = async (e) => {
+    if (e) e.preventDefault();
     try {
       setSavingSettings(true);
       const response = await axios.put(`${API_BASE_URL}/api/taekwondo-test/admin/settings`, settings, getAuthHeader());
