@@ -40,12 +40,12 @@ const Gallery = () => {
     // If filename already includes uploads/, use it directly (legacy local storage)
     if (filename.startsWith('uploads/')) {
       const baseUrl = import.meta.env.VITE_API_BASE_URL || 
-                      (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-r1qa.onrender.com');
+                      (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-f4bn.onrender.com');
       return `${baseUrl}/${filename}`;
     }
     // Construct the URL for legacy local storage files
     const baseUrl = import.meta.env.VITE_API_BASE_URL || 
-                    (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-r1qa.onrender.com');
+                    (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-f4bn.onrender.com');
     const cleanFilename = filename.replace(/^\/+/, '');
     const imageUrl = `${baseUrl}/uploads/${cleanFilename}`;
     console.log("Constructed gallery image URL:", imageUrl, "from filename:", filename, "baseUrl:", baseUrl);

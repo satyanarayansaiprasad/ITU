@@ -32,7 +32,7 @@ const responsive = {
 };
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
-                    (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-r1qa.onrender.com');
+                    (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-f4bn.onrender.com');
 
 export default function Category() {
   const [selectedCategory, setSelectedCategory] = useState(null);

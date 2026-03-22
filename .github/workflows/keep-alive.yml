@@ -10,4 +10,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Curl Request
-        run: curl https://itu-r1qa.onrender.com/health
+        run: curl https://itu-f4bn.onrender.com/health

@@ -7,7 +7,7 @@ const PlayerBeltPromotionTests = ({ playerId }) => {
   const [loading, setLoading] = useState(true);
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
-    (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-r1qa.onrender.com');
+    (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-f4bn.onrender.com');
 
   useEffect(() => {
     if (playerId) {

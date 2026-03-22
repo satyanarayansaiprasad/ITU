@@ -2246,7 +2246,7 @@ exports.getBlogPosts = async (req, res) => {
       const postObj = post.toObject();
       if (postObj.image && !postObj.image.startsWith('http')) {
         const baseUrl = process.env.NODE_ENV === 'production'
-          ? 'https://itu-r1qa.onrender.com'
+          ? 'https://itu-f4bn.onrender.com'
           : 'http://localhost:3001';
         postObj.image = `${baseUrl}/${postObj.image}`;
       }
@@ -2429,7 +2429,7 @@ exports.getFeaturedPosts = async (req, res) => {
       const postObj = post.toObject();
       if (postObj.image && !postObj.image.startsWith('http')) {
         const baseUrl = process.env.NODE_ENV === 'production'
-          ? 'https://itu-r1qa.onrender.com'
+          ? 'https://itu-f4bn.onrender.com'
           : 'http://localhost:3001';
         postObj.image = `${baseUrl}/${postObj.image}`;
       }
@@ -2481,7 +2481,7 @@ exports.getRelatedPosts = async (req, res) => {
       const postObj = post.toObject();
       if (postObj.image && !postObj.image.startsWith('http')) {
         const baseUrl = process.env.NODE_ENV === 'production'
-          ? 'https://itu-r1qa.onrender.com'
+          ? 'https://itu-f4bn.onrender.com'
           : 'http://localhost:3001';
         postObj.image = `${baseUrl}/${postObj.image}`;
       }

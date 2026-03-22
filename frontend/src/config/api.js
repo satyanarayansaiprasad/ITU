@@ -9,7 +9,7 @@ const getApiBaseUrl = () => {
     return 'http://localhost:3001';
   }
   // Default to production URL
-  return 'https://itu-r1qa.onrender.com';
+  return 'https://itu-f4bn.onrender.com';
 };
 
 const API_BASE_URL = getApiBaseUrl();

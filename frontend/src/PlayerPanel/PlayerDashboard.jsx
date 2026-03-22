@@ -32,7 +32,7 @@ import PlayerBeltPromotionTests from "./PlayerBeltPromotionTests";
 import { clearAuthData } from "../utils/auth";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
-                    (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-r1qa.onrender.com');
+                    (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-f4bn.onrender.com');
 
 const PlayerDashboard = () => {
   const navigate = useNavigate();
@@ -244,7 +244,7 @@ const PlayerDashboard = () => {
       
       // Optionally call backend logout endpoint
       const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
-        (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-r1qa.onrender.com');
+        (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-f4bn.onrender.com');
       
       try {
         await axios.post(`${API_BASE_URL}/api/admin/logout`, {}, {

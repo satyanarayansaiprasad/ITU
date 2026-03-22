@@ -34,7 +34,7 @@ const TaekwondoTestManagement = () => {
 
   const getBaseUrl = () => {
     if (window.location.hostname === 'localhost') return 'http://localhost:3001';
-    const envUrl = import.meta.env.VITE_API_BASE_URL || 'https://itu-r1qa.onrender.com';
+    const envUrl = import.meta.env.VITE_API_BASE_URL || 'https://itu-f4bn.onrender.com';
     return envUrl.endsWith('/') ? envUrl.slice(0, -1) : envUrl;
   };
   const API_BASE_URL = getBaseUrl();
