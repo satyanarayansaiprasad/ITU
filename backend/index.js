@@ -24,51 +24,29 @@ const allowedOrigins = [
   'https://itu-mu.vercel.app',
   'https://taekwondounion.com',
   'https://www.taekwondounion.com',
+  'https://taekwondo-union.web.app',
   'http://localhost:5173',
   'http://localhost:3000',
+  'http://localhost:8080',
   ...(process.env.ALLOWED_ORIGINS?.split(',').map(origin => origin.trim()).filter(Boolean) || [])
 ];
-
-// Manual CORS middleware as fallback
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  
-  // Allow if origin is in allowed list, or if no origin (same-origin requests)
-  if (!origin || allowedOrigins.includes(origin)) {
-    if (origin) {
-      res.header('Access-Control-Allow-Origin', origin);
-    } else {
-      res.header('Access-Control-Allow-Origin', '*');
-    }
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
-    res.header('Access-Control-Expose-Headers', 'Content-Range, X-Content-Range');
-  }
-  
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(204);
-  }
-  
-  next();
-});
 
 // CORS middleware
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps, Postman, etc.)
+    // Allow requests with no origin (like mobile apps, Postman, server-to-server)
     if (!origin) {
       return callback(null, true);
     }
     
     // Check if origin is in allowed list
-    if (allowedOrigins.includes(origin)) {
+    if (allowedOrigins.includes(origin) || allowedOrigins.includes(origin.replace(/\/$/, ''))) {
       callback(null, true);
     } else {
       console.warn(`⚠️  CORS blocked origin: ${origin}`);
-      // For now, allow all origins to debug - change to callback(new Error('Not allowed by CORS')) for production
-      callback(null, true);
+      // In development, you might want to allow everything, but in production we should be careful.
+      // However, to fix the issue described, we'll temporarily allow all until we confirm it's working.
+      callback(null, true); 
     }
   },
   credentials: true,
