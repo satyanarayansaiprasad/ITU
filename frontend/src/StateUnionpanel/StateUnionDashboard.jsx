@@ -126,14 +126,9 @@ const StateUnionDashboard = () => {
         delete values.establishedYear;
       }
       
-      // Auto-append "UNION" to organization name if not present
+      // Use organization name as is
       if (values.organizationName) {
-        const orgName = values.organizationName.trim();
-        if (orgName && !orgName.toUpperCase().endsWith('UNION')) {
-          values.name = `${orgName} UNION`;
-        } else {
-          values.name = orgName;
-        }
+        values.name = values.organizationName.trim();
         delete values.organizationName;
       }
       
@@ -355,12 +350,11 @@ const StateUnionDashboard = () => {
                   <input 
                     type="text" 
                     name="organizationName" 
-                    defaultValue={profileData?.name ? profileData.name.replace(/\s+UNION$/i, '') : ''} 
-                    placeholder="e.g., GODDA DISTRICT TAEKWONDO"
+                    defaultValue={profileData?.name || ''} 
+                    placeholder="e.g., GODDA DISTRICT TAEKWONDO UNION"
                     required 
                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                   />
-                  <p className="text-xs text-gray-500 mt-1">"UNION" will be automatically added at the end</p>
                 </div>
                 
                 <div>
