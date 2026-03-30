@@ -969,10 +969,10 @@ exports.getPlayers = async (req, res) => {
   }
 };
 
-// Generate player password: playerName + ITU + Union + 540720
-const generatePlayerPassword = (playerName) => {
-  const cleanName = playerName.replace(/\s+/g, '').toUpperCase();
-  return `${cleanName}ITUUnion540720`;
+// Generate player password: Itu@[dob year]
+const generatePlayerPassword = (dob) => {
+  const year = dob ? new Date(dob).getFullYear() : '2024';
+  return `Itu@${year}`;
 };
 
 // Approve multiple players at once
@@ -1011,8 +1011,8 @@ exports.approvePlayers = async (req, res) => {
     // Approve each player and send email
     for (const player of players) {
       try {
-        // Generate password: playerName + ITU + Union + 540720
-        const password = generatePlayerPassword(player.name);
+        // Generate password: Itu@[dob year]
+        const password = generatePlayerPassword(player.dob);
 
         // Generate player ID if not exists
         if (!player.playerId) {

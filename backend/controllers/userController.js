@@ -767,9 +767,9 @@ exports.getPlayersByUnion = async (req, res) => {
     // so we regenerate the original plain-text password from the player's name
     const playersWithPassword = players.map(player => {
       if (player.password && player.password.startsWith('$2b$')) {
-        // Password was hashed - regenerate original plain-text password
-        const cleanName = player.name.replace(/\s+/g, '').toUpperCase();
-        player.password = `${cleanName}ITUUnion540720`;
+        // Password was hashed - regenerate original Itu@YYYY password
+        const year = player.dob ? new Date(player.dob).getFullYear() : '2024';
+        player.password = `Itu@${year}`;
       }
       return player;
     });
