@@ -206,7 +206,30 @@ const Form = () => {
     const playerSpecificFields = [
       { name: "address", label: "Address", type: "textarea" },
       { name: "dob", label: "Date of Birth", type: "date" },
-      { name: "beltLevel", label: "Belt Level", type: "text" },
+      { 
+        name: "beltLevel", 
+        label: "Belt Level", 
+        type: "select", 
+        options: [
+          { value: "White", label: "White" },
+          { value: "Yellow", label: "Yellow" },
+          { value: "Green", label: "Green" },
+          { value: "Green One", label: "Green One" },
+          { value: "Blue", label: "Blue" },
+          { value: "Blue One", label: "Blue One" },
+          { value: "Red", label: "Red" },
+          { value: "Red One", label: "Red One" },
+          { value: "1st Dan Black Belt", label: "1st Dan Black Belt" },
+          { value: "2nd Dan Black Belt", label: "2nd Dan Black Belt" },
+          { value: "3rd Dan Black Belt", label: "3rd Dan Black Belt" },
+          { value: "4th Dan Black Belt", label: "4th Dan Black Belt" },
+          { value: "5th Dan Black Belt", label: "5th Dan Black Belt" },
+          { value: "6th Dan Black Belt", label: "6th Dan Black Belt" },
+          { value: "7th Dan Black Belt", label: "7th Dan Black Belt" },
+          { value: "8th Dan Black Belt", label: "8th Dan Black Belt" },
+          { value: "9th Dan Black Belt", label: "9th Dan Black Belt" },
+        ] 
+      },
     ];
 
     const allFields = formType === 'player' 

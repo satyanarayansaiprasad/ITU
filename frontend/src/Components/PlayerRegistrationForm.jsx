@@ -443,14 +443,36 @@ const PlayerRegistrationForm = ({ onBack }) => {
                 <div className="absolute top-1/2 -translate-y-1/2 left-3 z-10">
                   <Award className="w-5 h-5 text-purple-600" />
                 </div>
-                <input
-                  type="text"
-                  placeholder="Belt Level *"
+                <select
                   value={player.beltLevel}
                   onChange={(e) => handlePlayerChange(index, "beltLevel", e.target.value)}
                   required
-                  className="w-full p-3 pl-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
+                  className="w-full p-3 pl-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white appearance-none"
+                >
+                  <option value="" disabled>Select Belt Level *</option>
+                  <option value="White">White</option>
+                  <option value="Yellow">Yellow</option>
+                  <option value="Green">Green</option>
+                  <option value="Green One">Green One</option>
+                  <option value="Blue">Blue</option>
+                  <option value="Blue One">Blue One</option>
+                  <option value="Red">Red</option>
+                  <option value="Red One">Red One</option>
+                  <option value="1st Dan Black Belt">1st Dan Black Belt</option>
+                  <option value="2nd Dan Black Belt">2nd Dan Black Belt</option>
+                  <option value="3rd Dan Black Belt">3rd Dan Black Belt</option>
+                  <option value="4th Dan Black Belt">4th Dan Black Belt</option>
+                  <option value="5th Dan Black Belt">5th Dan Black Belt</option>
+                  <option value="6th Dan Black Belt">6th Dan Black Belt</option>
+                  <option value="7th Dan Black Belt">7th Dan Black Belt</option>
+                  <option value="8th Dan Black Belt">8th Dan Black Belt</option>
+                  <option value="9th Dan Black Belt">9th Dan Black Belt</option>
+                </select>
+                <div className="absolute top-1/2 -translate-y-1/2 right-3 pointer-events-none">
+                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
               </div>
 
 
