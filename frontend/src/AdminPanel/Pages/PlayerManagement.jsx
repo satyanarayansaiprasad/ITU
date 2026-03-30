@@ -406,10 +406,6 @@ const PlayerManagement = () => {
                         <Award size={16} className="text-yellow-500" />
                         <span className="text-sm">Belt: {player.beltLevel}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-gray-700">
-                        <Clock size={16} className="text-indigo-500" />
-                        <span className="text-sm">{player.yearsOfExperience} years experience</span>
-                      </div>
                       {player.status === 'approved' && player.password && (
                         <div className="flex items-center gap-2 text-gray-700">
                           <Key size={16} className="text-red-500" />

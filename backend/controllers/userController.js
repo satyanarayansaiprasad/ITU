@@ -489,7 +489,7 @@ exports.registerPlayers = async (req, res) => {
       const player = players[i];
       
       if (!player.name || !player.email || !player.phone || !player.address || 
-          !player.dob || !player.beltLevel || !player.yearsOfExperience) {
+          !player.dob || !player.beltLevel) {
         errors.push(`Player ${i + 1}: All fields are required`);
         continue;
       }
@@ -515,7 +515,6 @@ exports.registerPlayers = async (req, res) => {
         address: player.address.trim(),
         dob: new Date(player.dob),
         beltLevel: player.beltLevel.trim(),
-        yearsOfExperience: parseInt(player.yearsOfExperience) || 0,
         status: 'pending'
       });
     }

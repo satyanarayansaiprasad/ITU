@@ -47,10 +47,6 @@ const PlayerSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    yearsOfExperience: {
-      type: Number,
-      required: true,
-    },
     photo: {
       type: String, // Cloudinary URL
       default: null,

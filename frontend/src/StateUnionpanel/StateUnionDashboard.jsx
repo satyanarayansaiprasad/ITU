@@ -563,7 +563,6 @@ const StateUnionDashboard = () => {
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Password</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Belt Level</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Experience</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DOB</th>
                     </tr>
                   </thead>
@@ -606,7 +605,7 @@ const StateUnionDashboard = () => {
                               {player.beltLevel}
                           </span>
                         </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{player.yearsOfExperience} years</td>
+
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                             {player.dob ? new Date(player.dob).toLocaleDateString() : 'N/A'}
                         </td>

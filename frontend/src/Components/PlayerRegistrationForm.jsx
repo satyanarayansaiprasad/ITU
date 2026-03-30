@@ -18,7 +18,6 @@ const PlayerRegistrationForm = ({ onBack }) => {
       address: "",
       dob: "",
       beltLevel: "",
-      yearsOfExperience: ""
     }
   ]);
   const [states, setStates] = useState([]);
@@ -117,7 +116,6 @@ const PlayerRegistrationForm = ({ onBack }) => {
         address: "",
         dob: "",
         beltLevel: "",
-        yearsOfExperience: ""
       }
     ]);
   };
@@ -151,7 +149,7 @@ const PlayerRegistrationForm = ({ onBack }) => {
     const invalidPlayers = [];
     players.forEach((player, index) => {
       if (!player.name || !player.email || !player.phone || !player.address ||
-          !player.dob || !player.beltLevel || !player.yearsOfExperience) {
+          !player.dob || !player.beltLevel) {
         invalidPlayers.push(index + 1);
       }
     });
@@ -179,7 +177,6 @@ const PlayerRegistrationForm = ({ onBack }) => {
           address: "",
           dob: "",
           beltLevel: "",
-          yearsOfExperience: ""
         }]);
         setState("");
         setDistrict("");
@@ -456,20 +453,7 @@ const PlayerRegistrationForm = ({ onBack }) => {
                 />
               </div>
 
-              <div className="relative">
-                <div className="absolute top-1/2 -translate-y-1/2 left-3 z-10">
-                  <Clock className="w-5 h-5 text-yellow-600" />
-                </div>
-                <input
-                  type="number"
-                  placeholder="Years of Experience *"
-                  value={player.yearsOfExperience}
-                  onChange={(e) => handlePlayerChange(index, "yearsOfExperience", e.target.value)}
-                  required
-                  min="0"
-                  className="w-full p-3 pl-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-500"
-                />
-              </div>
+
 
               <div className="relative md:col-span-2">
                 <div className="absolute top-3 left-3 z-10">

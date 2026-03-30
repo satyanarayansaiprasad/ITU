@@ -79,7 +79,6 @@ const PlayerDashboard = () => {
         address: parsed.address || "",
         dob: parsed.dob ? new Date(parsed.dob).toISOString().split('T')[0] : "",
         beltLevel: parsed.beltLevel || "",
-        yearsOfExperience: parsed.yearsOfExperience || ""
       });
       
       // Set photo preview from localStorage data
@@ -476,27 +475,8 @@ const PlayerDashboard = () => {
                       <p className="text-gray-900">{player.beltLevel}</p>
                     )}
                   </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      <Clock className="inline mr-2" size={16} />
-                      Years of Experience
-                    </label>
-                    {isEditing ? (
-                      <input
-                        type="number"
-                        name="yearsOfExperience"
-                        value={formData.yearsOfExperience}
-                        onChange={handleInputChange}
-                        min="0"
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                      />
-                    ) : (
-                      <p className="text-gray-900">{player.yearsOfExperience} years</p>
-                    )}
                   </div>
                 </div>
-              </div>
 
               {/* Action Buttons */}
               {isEditing && (
@@ -518,7 +498,6 @@ const PlayerDashboard = () => {
                         address: player.address || "",
                         dob: player.dob ? new Date(player.dob).toISOString().split('T')[0] : "",
                         beltLevel: player.beltLevel || "",
-                        yearsOfExperience: player.yearsOfExperience || ""
                       });
                       setSelectedPhoto(null);
                       setPhotoPreview(getImageUrl(player.photo));

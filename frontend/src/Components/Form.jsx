@@ -16,7 +16,6 @@ const Form = () => {
     role: "",
     dob: "",
     beltLevel: "",
-    yearsOfExperience: ""
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -99,7 +98,6 @@ const Form = () => {
         role: "",
         dob: "",
         beltLevel: "",
-        yearsOfExperience: ""
       });
     } catch (error) {
       if (error.response) {
@@ -145,7 +143,6 @@ const Form = () => {
     address: <MapPin className="w-5 h-5 text-green-700" />,
     dob: <Landmark className="w-5 h-5 text-blue-600" />,
     beltLevel: <Landmark className="w-5 h-5 text-purple-600" />,
-    yearsOfExperience: <Landmark className="w-5 h-5 text-yellow-600" />
   };
 
   const resetForm = () => {
@@ -210,7 +207,6 @@ const Form = () => {
       { name: "address", label: "Address", type: "textarea" },
       { name: "dob", label: "Date of Birth", type: "date" },
       { name: "beltLevel", label: "Belt Level", type: "text" },
-      { name: "yearsOfExperience", label: "Years of Experience", type: "number" }
     ];
 
     const allFields = formType === 'player' 
