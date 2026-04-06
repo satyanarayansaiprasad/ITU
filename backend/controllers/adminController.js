@@ -953,11 +953,22 @@ exports.getPlayers = async (req, res) => {
 
     const players = await Player.find(query)
       .sort({ createdAt: -1 })
-      .populate('union', 'name email phone');
+      .populate('union', 'name email phone')
+      .lean(); // Use lean to allow modification
+
+    // Regenerate plain-text passwords for display
+    const playersWithPassword = players.map(player => {
+      if (player.password && player.password.startsWith('$2b$')) {
+        // Password was hashed - regenerate original Itu@YYYY password
+        const year = player.dob ? new Date(player.dob).getFullYear() : '2024';
+        player.password = `Itu@${year}`;
+      }
+      return player;
+    });
 
     res.status(200).json({
       success: true,
-      data: players,
+      data: playersWithPassword,
       count: players.length
     });
   } catch (error) {

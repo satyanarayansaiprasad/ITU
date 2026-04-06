@@ -139,20 +139,10 @@ exports.loginStateUnion = async (req, res) => {
         isPasswordValid = await bcrypt.compare(password, stateUnion.password);
       } else {
         isPasswordValid = password === stateUnion.password;
-        // Auto-hash if plain text
-        if (isPasswordValid) {
-          stateUnion.password = await bcrypt.hash(password, 10);
-          await stateUnion.save();
-        }
       }
     } else {
       // Fallback to generated password for backward compatibility
       isPasswordValid = password === expectedPassword;
-      // Store hashed password
-      if (isPasswordValid) {
-        stateUnion.password = await bcrypt.hash(password, 10);
-        await stateUnion.save();
-      }
     }
     
     if (!isPasswordValid) {
@@ -605,11 +595,6 @@ exports.playerLogin = async (req, res) => {
     } else {
       // Password is plain text (legacy)
       isPasswordValid = player.password === password;
-      // Auto-hash if plain text
-      if (isPasswordValid) {
-        player.password = await bcrypt.hash(password, 10);
-        await player.save();
-      }
     }
 
     if (!isPasswordValid) {
@@ -764,7 +749,7 @@ exports.getPlayersByUnion = async (req, res) => {
 
     // Regenerate plain-text passwords for display in union dashboard
     // Passwords may have been auto-hashed (bcrypt) when players logged in,
-    // so we regenerate the original plain-text password from the player's name
+    // so we regenerate the original Itu@YYYY password
     const playersWithPassword = players.map(player => {
       if (player.password && player.password.startsWith('$2b$')) {
         // Password was hashed - regenerate original Itu@YYYY password
