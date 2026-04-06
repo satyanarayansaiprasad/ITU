@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { API_ENDPOINTS } from "../config/api";
 import { MapPin, User, Mail, Phone, Landmark, CheckCircle, AlertCircle, ChevronLeft } from "lucide-react";
 import PlayerRegistrationForm from "./PlayerRegistrationForm";
-
 const Form = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Initial state from URL
+  const initialType = searchParams.get("type");
+  const [formType, setFormType] = useState(initialType); // 'acceleration' or 'player'
   const [formData, setFormData] = useState({
     state: "",
     name: "",
@@ -20,10 +25,28 @@ const Form = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
-  const [formType, setFormType] = useState(null); // 'acceleration' or 'player'
   const [states, setStates] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [loadingDistricts, setLoadingDistricts] = useState(false);
+
+  // Sync state with URL
+  useEffect(() => {
+    const type = searchParams.get("type");
+    if (type && ["acceleration", "player"].includes(type)) {
+      setFormType(type);
+    } else if (!type) {
+      setFormType(null);
+    }
+  }, [searchParams]);
+
+  const handleSetFormType = (type) => {
+    if (type) {
+      setSearchParams({ type });
+    } else {
+      setSearchParams({});
+    }
+    setFormType(type);
+  };
 
   // Fetch states on component mount
   useEffect(() => {
@@ -145,9 +168,9 @@ const Form = () => {
     beltLevel: <Landmark className="w-5 h-5 text-purple-600" />,
   };
 
-  const resetForm = () => {
+   const resetForm = () => {
     setIsSubmitted(false);
-    setFormType(null);
+    handleSetFormType(null);
   };
 
   const renderFormSelection = () => (
@@ -164,10 +187,10 @@ const Form = () => {
       </p>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <motion.button
+         <motion.button
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
-          onClick={() => setFormType('acceleration')}
+          onClick={() => handleSetFormType('acceleration')}
           className="bg-gradient-to-r from-orange-500 to-orange-600 text-white py-4 px-6 rounded-xl shadow-md transition flex flex-col items-center"
         >
           <Landmark className="w-10 h-10 mb-2" />
@@ -178,7 +201,7 @@ const Form = () => {
         <motion.button
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
-          onClick={() => setFormType('player')}
+          onClick={() => handleSetFormType('player')}
           className="bg-gradient-to-r from-green-500 to-green-600 text-white py-4 px-6 rounded-xl shadow-md transition flex flex-col items-center"
         >
           <User className="w-10 h-10 mb-2" />
@@ -238,8 +261,8 @@ const Form = () => {
 
     return (
       <>
-        <button
-          onClick={() => setFormType(null)}
+         <button
+          onClick={() => handleSetFormType(null)}
           className="flex items-center text-orange-600 hover:text-orange-800 mb-4"
         >
           <ChevronLeft className="w-5 h-5 mr-1" />
@@ -368,8 +391,8 @@ const Form = () => {
                   : "Join our community"}
             </motion.p>
 
-            {formType === 'player' ? (
-              <PlayerRegistrationForm onBack={() => setFormType(null)} />
+             {formType === 'player' ? (
+              <PlayerRegistrationForm onBack={() => handleSetFormType(null)} />
             ) : formType ? (
               renderFormFields()
             ) : (

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import React from 'react'; 
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { API_ENDPOINTS } from "../config/api";
@@ -14,13 +14,33 @@ const modalVariants = {
 };
 
 const LoginPage = () => {
+   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Initial state from URL
+  const initialType = searchParams.get("type");
+  
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(true);
-  const [loginType, setLoginType] = useState(null);
-  const [formData, setFormData] = useState({ email: "", password: "" });
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate();
+  const [loginType, setLoginType] = useState(initialType);
+
+  // Sync state with URL
+  useEffect(() => {
+    const type = searchParams.get("type");
+    if (type && ["admin", "stateunion", "player"].includes(type)) {
+      setLoginType(type);
+    } else if (!type) {
+      setLoginType(null);
+    }
+  }, [searchParams]);
+
+  const handleSetLoginType = (type) => {
+    if (type) {
+      setSearchParams({ type });
+    } else {
+      setSearchParams({});
+    }
+    setLoginType(type);
+  };
 
   const handleInputChange = (e) => {
     setFormData(prev => ({
@@ -182,8 +202,8 @@ const LoginPage = () => {
                     </div>
 
                     <div className="grid grid-cols-1 gap-4">
-                      <motion.button
-                        onClick={() => setLoginType("admin")}
+                       <motion.button
+                        onClick={() => handleSetLoginType("admin")}
                         className="flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-[#0B2545] to-[#13315C] text-white rounded-lg hover:shadow-lg transition-all"
                         whileHover={{ y: -2 }}
                         whileTap={{ scale: 0.98 }}
@@ -193,7 +213,7 @@ const LoginPage = () => {
                       </motion.button>
 
                       <motion.button
-                        onClick={() => setLoginType("stateunion")}
+                        onClick={() => handleSetLoginType("stateunion")}
                         className="flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-[#0B2545] to-[#13315C] text-white rounded-lg hover:shadow-lg transition-all"
                         whileHover={{ y: -2 }}
                         whileTap={{ scale: 0.98 }}
@@ -203,7 +223,7 @@ const LoginPage = () => {
                       </motion.button>
 
                       <motion.button
-                        onClick={() => setLoginType("player")}
+                        onClick={() => handleSetLoginType("player")}
                         className="flex items-center justify-center gap-3 px-6 py-4 bg-gradient-to-r from-[#0B2545] to-[#13315C] text-white rounded-lg hover:shadow-lg transition-all"
                         whileHover={{ y: -2 }}
                         whileTap={{ scale: 0.98 }}
@@ -329,9 +349,9 @@ const LoginPage = () => {
                       </motion.button>
                     </form>
 
-                    <motion.button
+                     <motion.button
                       onClick={() => {
-                        setLoginType(null);
+                        handleSetLoginType(null);
                         setError("");
                         setFormData({ email: "", password: "" });
                       }}

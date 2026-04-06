@@ -413,7 +413,7 @@ const DistrictDetails = () => {
                   Be a part of the Indian Taekwondo Union. Register your organization today!
                 </p>
                 <button
-                  onClick={() => navigate('/forms')}
+                  onClick={() => navigate('/forms?type=acceleration')}
                   className="bg-white text-orange-600 px-6 sm:px-8 py-2 sm:py-3 rounded-lg font-bold text-base sm:text-lg hover:bg-gray-100 transition-colors flex items-center gap-2 mx-auto"
                 >
                   <ExternalLink className="w-5 h-5" />
@@ -625,7 +625,7 @@ const DistrictDetails = () => {
               >
                 <p className="text-lg text-gray-600 mb-6">No other unions available in this district.</p>
                 <button
-                  onClick={() => navigate('/forms')}
+                  onClick={() => navigate('/forms?type=acceleration')}
                   className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-orange-600 hover:to-red-700 transition-colors"
                 >
                   Join Our Organization
