@@ -17,7 +17,8 @@ import {
   Square,
   AlertCircle,
   Building2,
-  Key
+  Key,
+  Trash2
 } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -49,11 +50,10 @@ const PlayerManagement = () => {
   };
 
   const handleSelectAll = () => {
-    const pendingPlayers = players.filter(p => p.status === 'pending');
-    if (selectedPlayers.length === pendingPlayers.length) {
+    if (selectedPlayers.length === players.length) {
       setSelectedPlayers([]);
     } else {
-      setSelectedPlayers(pendingPlayers.map(p => p._id));
+      setSelectedPlayers(players.map(p => p._id));
     }
   };
 
@@ -192,6 +192,63 @@ const PlayerManagement = () => {
     }
   };
 
+  const handleDeletePlayer = async (playerId) => {
+    if (!window.confirm("Are you sure you want to delete this player? This action cannot be undone and will remove all their records.")) {
+      return;
+    }
+
+    try {
+      setApproving(true);
+      const response = await axios.delete(API_ENDPOINTS.DELETE_PLAYERS, {
+        data: { playerIds: [playerId] }
+      });
+
+      if (response.data.success) {
+        toast.success("Player deleted successfully");
+        setPlayers(prev => prev.filter(p => p._id !== playerId));
+        setSelectedPlayers(prev => prev.filter(id => id !== playerId));
+      } else {
+        toast.error(response.data.error || "Failed to delete player");
+      }
+    } catch (error) {
+      console.error("Error deleting player:", error);
+      toast.error(error.response?.data?.error || "Failed to delete player");
+    } finally {
+      setApproving(false);
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedPlayers.length === 0) {
+      toast.warning("Please select players to delete");
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to delete ${selectedPlayers.length} player(s)? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      setApproving(true);
+      const response = await axios.delete(API_ENDPOINTS.DELETE_PLAYERS, {
+        data: { playerIds: selectedPlayers }
+      });
+
+      if (response.data.success) {
+        toast.success(`${selectedPlayers.length} player(s) deleted successfully`);
+        setPlayers(prev => prev.filter(p => !selectedPlayers.includes(p._id)));
+        setSelectedPlayers([]);
+      } else {
+        toast.error(response.data.error || "Failed to delete players");
+      }
+    } catch (error) {
+      console.error("Error deleting players:", error);
+      toast.error(error.response?.data?.error || "Failed to delete players");
+    } finally {
+      setApproving(false);
+    }
+  };
+
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
@@ -259,35 +316,47 @@ const PlayerManagement = () => {
               </select>
             </div>
 
-            {pendingCount > 0 && (
-              <div className="flex items-center gap-3">
+            {players.length > 0 && (
+              <div className="flex flex-wrap items-center gap-3">
                 <button
                   onClick={handleSelectAll}
                   className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
                 >
-                  {selectedPlayers.length === pendingCount ? (
+                  {selectedPlayers.length === players.length ? (
                     <CheckSquare size={16} />
                   ) : (
                     <Square size={16} />
                   )}
-                  Select All Pending ({pendingCount})
+                  Select All ({players.length})
                 </button>
+                
+                {pendingCount > 0 && (
+                  <button
+                    onClick={handleApproveAll}
+                    disabled={selectedPlayers.filter(id => players.find(p => p._id === id)?.status === 'pending').length === 0 || approving}
+                    className={`px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2`}
+                  >
+                    {approving ? (
+                      <>
+                        <Loader className="animate-spin" size={16} />
+                        Approving...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle size={16} />
+                        Approve Pending ({selectedPlayers.filter(id => players.find(p => p._id === id)?.status === 'pending').length})
+                      </>
+                    )}
+                  </button>
+                )}
+
                 <button
-                  onClick={handleApproveAll}
+                  onClick={handleDeleteSelected}
                   disabled={selectedPlayers.length === 0 || approving}
-                  className={`px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2`}
+                  className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
-                  {approving ? (
-                    <>
-                      <Loader className="animate-spin" size={16} />
-                      Approving...
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle size={16} />
-                      Approve Selected ({selectedPlayers.length})
-                    </>
-                  )}
+                  <Trash2 size={16} />
+                  Delete Selected ({selectedPlayers.length})
                 </button>
               </div>
             )}
@@ -317,14 +386,12 @@ const PlayerManagement = () => {
               >
                 <div className="flex items-start gap-4">
                   {/* Checkbox for pending players */}
-                  {player.status === "pending" && (
-                    <input
-                      type="checkbox"
-                      checked={selectedPlayers.includes(player._id)}
-                      onChange={() => handleSelectPlayer(player._id)}
-                      className="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
-                    />
-                  )}
+                  <input
+                    type="checkbox"
+                    checked={selectedPlayers.includes(player._id)}
+                    onChange={() => handleSelectPlayer(player._id)}
+                    className="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                  />
 
                   <div className="flex-1">
                     <div className="flex items-start justify-between mb-4">
@@ -377,6 +444,18 @@ const PlayerManagement = () => {
                           </button>
                         </div>
                       )}
+                      
+                      {/* Global Delete Button */}
+                      <div className="flex items-center gap-2 ml-4">
+                        <button
+                          onClick={() => handleDeletePlayer(player._id)}
+                          disabled={approving}
+                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors border border-red-100"
+                          title="Delete Player"
+                        >
+                          <Trash2 size={20} />
+                        </button>
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
