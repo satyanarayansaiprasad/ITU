@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import React from 'react'; 
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -22,6 +22,10 @@ const LoginPage = () => {
   
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(true);
   const [loginType, setLoginType] = useState(initialType);
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   // Sync state with URL
   useEffect(() => {
