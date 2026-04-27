@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { API_ENDPOINTS } from "../config/api";
+import OptimizedImage from "./Common/OptimizedImage";
 import { 
   Search, 
   Filter, 
@@ -225,13 +226,10 @@ const Blog = () => {
             {/* Post Header */}
             <div className="bg-white rounded-3xl shadow-xl overflow-hidden mb-8">
               <div className="relative h-64 sm:h-80 md:h-96">
-                <img
+                <OptimizedImage
                   src={getImageUrl(selectedPost.image)}
                   alt={selectedPost.title}
                   className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.target.src = "/default-image.png";
-                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                 <div className="absolute bottom-6 left-6 right-6">
@@ -329,13 +327,10 @@ const Blog = () => {
                     >
                       <div className="bg-gray-50 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300">
                         <div className="relative h-40">
-                          <img
+                          <OptimizedImage
                             src={getImageUrl(post.image)}
                             alt={post.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            onError={(e) => {
-                              e.target.src = "/default-image.png";
-                            }}
                           />
                         </div>
                         <div className="p-4">
@@ -441,13 +436,10 @@ const Blog = () => {
                     >
                       <div className="bg-white rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300">
                         <div className={`relative ${index === 0 ? 'h-64 lg:h-80' : 'h-48'}`}>
-                          <img
+                          <OptimizedImage
                             src={getImageUrl(post.image)}
                             alt={post.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                            onError={(e) => {
-                              e.target.src = "/default-image.png";
-                            }}
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                           <div className="absolute top-4 left-4">
@@ -514,13 +506,10 @@ const Blog = () => {
                     >
                       <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 h-full">
                         <div className="relative h-48">
-                          <img
+                          <OptimizedImage
                             src={getImageUrl(post.image)}
                             alt={post.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            onError={(e) => {
-                              e.target.src = "/default-image.png";
-                            }}
                           />
                           <div className="absolute top-3 left-3">
                             <span className="px-2 py-1 bg-red-600 text-white rounded-full text-xs font-semibold">

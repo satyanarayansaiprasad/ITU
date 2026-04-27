@@ -3,6 +3,7 @@ import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_ENDPOINTS, GET_UPLOAD_URL } from '../config/api';
 import { X, ZoomIn, Download, Heart } from 'lucide-react';
+import OptimizedImage from './Common/OptimizedImage';
 
 const Gallery = () => {
   const [galleryImages, setGalleryImages] = useState([]);
@@ -162,22 +163,10 @@ const Gallery = () => {
                   onClick={() => setSelectedImage({ ...img, imageUrl })}
                 >
                   <div className="aspect-square-responsive overflow-hidden">
-                    <img
+                    <OptimizedImage
                       src={hasError ? "/default-image.png" : imageUrl}
                       alt={img.title || `Indian Taekwondo Union Training Session - Professional Martial Arts Training in India`}
-                      onError={(e) => {
-                        console.error("Gallery image load error:", { 
-                          src: e.target.src, 
-                          filename: img.filename,
-                          imageId: img._id 
-                        });
-                        handleImageError(img._id);
-                      }}
-                      onLoad={() => {
-                        console.log("Gallery image loaded successfully:", imageUrl);
-                      }}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      loading="lazy"
                     />
                     
                     {/* Overlay */}
@@ -257,7 +246,7 @@ const Gallery = () => {
 
               {/* Image */}
               <div className="relative overflow-hidden rounded-2xl shadow-2xl">
-                <img
+                <OptimizedImage
                   src={selectedImage.imageUrl}
                   alt={selectedImage.title || "Gallery Image"}
                   className="w-full h-auto max-h-[80vh] object-contain"

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { API_ENDPOINTS } from "../config/api";
+import OptimizedImage from "./Common/OptimizedImage";
 
 const News = () => {
   const [newsList, setNewsList] = useState([]);
@@ -65,11 +66,10 @@ const News = () => {
       {selectedNews ? (
         <div className="bg-white p-6 rounded-lg shadow-md">
           <div className="relative w-full h-64 bg-gray-200 rounded-lg overflow-hidden">
-            <img
+            <OptimizedImage
               src={getImageUrl(selectedNews.image)}
               alt={selectedNews.title}
-              className={`w-full h-full object-cover ${imageLoadErrors[selectedNews._id] ? 'hidden' : ''}`}
-              onError={() => handleImageError(selectedNews._id)}
+              className="w-full h-full object-cover"
             />
             {imageLoadErrors[selectedNews._id] && (
               <div className="w-full h-full flex items-center justify-center bg-gray-200">
@@ -97,11 +97,10 @@ const News = () => {
               onClick={() => setSelectedNews(newsList[0])}
             >
               <div className="relative w-full h-64 overflow-hidden">
-                <img
+                <OptimizedImage
                   src={getImageUrl(newsList[0].image)}
                   alt="Featured News"
-                  className={`w-full h-full object-cover ${imageLoadErrors[newsList[0]._id] ? 'hidden' : ''}`}
-                  onError={() => handleImageError(newsList[0]._id)}
+                  className="w-full h-full object-cover"
                 />
                 {imageLoadErrors[newsList[0]._id] && (
                   <div className="w-full h-full flex items-center justify-center bg-gray-800">
@@ -126,12 +125,11 @@ const News = () => {
                 onClick={() => setSelectedNews(news)}
               >
                 <div className="relative w-full h-40 bg-gray-200 rounded-lg overflow-hidden">
-                  <img
-  src={getImageUrl(news.image)}
-  alt={news.title}
-  className={`max-w-full h-auto mx-auto ${imageLoadErrors[news._id] ? 'hidden' : ''}`}
-  onError={() => handleImageError(news._id)}
-/>
+                  <OptimizedImage
+                    src={getImageUrl(news.image)}
+                    alt={news.title}
+                    className="max-w-full h-auto mx-auto"
+                  />
 
                   {imageLoadErrors[news._id] && (
                     <div className="w-full h-full flex items-center justify-center bg-gray-200">

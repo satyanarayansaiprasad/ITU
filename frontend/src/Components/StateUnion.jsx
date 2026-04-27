@@ -132,50 +132,63 @@ const StateUnion = () => {
             </div>
             
             <div className="overflow-x-auto -mx-4 sm:mx-0">
-              <table className="w-full min-w-[600px]">
-                <thead className="bg-gray-50">
+              <table className="w-full min-w-[800px] border-collapse">
+                <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">State</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Union Name</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">General Secretary</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Districts</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">State</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Union Name</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">General Secretary</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase tracking-wider">Districts</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-gray-200 bg-white">
                   {activeStates.map((state, index) => {
                     const stateHead = stateHeads[state.name];
+                    const districtList = Array.isArray(state.districts) ? state.districts : [];
+                    const displayDistricts = districtList.slice(0, 3).join(', ');
+                    const remainingCount = districtList.length - 3;
+
                     return (
                       <motion.tr
                         key={state.id}
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className="hover:bg-orange-50 transition-colors cursor-pointer"
+                        className="hover:bg-orange-50 transition-colors cursor-pointer group"
                         onClick={() => navigate(`/state-union/${state.name}`)}
                       >
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-gray-800">{state.name}</span>
+                        <td className="px-6 py-5 whitespace-nowrap">
+                          <div className="flex flex-col gap-1">
+                            <span className="font-bold text-gray-900 group-hover:text-orange-600 transition-colors">{state.name}</span>
                             {stateHead && (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-yellow-500 text-white text-xs font-semibold rounded-full">
+                              <span className="inline-flex w-fit items-center gap-1 px-2 py-0.5 bg-yellow-500 text-white text-[10px] font-bold rounded-full uppercase">
                                 <Crown className="w-3 h-3" />
                                 State Head
                               </span>
                             )}
                           </div>
                         </td>
-                        <td className="px-6 py-4">
-                          <span className="text-gray-700">{state.unionName || stateHead?.name || '-'}</span>
+                        <td className="px-6 py-5">
+                          <div className="text-sm text-gray-700 font-medium line-clamp-2">
+                            {state.unionName || stateHead?.name || '-'}
+                          </div>
                         </td>
-                        <td className="px-6 py-4">
-                          <span className="text-gray-700">
+                        <td className="px-6 py-5 whitespace-nowrap">
+                          <div className="text-sm text-gray-700">
                             {stateHead?.secretaryName || state.secretary || '-'}
-                          </span>
+                          </div>
                         </td>
-                        <td className="px-6 py-4">
-                          <span className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                            {state.districts}
-                          </span>
+                        <td className="px-6 py-5">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-bold">
+                              {districtList.length} Districts
+                            </span>
+                            {districtList.length > 0 && (
+                              <span className="text-xs text-gray-500 italic max-w-[200px] truncate">
+                                {displayDistricts}{remainingCount > 0 ? ` +${remainingCount} more` : ''}
+                              </span>
+                            )}
+                          </div>
                         </td>
                       </motion.tr>
                     );
@@ -233,55 +246,68 @@ const StateUnion = () => {
             </div>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredUpcomingStates.map((state, index) => {
               const stateHead = stateHeads[state.name];
+              const districtList = Array.isArray(state.districts) ? state.districts : [];
+              
               return (
                 <motion.div
                   key={state.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
+                  initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.03 }}
-                  className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border-2 border-dashed border-gray-300 p-4 group cursor-pointer"
+                  transition={{ delay: index * 0.05 }}
+                  className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 p-5 flex flex-col justify-between group cursor-pointer h-full"
                   onClick={() => navigate(`/state-union/${state.name}`)}
                 >
-                  <div className="text-center mb-3">
-                    <div className="text-gray-600 font-medium group-hover:text-orange-600 transition-colors text-sm mb-2">
-                      {state.name}
-                    </div>
-                    <div className="text-xs text-gray-500 mb-2">
-                      {state.districts} {state.districts === 1 ? 'District' : 'Districts'}
-                    </div>
-                    <div className="flex items-center justify-center gap-1 flex-wrap">
-                      {districtsWithData[state.name] ? (
-                        <span className="inline-block bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">
-                          Districts Active
-                        </span>
-                      ) : (
-                        <span className="inline-block bg-amber-100 text-amber-800 px-2 py-1 rounded text-xs font-medium">
-                          Coming Soon
-                        </span>
-                      )}
+                  <div>
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="text-gray-900 font-bold group-hover:text-orange-600 transition-colors text-lg">
+                        {state.name}
+                      </div>
                       {state.type === 'Union Territory' && (
-                        <span className="inline-block bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
+                        <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] font-bold rounded uppercase border border-blue-100">
                           UT
                         </span>
                       )}
                     </div>
+                    
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-bold rounded">
+                        {districtList.length} Districts
+                      </span>
+                      {districtsWithData[state.name] ? (
+                        <span className="px-2 py-1 bg-green-50 text-green-600 text-[10px] font-bold rounded border border-green-100 uppercase">
+                          Districts Active
+                        </span>
+                      ) : (
+                        <span className="px-2 py-1 bg-amber-50 text-amber-600 text-[10px] font-bold rounded border border-amber-100 uppercase">
+                          Coming Soon
+                        </span>
+                      )}
+                    </div>
+
+                    {districtList.length > 0 && (
+                      <div className="text-xs text-gray-400 italic mb-4 line-clamp-2 leading-relaxed">
+                        {districtList.slice(0, 8).join(', ')}{districtList.length > 8 ? '...' : ''}
+                      </div>
+                    )}
                   </div>
 
                   {/* State Head Display */}
                   {stateHead && (
-                    <div className="mt-3 pt-3 border-t border-gray-200">
-                      <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-lg p-3 text-white">
+                    <div className="mt-auto pt-4 border-t border-gray-50">
+                      <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg p-3 border border-amber-100">
                         <div className="flex items-center gap-2 mb-2">
-                          <Crown className="w-4 h-4" />
-                          <span className="text-xs font-semibold uppercase">State Head</span>
+                          <Crown className="w-3.5 h-3.5 text-amber-600" />
+                          <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">State Head</span>
                         </div>
-                        <div className="font-bold text-sm mb-1">{stateHead.name}</div>
-                        {stateHead.phone && <div className="text-xs opacity-90">{stateHead.phone}</div>}
-                        {stateHead.headOfficeAddress && (
-                          <div className="text-xs opacity-90 mt-1 line-clamp-2">{stateHead.headOfficeAddress}</div>
+                        <div className="font-bold text-gray-800 text-sm mb-1">{stateHead.name}</div>
+                        {stateHead.phone && (
+                          <div className="flex items-center gap-1.5 text-[11px] text-gray-600">
+                            <Phone className="w-3 h-3" />
+                            {stateHead.phone}
+                          </div>
                         )}
                       </div>
                     </div>

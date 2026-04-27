@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import Slider from "react-slick";
 import axios from "axios";
 import { API_ENDPOINTS, GET_UPLOAD_URL } from "../config/api";
+import OptimizedImage from "./Common/OptimizedImage";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 const textContainerVariants = {
@@ -107,7 +108,8 @@ const Home = () => {
         playsInline
         className="absolute top-0 left-0 w-full h-full object-cover"
       >
-        <source src="/flag.webm" type="video/mp4" />
+        <source src="/flag.webm" type="video/webm" />
+        <source src="/flag.mp4" type="video/mp4" />
         {/* Fallback for browsers that don't support the video */}
         <div className="absolute inset-0 bg-gradient-to-br from-[#0f2658] to-[#05183d]"></div>
       </video>
@@ -221,32 +223,15 @@ const Home = () => {
                       {sliderImages.map((slider, index) => {
                         const imageUrl = getImageUrl(slider.filename);
                         const hasError = imageLoadErrors[slider._id];
-                        console.log(`Slider ${index}:`, { 
-                          id: slider._id, 
-                          filename: slider.filename, 
-                          imageUrl, 
-                          hasError 
-                        });
+                        
                         return (
                           <div key={slider._id || index} className="relative group">
                             <div className="aspect-video overflow-hidden rounded-lg sm:rounded-xl shadow-lg">
-                              <img
+                              <OptimizedImage
                                 src={hasError ? "/default-image.png" : imageUrl}
                                 alt={`Indian Taekwondo Union Training Session ${index + 1} - Professional Martial Arts Training in India`}
-                                onError={(e) => {
-                                  console.error("Image load error:", { 
-                                    src: e.target.src, 
-                                    filename: slider.filename,
-                                    sliderId: slider._id 
-                                  });
-                                  handleImageError(slider._id);
-                                }}
-                                onLoad={() => {
-                                  console.log("Image loaded successfully:", imageUrl);
-                                }}
                                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                                loading="lazy"
-                                style={{ maxHeight: '400px', objectFit: 'cover' }}
+                                style={{ maxHeight: '400px' }}
                               />
                               {/* Subtle overlay for better text contrast */}
                               <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
