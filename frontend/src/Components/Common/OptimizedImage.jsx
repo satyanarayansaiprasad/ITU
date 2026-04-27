@@ -20,8 +20,8 @@ const OptimizedImage = ({
     let finalSrc = src;
     if (src && src.includes('cloudinary.com') && src.includes('/upload/')) {
       // Inject auto quality and auto format transformations
-      // We also limit the width to 1000px on the CDN side
-      finalSrc = src.replace('/upload/', '/upload/c_limit,w_1000/q_auto:eco,f_auto/');
+      // We also limit the width to 1200px on the CDN side
+      finalSrc = src.replace('/upload/', '/upload/c_limit,w_1200/q_auto:eco,f_auto/');
     }
     
     setCurrentSrc(finalSrc);

@@ -9,8 +9,8 @@ const sharp = require('sharp');
 const optimizeImage = async (buffer, options = {}) => {
   try {
     const {
-      maxWidth = 1000,
-      maxHeight = 1000,
+      maxWidth = 1200,
+      maxHeight = 1200,
       quality = 50,
       format = 'avif'
     } = options;

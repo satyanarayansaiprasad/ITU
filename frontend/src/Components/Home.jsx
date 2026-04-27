@@ -231,7 +231,6 @@ const Home = () => {
                                 src={hasError ? "/default-image.png" : imageUrl}
                                 alt={`Indian Taekwondo Union Training Session ${index + 1} - Professional Martial Arts Training in India`}
                                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                                style={{ maxHeight: '400px' }}
                               />
                               {/* Subtle overlay for better text contrast */}
                               <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
