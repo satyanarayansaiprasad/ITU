@@ -2,6 +2,7 @@
 const { firestoreService } = require('../services/firebaseService');
 const path = require('path');
 const fs = require('fs');
+const AccelerationForm = require('../models/AccelerationForm');
 
 // Fallback: Load static data if Firebase is not available
 let staticStatesData = null;
@@ -554,3 +555,85 @@ exports.updateStateStatus = async (req, res) => {
   }
 };
 
+/**
+ * Get a summary of all states with their state head and district status
+ * Consolidates data to avoid N+1 queries from frontend
+ */
+exports.getStatesSummary = async (req, res) => {
+  try {
+    // 1. Fetch all states (using existing logic)
+    let states = [];
+    let source = 'firebase';
+
+    if (firestoreService.isAvailable()) {
+      try {
+        states = await firestoreService.getAll('states');
+      } catch (err) {
+        console.warn('Firebase query failed in summary, falling back to static:', err.message);
+      }
+    }
+
+    if (!states || states.length === 0) {
+      const staticData = loadStaticData();
+      if (staticData) {
+        states = convertStaticToAPI(staticData);
+        source = 'static';
+      }
+    }
+
+    if (!states || states.length === 0) {
+      return res.status(503).json({ success: false, error: 'States data not available' });
+    }
+
+    states.sort((a, b) => a.name.localeCompare(b.name));
+
+    // 2. Fetch all approved organizations from MongoDB
+    const organizations = await AccelerationForm.find({
+      status: 'approved'
+    }).select('name email phone district state isDistrictHead isStateHead secretaryName headOfficeAddress establishedDate').lean();
+
+    // 3. Process organizations by state
+    const stateHeads = {};
+    const districtsWithData = {};
+
+    organizations.forEach(org => {
+      const stateName = org.state;
+      
+      // Track state heads
+      if (org.isStateHead) {
+        stateHeads[stateName] = org;
+      }
+
+      // Track states that have at least one active district organization
+      if (!org.isStateHead && org.district) {
+        districtsWithData[stateName] = true;
+      }
+    });
+
+    // 4. Merge data into states list
+    const enrichedStates = states.map(state => {
+      const head = stateHeads[state.name];
+      const hasDistricts = districtsWithData[state.name] || false;
+
+      return {
+        ...state,
+        active: !!head,
+        stateHead: head || null,
+        hasDistrictData: hasDistricts,
+        unionName: head ? head.name : null,
+        secretary: head ? head.secretaryName : null,
+        established: head ? head.establishedDate : null
+      };
+    });
+
+    res.json({
+      success: true,
+      data: enrichedStates,
+      source: source
+    });
+
+  } catch (error) {
+    console.error('Error fetching states summary:', error);
+    res.status(500).json({ success: false, error: 'Internal server error', details: error.message });
+  }
+};

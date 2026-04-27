@@ -1,5 +1,7 @@
 const cloudinary = require('cloudinary').v2;
 require('dotenv').config();
+const { optimizeImage } = require('../utils/imageOptimizer');
+const fs = require('fs');
 
 // Configure Cloudinary
 cloudinary.config({
@@ -8,24 +10,40 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-// Helper function to upload image to Cloudinary
+// Helper function to upload image to Cloudinary (from file path)
 const uploadToCloudinary = async (filePath, folder = 'itu') => {
   try {
-    const result = await cloudinary.uploader.upload(filePath, {
-      folder: folder,
-      resource_type: 'auto',
-      transformation: [
-        { quality: 'auto' },
-        { fetch_format: 'auto' }
-      ]
+    // Read file into buffer for optimization
+    const buffer = fs.readFileSync(filePath);
+    const optimizedBuffer = await optimizeImage(buffer);
+
+    return new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: folder,
+          resource_type: 'auto',
+          transformation: [
+            { quality: 'auto' },
+            { fetch_format: 'auto' }
+          ]
+        },
+        (error, result) => {
+          if (error) {
+            console.error('Cloudinary upload error:', error);
+            reject(error);
+          } else {
+            resolve({
+              url: result.secure_url,
+              public_id: result.public_id,
+              width: result.width,
+              height: result.height,
+              format: result.format
+            });
+          }
+        }
+      );
+      uploadStream.end(optimizedBuffer);
     });
-    return {
-      url: result.secure_url,
-      public_id: result.public_id,
-      width: result.width,
-      height: result.height,
-      format: result.format
-    };
   } catch (error) {
     console.error('Cloudinary upload error:', error);
     throw error;
@@ -34,34 +52,42 @@ const uploadToCloudinary = async (filePath, folder = 'itu') => {
 
 // Helper function to upload from buffer (for multer)
 const uploadBufferToCloudinary = async (buffer, folder = 'itu', filename = null) => {
-  return new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder: folder,
-        resource_type: 'auto',
-        transformation: [
-          { quality: 'auto' },
-          { fetch_format: 'auto' }
-        ],
-        public_id: filename ? `${folder}/${filename}` : undefined
-      },
-      (error, result) => {
-        if (error) {
-          console.error('Cloudinary upload error:', error);
-          reject(error);
-        } else {
-          resolve({
-            url: result.secure_url,
-            public_id: result.public_id,
-            width: result.width,
-            height: result.height,
-            format: result.format
-          });
+  try {
+    // Optimize buffer before upload
+    const optimizedBuffer = await optimizeImage(buffer);
+
+    return new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: folder,
+          resource_type: 'auto',
+          transformation: [
+            { quality: 'auto' },
+            { fetch_format: 'auto' }
+          ],
+          public_id: filename ? `${folder}/${filename}` : undefined
+        },
+        (error, result) => {
+          if (error) {
+            console.error('Cloudinary upload error:', error);
+            reject(error);
+          } else {
+            resolve({
+              url: result.secure_url,
+              public_id: result.public_id,
+              width: result.width,
+              height: result.height,
+              format: result.format
+            });
+          }
         }
-      }
-    );
-    uploadStream.end(buffer);
-  });
+      );
+      uploadStream.end(optimizedBuffer);
+    });
+  } catch (error) {
+    console.error('Cloudinary buffer upload error:', error);
+    throw error;
+  }
 };
 
 // Helper function to delete image from Cloudinary

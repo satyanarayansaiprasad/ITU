@@ -14,87 +14,34 @@ const StateUnion = () => {
   const [stateHeads, setStateHeads] = useState({}); // Map of stateName -> stateHead data
   const [districtsWithData, setDistrictsWithData] = useState({}); // Map of stateName -> boolean (has districts with data)
 
-  // Fetch states from Firebase API
+  // Fetch states summary from API
   useEffect(() => {
     const fetchStates = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(API_ENDPOINTS.GET_ALL_STATES);
+        const response = await axios.get(API_ENDPOINTS.GET_STATES_SUMMARY);
         
         if (response.data.success) {
-          // Map Firebase data to component format
-          const mappedStates = response.data.data.map((state, index) => {
-            return {
-              id: state.id || index + 1,
-              name: state.name,
-              districts: state.districtCount || state.districts?.length || 0,
-              type: state.type,
-              active: false,
-              secretary: null,
-              unionName: null,
-              established: null
-            };
-          });
-          setStates(mappedStates);
+          const enrichedStates = response.data.data;
           
-          // Fetch state heads and check for districts with data
+          setStates(enrichedStates);
+          
           const headsMap = {};
           const districtsDataMap = {};
           
-          const stateDataPromises = mappedStates.map(async (state) => {
-            try {
-              // Fetch organizations for the state
-              const orgResponse = await axios.get(API_ENDPOINTS.GET_ORGANIZATIONS_BY_STATE(state.name));
-              if (orgResponse.data.success) {
-                const organizations = orgResponse.data.data || [];
-                const stateHead = organizations.find(org => org.isStateHead);
-                
-                // Check if any district has organizations (excluding state head)
-                const hasDistrictData = organizations.some(org => !org.isStateHead && org.district);
-                
-                return {
-                  stateName: state.name,
-                  stateHead: stateHead || null,
-                  hasDistrictData: hasDistrictData
-                };
-              }
-            } catch (err) {
-              console.error(`Error fetching data for ${state.name}:`, err);
+          enrichedStates.forEach(state => {
+            if (state.stateHead) {
+              headsMap[state.name] = state.stateHead;
             }
-            return {
-              stateName: state.name,
-              stateHead: null,
-              hasDistrictData: false
-            };
-          });
-          
-          const results = await Promise.all(stateDataPromises);
-          results.forEach(result => {
-            if (result.stateHead) {
-              headsMap[result.stateName] = result.stateHead;
-            }
-            districtsDataMap[result.stateName] = result.hasDistrictData;
+            districtsDataMap[state.name] = state.hasDistrictData;
           });
           
           setStateHeads(headsMap);
           setDistrictsWithData(districtsDataMap);
-          
-          // Mark states with state heads as active and update their details
-          mappedStates.forEach(state => {
-            if (headsMap[state.name]) {
-              const head = headsMap[state.name];
-              state.active = true;
-              state.unionName = head.name;
-              state.secretary = head.secretaryName || null; // Store actual secretary name or null
-              state.established = head.establishedDate;
-            }
-          });
-          setStates(mappedStates);
         }
       } catch (err) {
-        console.error('Error fetching states:', err);
-        setError('Failed to load states. Please try again later.');
-        // Fallback to empty array
+        console.error('Error fetching states summary:', err);
+        setError('Failed to load states summary. Please try again later.');
         setStates([]);
       } finally {
         setLoading(false);

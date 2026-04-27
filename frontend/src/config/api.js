@@ -84,6 +84,7 @@ export const API_ENDPOINTS = {
 
   // States and Districts endpoints
   GET_ALL_STATES: `${API_BASE_URL}/api/states`,
+  GET_STATES_SUMMARY: `${API_BASE_URL}/api/states/summary`,
   GET_STATES_ONLY: `${API_BASE_URL}/api/states/states-only`,
   GET_UNION_TERRITORIES: `${API_BASE_URL}/api/states/union-territories`,
   GET_STATE: (stateName) => `${API_BASE_URL}/api/states/${encodeURIComponent(stateName)}`,

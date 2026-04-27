@@ -8,6 +8,9 @@ router.post('/', statesController.createState);
 // Get all states and UTs
 router.get('/', statesController.getAllStates);
 
+// Get states summary with heads and district status
+router.get('/summary', statesController.getStatesSummary);
+
 // Get only states (excluding UTs)
 router.get('/states-only', statesController.getStatesOnly);
 
