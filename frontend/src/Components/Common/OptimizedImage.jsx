@@ -16,7 +16,15 @@ const OptimizedImage = ({
   const [currentSrc, setCurrentSrc] = useState(src);
 
   useEffect(() => {
-    setCurrentSrc(src);
+    // Apply Cloudinary transformations if it's a Cloudinary URL
+    let finalSrc = src;
+    if (src && src.includes('cloudinary.com') && src.includes('/upload/')) {
+      // Inject auto quality and auto format transformations
+      // We also limit the width to 1000px on the CDN side
+      finalSrc = src.replace('/upload/', '/upload/c_limit,w_1000/q_auto:eco,f_auto/');
+    }
+    
+    setCurrentSrc(finalSrc);
     setIsLoaded(false);
     setError(false);
   }, [src]);

@@ -9,10 +9,10 @@ const sharp = require('sharp');
 const optimizeImage = async (buffer, options = {}) => {
   try {
     const {
-      maxWidth = 1600,
-      maxHeight = 1600,
-      quality = 80,
-      format = 'webp'
+      maxWidth = 1000,
+      maxHeight = 1000,
+      quality = 50,
+      format = 'avif'
     } = options;
 
     let pipeline = sharp(buffer);
@@ -29,7 +29,9 @@ const optimizeImage = async (buffer, options = {}) => {
     }
 
     // Convert to requested format and apply quality compression
-    if (format === 'webp') {
+    if (format === 'avif') {
+      pipeline = pipeline.avif({ quality, effort: 4 });
+    } else if (format === 'webp') {
       pipeline = pipeline.webp({ quality });
     } else if (format === 'jpeg' || format === 'jpg') {
       pipeline = pipeline.jpeg({ quality, mozjpeg: true });
