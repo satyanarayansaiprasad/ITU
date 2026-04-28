@@ -34,32 +34,31 @@ const Districts = () => {
             stateName: response.data.data.stateName || stateName
           });
           
-          // Fetch state head
+          // Fetch state head and all organizations for this state to avoid N+1 API calls
+          const orgsMap = {};
           try {
             const orgResponse = await axios.get(API_ENDPOINTS.GET_ORGANIZATIONS_BY_STATE(stateName));
             if (orgResponse.data.success) {
-              const head = orgResponse.data.data.find(org => org.isStateHead);
+              const organizations = orgResponse.data.data || [];
+              
+              // Find state head
+              const head = organizations.find(org => org.isStateHead);
               if (head) {
                 setStateHead(head);
               }
+
+              // Group organizations by district
+              for (const org of organizations) {
+                if (org.district) {
+                  if (!orgsMap[org.district]) {
+                    orgsMap[org.district] = [];
+                  }
+                  orgsMap[org.district].push(org);
+                }
+              }
             }
           } catch (err) {
-            console.error(`Error fetching state head for ${stateName}:`, err);
-          }
-          
-          // Fetch organizations for each district
-          const orgsMap = {};
-          for (const district of districts) {
-            try {
-              const orgResponse = await axios.get(
-                API_ENDPOINTS.GET_ORGANIZATIONS_BY_DISTRICT(stateName, district)
-              );
-              if (orgResponse.data.success && orgResponse.data.data.length > 0) {
-                orgsMap[district] = orgResponse.data.data;
-              }
-            } catch (err) {
-              console.error(`Error fetching organizations for ${district}:`, err);
-            }
+            console.error(`Error fetching organizations for ${stateName}:`, err);
           }
           setOrganizationsByDistrict(orgsMap);
         }
