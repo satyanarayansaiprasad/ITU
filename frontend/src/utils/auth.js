@@ -1,3 +1,62 @@
+// LocalStorage key namespace isolation to prevent collisions between admin and other roles on the same browser
+(() => {
+  if (typeof window === 'undefined' || !window.localStorage) return;
+
+  const originalGetItem = window.localStorage.getItem;
+  const originalSetItem = window.localStorage.setItem;
+  const originalRemoveItem = window.localStorage.removeItem;
+
+  const targetKeys = ['accessToken', 'refreshToken', 'userData', 'stateUnionId', 'playerData'];
+
+  const getRolePrefix = () => {
+    const path = window.location.pathname;
+    const searchParams = new URLSearchParams(window.location.search);
+    const typeParam = searchParams.get('type');
+
+    if (path.startsWith('/admin') || path.startsWith('/admindashboard') || typeParam === 'admin') {
+      return 'admin_';
+    }
+    if (path.startsWith('/stateunion') || path.startsWith('/state-union') || typeParam === 'stateunion') {
+      return 'stateunion_';
+    }
+    if (path.startsWith('/player') || typeParam === 'player') {
+      return 'player_';
+    }
+    return '';
+  };
+
+  window.localStorage.getItem = function(key) {
+    if (targetKeys.includes(key)) {
+      const prefix = getRolePrefix();
+      if (prefix) {
+        const val = originalGetItem.call(window.localStorage, prefix + key);
+        if (val !== null) return val;
+      }
+    }
+    return originalGetItem.call(window.localStorage, key);
+  };
+
+  window.localStorage.setItem = function(key, value) {
+    if (targetKeys.includes(key)) {
+      const prefix = getRolePrefix();
+      if (prefix) {
+        originalSetItem.call(window.localStorage, prefix + key, value);
+      }
+    }
+    originalSetItem.call(window.localStorage, key, value);
+  };
+
+  window.localStorage.removeItem = function(key) {
+    if (targetKeys.includes(key)) {
+      const prefix = getRolePrefix();
+      if (prefix) {
+        originalRemoveItem.call(window.localStorage, prefix + key);
+      }
+    }
+    originalRemoveItem.call(window.localStorage, key);
+  };
+})();
+
 const TOKEN_KEY = 'accessToken';
 const REFRESH_TOKEN_KEY = 'refreshToken';
 const USER_DATA_KEY = 'userData';

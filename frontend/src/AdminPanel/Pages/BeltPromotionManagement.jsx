@@ -35,9 +35,7 @@ const BeltPromotionManagement = () => {
   }, [selectedState, selectedDistrict]);
 
   useEffect(() => {
-    if (selectedState || selectedDistrict || selectedUnion) {
-      fetchPromotions();
-    }
+    fetchPromotions();
   }, [selectedState, selectedDistrict, selectedUnion]);
 
   const fetchUnions = async () => {
