@@ -21,6 +21,7 @@ initializeFirebase();
 // CORS Configuration
 const allowedOrigins = [
   'https://itu-f4bn.onrender.com',
+  'https://itu-bqhr.onrender.com',
   'https://itu-mu.vercel.app',
   'https://taekwondounion.com',
   'https://www.taekwondounion.com',

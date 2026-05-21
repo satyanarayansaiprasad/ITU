@@ -1,15 +1,12 @@
 // API Configuration
+import { getActiveBackendUrl } from '../utils/backendManager';
+
 // Auto-detect production vs localhost
 const getApiBaseUrl = () => {
   if (import.meta.env.VITE_API_BASE_URL) {
     return import.meta.env.VITE_API_BASE_URL;
   }
-  // Check if we're running on localhost
-  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-    return 'http://localhost:3001';
-  }
-  // Default to production URL
-  return 'https://itu-f4bn.onrender.com';
+  return getActiveBackendUrl();
 };
 
 const API_BASE_URL = getApiBaseUrl();

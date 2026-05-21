@@ -1,17 +1,18 @@
 import axios from 'axios';
 import { getAccessToken, refreshAccessToken, clearAuthData } from './auth';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
-  (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-f4bn.onrender.com');
+import { getActiveBackendUrl, setupAxiosInterceptors } from './backendManager';
 
 // Create axios instance
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: getActiveBackendUrl(),
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+// Setup dynamic URL fallback interceptors on this instance
+setupAxiosInterceptors(api);
 
 // Request interceptor - Add token to requests
 api.interceptors.request.use(
