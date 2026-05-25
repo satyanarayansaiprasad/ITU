@@ -430,8 +430,12 @@ const PlayerRegistrationForm = ({ onBack }) => {
                   <Calendar className="w-5 h-5 text-blue-600" />
                 </div>
                 <input
-                  type="date"
-                  placeholder="Date of Birth *"
+                  type={player.dob ? "date" : "text"}
+                  placeholder="DOB *"
+                  onFocus={(e) => (e.target.type = "date")}
+                  onBlur={(e) => {
+                    if (!e.target.value) e.target.type = "text";
+                  }}
                   value={player.dob}
                   onChange={(e) => handlePlayerChange(index, "dob", e.target.value)}
                   required

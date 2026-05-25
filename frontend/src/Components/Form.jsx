@@ -228,7 +228,7 @@ const Form = () => {
 
     const playerSpecificFields = [
       { name: "address", label: "Address", type: "textarea" },
-      { name: "dob", label: "Date of Birth", type: "date" },
+      { name: "dob", label: "DOB", type: "date" },
       { 
         name: "beltLevel", 
         label: "Belt Level", 
@@ -331,7 +331,11 @@ const Form = () => {
                 ) : (
                   <input
                     placeholder={field.label}
-                    type={field.type}
+                    type={field.type === "date" ? (formData[field.name] ? "date" : "text") : field.type}
+                    onFocus={field.type === "date" ? (e) => (e.target.type = "date") : undefined}
+                    onBlur={field.type === "date" ? (e) => {
+                      if (!e.target.value) e.target.type = "text";
+                    } : undefined}
                     {...commonProps}
                   />
                 )}
