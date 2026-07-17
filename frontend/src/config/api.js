@@ -35,6 +35,7 @@ export const API_ENDPOINTS = {
   EDIT_NEWS: (id) => `${API_BASE_URL}/api/admin/editNews/${id}`,
   DELETE_NEWS: (id) => `${API_BASE_URL}/api/admin/deleteNews/${id}`,
   GET_FORM: `${API_BASE_URL}/api/admin/getForm`,
+  DOWNLOAD_APPROVED_UNIONS: `${API_BASE_URL}/api/admin/approved-unions/download`,
   APPROVE_FORM: `${API_BASE_URL}/api/admin/approveForm`,
   REJECT_FORM: `${API_BASE_URL}/api/admin/rejectForm`,
   DELETE_USER: `${API_BASE_URL}/api/admin/deleteUser`,

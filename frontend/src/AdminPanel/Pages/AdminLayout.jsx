@@ -18,6 +18,7 @@ import {
   User,
   Award,
   Trophy,
+  FileSpreadsheet,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
@@ -38,6 +39,7 @@ const AdminLayout = () => {
     { title: "Blog Management", icon: <Newspaper className="w-5 h-5" />, path: "/admin/blogs" },
     { title: "Gallery Management", icon: <GalleryVerticalEnd className="w-5 h-5" />, path: "/admin/gallery" },
     { title: "Form Submissions", icon: <FilePlus className="w-5 h-5" />, path: "/admin/form-submissions" },
+    { title: "Affiliated Unions", icon: <FileSpreadsheet className="w-5 h-5" />, path: "/admin/affiliated-unions" },
     { title: "States & Districts", icon: <MapPin className="w-5 h-5" />, path: "/admin/states-districts" },
     { title: "District & State Heads", icon: <Crown className="w-5 h-5" />, path: "/admin/heads-management" },
     { title: "Player Management", icon: <User className="w-5 h-5" />, path: "/admin/player-management" },

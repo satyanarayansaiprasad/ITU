@@ -29,6 +29,7 @@ import CategorySliderManager from './AdminPanel/Pages/CategorySliderManager';
 import ModernGalleryMng from './AdminPanel/Pages/ModernGalleryMng';
 import Form from './Components/Form';
 import ModernFormSubmissions from './AdminPanel/Pages/ModernFormSubmissions';
+import ModernAffiliatedUnions from './AdminPanel/Pages/ModernAffiliatedUnions';
 import ModernStatesDistrictsManager from './AdminPanel/Pages/ModernStatesDistrictsManager';
 import HeadsManagement from './AdminPanel/Pages/HeadsManagement';
 import PlayerManagement from './AdminPanel/Pages/PlayerManagement';
@@ -97,6 +98,7 @@ const App = () => {
           <Route path="/admin/category-slider" element={<CategorySliderManager />} />
           <Route path="/admin/gallery" element={<ModernGalleryMng />} />
           <Route path="/admin/form-submissions" element={<ModernFormSubmissions />} />
+          <Route path="/admin/affiliated-unions" element={<ModernAffiliatedUnions />} />
           <Route path="/admin/states-districts" element={<ModernStatesDistrictsManager />} />
           <Route path="/admin/heads-management" element={<HeadsManagement />} />
           <Route path="/admin/player-management" element={<PlayerManagement />} />

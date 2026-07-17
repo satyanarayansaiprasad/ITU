@@ -3059,3 +3059,183 @@ exports.deletePoliceTrainingPhoto = async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to delete photo', error: error.message });
   }
 };
+
+// DOWNLOAD APPROVED UNIONS EXCEL
+exports.downloadApprovedUnionsExcel = async (req, res) => {
+  try {
+    const ExcelJS = require('exceljs');
+    const AccelerationForm = require('../models/AccelerationForm');
+
+    const approved = await AccelerationForm.find({ status: 'approved' });
+
+    // Process and sort alphabetically by Union / Organization Name
+    const cleanString = (val, toUpper = true) => {
+      if (!val || val === 'undefined' || val.toString().trim() === '') {
+        return 'N/A';
+      }
+      const str = val.toString().trim();
+      return toUpper ? str.toUpperCase() : str;
+    };
+
+    const formatDate = (date) => {
+      if (!date) return '';
+      const d = new Date(date);
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      return `${day}/${month}/${year}`;
+    };
+
+    const processedData = approved.map((doc) => {
+      const certId = `ITU-${doc._id.toString().substring(0, 8).toUpperCase()}`;
+      const name = cleanString(doc.name, true);
+      const state = cleanString(doc.state, false);
+      const district = cleanString(doc.district, false);
+      const presidentName = cleanString(doc.presidentName, true);
+      const secretaryName = cleanString(doc.secretaryName, true);
+      const email = cleanString(doc.email, false).toLowerCase();
+      const phone = cleanString(doc.phone, false);
+      const approvalDate = formatDate(doc.updatedAt);
+
+      return {
+        certId,
+        name,
+        state,
+        district,
+        presidentName,
+        secretaryName,
+        email,
+        phone,
+        approvalDate
+      };
+    });
+
+    processedData.sort((a, b) => a.name.localeCompare(b.name));
+
+    const workbook = new ExcelJS.Workbook();
+    const sheet = workbook.addWorksheet('Approved Unions', {
+      views: [{ showGridLines: true }]
+    });
+
+    // Set column widths
+    sheet.columns = [
+      { width: 8 },  // S.No
+      { width: 20 }, // Certificate ID
+      { width: 35 }, // Union / Organization Name
+      { width: 18 }, // State
+      { width: 18 }, // District
+      { width: 25 }, // President Name
+      { width: 25 }, // Secretary Name
+      { width: 30 }, // Email Address
+      { width: 18 }, // Phone Number
+      { width: 15 }  // Approval Date
+    ];
+
+    // Set row heights
+    sheet.getRow(1).height = 40;
+    sheet.getRow(2).height = 25;
+    sheet.getRow(4).height = 30;
+
+    // Title Banner (Row 1)
+    sheet.mergeCells('A1:J1');
+    const titleCell = sheet.getCell('A1');
+    titleCell.value = 'INDIAN TAEKWONDO UNION (ITU)';
+    titleCell.font = { name: 'Arial', size: 16, bold: true, color: { argb: 'FFFFFFFF' } };
+    titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0E2A4E' } };
+    titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    // Subtitle Banner (Row 2)
+    sheet.mergeCells('A2:J2');
+    const subtitleCell = sheet.getCell('A2');
+    subtitleCell.value = 'List of Affiliated and Approved Unions & Academies';
+    subtitleCell.font = { name: 'Arial', size: 11, italic: true, color: { argb: 'FFFFFFFF' } };
+    subtitleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1A4A7A' } };
+    subtitleCell.alignment = { horizontal: 'center', vertical: 'middle' };
+
+    // Headers (Row 4)
+    const headers = [
+      'S.No',
+      'Certificate ID',
+      'Union / Organization Name',
+      'State',
+      'District',
+      'President Name',
+      'Secretary Name',
+      'Email Address',
+      'Phone Number',
+      'Approval Date'
+    ];
+
+    const headerRow = sheet.getRow(4);
+    headers.forEach((header, colIndex) => {
+      const cell = headerRow.getCell(colIndex + 1);
+      cell.value = header;
+      cell.font = { name: 'Arial', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0E2A4E' } };
+      cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FFCCCCCC' } },
+        left: { style: 'thin', color: { argb: 'FFCCCCCC' } },
+        right: { style: 'thin', color: { argb: 'FFCCCCCC' } },
+        bottom: { style: 'medium', color: { argb: 'FF000000' } }
+      };
+    });
+
+    // Data Rows
+    processedData.forEach((row, idx) => {
+      const rowIndex = idx + 5;
+      const excelRow = sheet.getRow(rowIndex);
+      excelRow.height = 22;
+
+      const rowData = [
+        idx + 1,
+        row.certId,
+        row.name,
+        row.state,
+        row.district,
+        row.presidentName,
+        row.secretaryName,
+        row.email,
+        row.phone,
+        row.approvalDate
+      ];
+
+      const isOdd = idx % 2 === 0;
+      const fill = isOdd
+        ? { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF9FBFD' } }
+        : { type: 'pattern', pattern: 'none' };
+
+      rowData.forEach((val, colIndex) => {
+        const cell = excelRow.getCell(colIndex + 1);
+        cell.value = val;
+        cell.font = { name: 'Arial', size: 9 };
+        if (isOdd) cell.fill = fill;
+
+        if (colIndex === 0 || colIndex === 1 || colIndex === 9) {
+          cell.alignment = { horizontal: 'center', vertical: 'middle' };
+        } else {
+          cell.alignment = { horizontal: 'left', vertical: 'middle' };
+        }
+
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FFE0E0E0' } },
+          bottom: { style: 'thin', color: { argb: 'FFE0E0E0' } },
+          left: { style: 'thin', color: { argb: 'FFE0E0E0' } },
+          right: { style: 'thin', color: { argb: 'FFE0E0E0' } }
+        };
+      });
+    });
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename=Approved_Unions.xlsx');
+
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (error) {
+    console.error('Error generating Excel:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to generate Excel file'
+    });
+  }
+};
