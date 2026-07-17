@@ -3362,3 +3362,15 @@ exports.deleteApprovedUnion = async (req, res) => {
     res.status(500).json({ success: false, error: error.message || 'Failed to delete union' });
   }
 };
+
+// GET ALL APPROVED UNIONS DIRECTLY
+exports.getApprovedUnions = async (req, res) => {
+  try {
+    const AccelerationForm = require('../models/AccelerationForm');
+    const approved = await AccelerationForm.find({ status: 'approved' }).sort({ name: 1 });
+    res.status(200).json({ success: true, data: approved });
+  } catch (error) {
+    console.error('Error fetching approved unions:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch approved unions' });
+  }
+};

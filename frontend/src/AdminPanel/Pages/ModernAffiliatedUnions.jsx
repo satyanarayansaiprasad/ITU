@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../utils/axiosConfig";
 import { 
   Search, CheckCircle, AlertCircle, Loader, Mail, Phone, 
   MapPin, Calendar, Download, RefreshCw, FileSpreadsheet, 
@@ -42,14 +42,16 @@ const ModernAffiliatedUnions = () => {
   const fetchUnions = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(API_ENDPOINTS.GET_FORM);
-      const approvedUnions = response.data.filter(
-        (form) => form.status === "approved"
-      );
-      setUnions(approvedUnions);
+      // Fetch directly from the dedicated approved-unions endpoint
+      const response = await api.get(API_ENDPOINTS.GET_APPROVED_UNIONS);
+      if (response.data && response.data.success) {
+        setUnions(response.data.data || []);
+      } else {
+        setUnions([]);
+      }
     } catch (error) {
       console.error("Error fetching unions:", error);
-      showNotification("Failed to fetch affiliated unions", "error");
+      showNotification("Failed to fetch affiliated unions from database", "error");
     } finally {
       setLoading(false);
     }
@@ -118,7 +120,7 @@ const ModernAffiliatedUnions = () => {
 
     setSubmitLoading(true);
     try {
-      const response = await axios.post(API_ENDPOINTS.CREATE_APPROVED_UNION, formData);
+      const response = await api.post(API_ENDPOINTS.CREATE_APPROVED_UNION, formData);
       if (response.data.success) {
         showNotification("Union manually created and approved successfully!");
         setIsAddModalOpen(false);
@@ -142,7 +144,7 @@ const ModernAffiliatedUnions = () => {
 
     setSubmitLoading(true);
     try {
-      const response = await axios.put(
+      const response = await api.put(
         API_ENDPOINTS.UPDATE_APPROVED_UNION(selectedUnion._id),
         formData
       );
@@ -162,7 +164,7 @@ const ModernAffiliatedUnions = () => {
   const handleDeleteSubmit = async () => {
     setSubmitLoading(true);
     try {
-      const response = await axios.delete(
+      const response = await api.delete(
         API_ENDPOINTS.DELETE_APPROVED_UNION(selectedUnion._id)
       );
       if (response.data.success) {
@@ -213,7 +215,7 @@ const ModernAffiliatedUnions = () => {
   const filteredUnions = unions
     .map((u) => ({
       ...u,
-      certId: `ITU-${u._id.substring(0, 8).toUpperCase()}`
+      certId: u._id ? `ITU-${u._id.toString().substring(0, 8).toUpperCase()}` : ""
     }))
     .filter((u) => {
       const searchLower = searchTerm.toLowerCase();
