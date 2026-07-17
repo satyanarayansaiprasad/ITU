@@ -3,7 +3,7 @@ import axios from "axios";
 import { 
   Search, CheckCircle, AlertCircle, Loader, Mail, Phone, 
   MapPin, Calendar, Download, RefreshCw, FileSpreadsheet, 
-  User, Award, ChevronRight, Copy
+  User, Award, ChevronRight, Copy, Plus, Edit, Trash2, X
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { API_ENDPOINTS } from "../../config/api";
@@ -16,6 +16,25 @@ const ModernAffiliatedUnions = () => {
   const [notification, setNotification] = useState(null);
   const [copyingId, setCopyingId] = useState(null);
 
+  // CRUD States
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedUnion, setSelectedUnion] = useState(null);
+  const [submitLoading, setSubmitLoading] = useState(false);
+
+  // Form State
+  const [formData, setFormData] = useState({
+    name: "",
+    state: "",
+    district: "",
+    presidentName: "",
+    secretaryName: "",
+    email: "",
+    phone: "",
+    address: ""
+  });
+
   useEffect(() => {
     fetchUnions();
   }, []);
@@ -24,7 +43,6 @@ const ModernAffiliatedUnions = () => {
     setLoading(true);
     try {
       const response = await axios.get(API_ENDPOINTS.GET_FORM);
-      // Filter for approved unions only
       const approvedUnions = response.data.filter(
         (form) => form.status === "approved"
       );
@@ -40,6 +58,124 @@ const ModernAffiliatedUnions = () => {
   const showNotification = (message, type = "success") => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 3000);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const validateForm = () => {
+    if (!formData.name.trim()) return "Union/Organization Name is required";
+    if (!formData.state.trim()) return "State is required";
+    if (!formData.email.trim()) return "Email is required";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) return "Invalid email address";
+    if (!formData.phone.trim()) return "Phone number is required";
+    return null;
+  };
+
+  const handleOpenAddModal = () => {
+    setFormData({
+      name: "",
+      state: "",
+      district: "",
+      presidentName: "",
+      secretaryName: "",
+      email: "",
+      phone: "",
+      address: ""
+    });
+    setIsAddModalOpen(true);
+  };
+
+  const handleOpenEditModal = (union) => {
+    setSelectedUnion(union);
+    setFormData({
+      name: union.name || "",
+      state: union.state || "",
+      district: union.district || "",
+      presidentName: union.presidentName || "",
+      secretaryName: union.secretaryName || "",
+      email: union.email || "",
+      phone: union.phone || "",
+      address: union.address || ""
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleOpenDeleteModal = (union) => {
+    setSelectedUnion(union);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleAddSubmit = async (e) => {
+    e.preventDefault();
+    const errorMsg = validateForm();
+    if (errorMsg) {
+      showNotification(errorMsg, "error");
+      return;
+    }
+
+    setSubmitLoading(true);
+    try {
+      const response = await axios.post(API_ENDPOINTS.CREATE_APPROVED_UNION, formData);
+      if (response.data.success) {
+        showNotification("Union manually created and approved successfully!");
+        setIsAddModalOpen(false);
+        fetchUnions();
+      }
+    } catch (error) {
+      console.error("Error creating union:", error);
+      showNotification(error.response?.data?.error || "Failed to create union", "error");
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    const errorMsg = validateForm();
+    if (errorMsg) {
+      showNotification(errorMsg, "error");
+      return;
+    }
+
+    setSubmitLoading(true);
+    try {
+      const response = await axios.put(
+        API_ENDPOINTS.UPDATE_APPROVED_UNION(selectedUnion._id),
+        formData
+      );
+      if (response.data.success) {
+        showNotification("Union details updated successfully!");
+        setIsEditModalOpen(false);
+        fetchUnions();
+      }
+    } catch (error) {
+      console.error("Error updating union:", error);
+      showNotification(error.response?.data?.error || "Failed to update union", "error");
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
+
+  const handleDeleteSubmit = async () => {
+    setSubmitLoading(true);
+    try {
+      const response = await axios.delete(
+        API_ENDPOINTS.DELETE_APPROVED_UNION(selectedUnion._id)
+      );
+      if (response.data.success) {
+        showNotification("Union deleted successfully!");
+        setIsDeleteModalOpen(false);
+        fetchUnions();
+      }
+    } catch (error) {
+      console.error("Error deleting union:", error);
+      showNotification(error.response?.data?.error || "Failed to delete union", "error");
+    } finally {
+      setSubmitLoading(false);
+    }
   };
 
   const handleExportExcel = () => {
@@ -75,7 +211,7 @@ const ModernAffiliatedUnions = () => {
 
   // Filter unions based on search and state filter
   const filteredUnions = unions
-    .map((u, idx) => ({
+    .map((u) => ({
       ...u,
       certId: `ITU-${u._id.substring(0, 8).toUpperCase()}`
     }))
@@ -95,7 +231,6 @@ const ModernAffiliatedUnions = () => {
 
       return matchSearch && matchState;
     })
-    // Sort alphabetically by Name
     .sort((a, b) => a.name.localeCompare(b.name));
 
   const containerVariants = {
@@ -145,7 +280,7 @@ const ModernAffiliatedUnions = () => {
                 Affiliated State Unions
               </h1>
               <p className="text-gray-600">
-                View officially affiliated & approved state unions and download reports
+                View, manually add, edit, and revoke officially affiliated state unions and download reports
               </p>
             </div>
             
@@ -159,6 +294,14 @@ const ModernAffiliatedUnions = () => {
                 Refresh
               </button>
               
+              <button 
+                onClick={handleOpenAddModal}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm"
+              >
+                <Plus size={16} />
+                Add Union
+              </button>
+
               <button 
                 onClick={handleExportExcel}
                 disabled={loading || unions.length === 0}
@@ -279,7 +422,8 @@ const ModernAffiliatedUnions = () => {
                     <th className="py-4 px-4 font-bold text-sm">President Name</th>
                     <th className="py-4 px-4 font-bold text-sm">Secretary Name</th>
                     <th className="py-4 px-4 font-bold text-sm">Contact Info</th>
-                    <th className="py-4 px-4 font-bold text-sm rounded-tr-2xl text-center">Approval Date</th>
+                    <th className="py-4 px-4 font-bold text-sm text-center">Approval Date</th>
+                    <th className="py-4 px-4 font-bold text-sm rounded-tr-2xl text-center">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -341,6 +485,24 @@ const ModernAffiliatedUnions = () => {
                       <td className="py-4 px-4 text-sm text-gray-600 text-center font-mono">
                         {formatDate(union.updatedAt)}
                       </td>
+                      <td className="py-4 px-4 text-sm text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => handleOpenEditModal(union)}
+                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="Edit Union"
+                          >
+                            <Edit size={16} />
+                          </button>
+                          <button
+                            onClick={() => handleOpenDeleteModal(union)}
+                            className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Revoke / Delete"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
                     </motion.tr>
                   ))}
                 </tbody>
@@ -348,8 +510,375 @@ const ModernAffiliatedUnions = () => {
             </div>
           )}
         </motion.div>
-
       </div>
+
+      {/* ADD UNION MODAL */}
+      <AnimatePresence>
+        {isAddModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden"
+            >
+              <div className="bg-[#0E2A4E] text-white px-6 py-4 flex items-center justify-between">
+                <h3 className="text-lg font-bold flex items-center gap-2">
+                  <Plus size={20} />
+                  Add Affiliated Union Manually
+                </h3>
+                <button 
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="text-white/80 hover:text-white transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <form onSubmit={handleAddSubmit} className="p-6 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="col-span-2">
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Union / Organization Name *</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      required
+                      placeholder="e.g. KARNATAKA TAEKWONDO UNION"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#0E2A4E] outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">State *</label>
+                    <input
+                      type="text"
+                      name="state"
+                      value={formData.state}
+                      onChange={handleInputChange}
+                      required
+                      placeholder="e.g. Karnataka"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#0E2A4E] outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">District</label>
+                    <input
+                      type="text"
+                      name="district"
+                      value={formData.district}
+                      onChange={handleInputChange}
+                      placeholder="e.g. Bengaluru"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#0E2A4E] outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">President Name</label>
+                    <input
+                      type="text"
+                      name="presidentName"
+                      value={formData.presidentName}
+                      onChange={handleInputChange}
+                      placeholder="e.g. MR. JOHN DOE"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#0E2A4E] outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Secretary Name</label>
+                    <input
+                      type="text"
+                      name="secretaryName"
+                      value={formData.secretaryName}
+                      onChange={handleInputChange}
+                      placeholder="e.g. MR. SHANKAR M"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#0E2A4E] outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Email Address *</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required
+                      placeholder="e.g. contact@karnatakatu.com"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#0E2A4E] outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Phone Number *</label>
+                    <input
+                      type="text"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      required
+                      placeholder="e.g. +91 9876543210"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#0E2A4E] outline-none"
+                    />
+                  </div>
+
+                  <div className="col-span-2">
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Office Address</label>
+                    <textarea
+                      name="address"
+                      value={formData.address}
+                      onChange={handleInputChange}
+                      rows={2}
+                      placeholder="Enter the full office address..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#0E2A4E] outline-none resize-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+                  <button
+                    type="button"
+                    onClick={() => setIsAddModalOpen(false)}
+                    className="px-4 py-2 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitLoading}
+                    className="px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 disabled:opacity-50"
+                  >
+                    {submitLoading ? (
+                      <Loader size={16} className="animate-spin" />
+                    ) : (
+                      "Save and Approve"
+                    )}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* EDIT UNION MODAL */}
+      <AnimatePresence>
+        {isEditModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden"
+            >
+              <div className="bg-[#0E2A4E] text-white px-6 py-4 flex items-center justify-between">
+                <h3 className="text-lg font-bold flex items-center gap-2">
+                  <Edit size={20} />
+                  Edit Affiliated Union
+                </h3>
+                <button 
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="text-white/80 hover:text-white transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <form onSubmit={handleEditSubmit} className="p-6 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="col-span-2 font-mono text-xs text-gray-500 bg-gray-50 p-2.5 rounded border border-gray-150 flex items-center justify-between">
+                    <span>Certificate ID: <strong>{selectedUnion?.certId}</strong></span>
+                    <span>Database ID: <strong>{selectedUnion?._id}</strong></span>
+                  </div>
+
+                  <div className="col-span-2">
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Union / Organization Name *</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      required
+                      placeholder="e.g. KARNATAKA TAEKWONDO UNION"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#0E2A4E] outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">State *</label>
+                    <input
+                      type="text"
+                      name="state"
+                      value={formData.state}
+                      onChange={handleInputChange}
+                      required
+                      placeholder="e.g. Karnataka"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#0E2A4E] outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">District</label>
+                    <input
+                      type="text"
+                      name="district"
+                      value={formData.district}
+                      onChange={handleInputChange}
+                      placeholder="e.g. Bengaluru"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#0E2A4E] outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">President Name</label>
+                    <input
+                      type="text"
+                      name="presidentName"
+                      value={formData.presidentName}
+                      onChange={handleInputChange}
+                      placeholder="e.g. MR. JOHN DOE"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#0E2A4E] outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Secretary Name</label>
+                    <input
+                      type="text"
+                      name="secretaryName"
+                      value={formData.secretaryName}
+                      onChange={handleInputChange}
+                      placeholder="e.g. MR. SHANKAR M"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#0E2A4E] outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Email Address *</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required
+                      placeholder="e.g. contact@karnatakatu.com"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#0E2A4E] outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Phone Number *</label>
+                    <input
+                      type="text"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      required
+                      placeholder="e.g. +91 9876543210"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#0E2A4E] outline-none"
+                    />
+                  </div>
+
+                  <div className="col-span-2">
+                    <label className="block text-xs font-bold text-gray-700 uppercase mb-1">Office Address</label>
+                    <textarea
+                      name="address"
+                      value={formData.address}
+                      onChange={handleInputChange}
+                      rows={2}
+                      placeholder="Enter the full office address..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#0E2A4E] outline-none resize-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+                  <button
+                    type="button"
+                    onClick={() => setIsEditModalOpen(false)}
+                    className="px-4 py-2 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitLoading}
+                    className="px-5 py-2 bg-[#0E2A4E] text-white rounded-lg hover:bg-[#193C69] transition-colors flex items-center gap-2 disabled:opacity-50"
+                  >
+                    {submitLoading ? (
+                      <Loader size={16} className="animate-spin" />
+                    ) : (
+                      "Save Changes"
+                    )}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* DELETE CONFIRMATION MODAL */}
+      <AnimatePresence>
+        {isDeleteModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden"
+            >
+              <div className="bg-red-600 text-white px-6 py-4 flex items-center gap-2">
+                <Trash2 size={20} />
+                <h3 className="text-lg font-bold">Delete Affiliated Union?</h3>
+              </div>
+
+              <div className="p-6 space-y-4">
+                <p className="text-gray-600">
+                  Are you sure you want to delete/revoke the affiliation for:
+                  <strong className="block text-gray-800 text-base mt-2 uppercase">
+                    {selectedUnion?.name}
+                  </strong>
+                  <span className="block font-mono text-xs text-gray-500 mt-1">
+                    (ID: {selectedUnion?.certId})
+                  </span>
+                </p>
+                
+                <div className="p-3 bg-red-50 border border-red-100 rounded-lg text-xs text-red-700 flex items-start gap-2">
+                  <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                  <span>
+                    Warning: This action will completely remove the state union record and its login credentials from the database. This action is permanent and cannot be undone.
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+                  <button
+                    type="button"
+                    onClick={() => setIsDeleteModalOpen(false)}
+                    className="px-4 py-2 border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDeleteSubmit}
+                    disabled={submitLoading}
+                    className="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 disabled:opacity-50"
+                  >
+                    {submitLoading ? (
+                      <Loader size={16} className="animate-spin" />
+                    ) : (
+                      "Confirm Delete"
+                    )}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

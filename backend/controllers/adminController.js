@@ -3239,3 +3239,126 @@ exports.downloadApprovedUnionsExcel = async (req, res) => {
     });
   }
 };
+
+// CREATE MANUALLY APPROVED UNION
+exports.createApprovedUnion = async (req, res) => {
+  try {
+    const AccelerationForm = require('../models/AccelerationForm');
+    const { name, state, district, presidentName, secretaryName, email, phone, address } = req.body;
+    
+    // Check if email already exists
+    const existing = await AccelerationForm.findOne({ email: email.toLowerCase().trim() });
+    if (existing) {
+      return res.status(400).json({ success: false, error: 'Email address is already in use' });
+    }
+
+    const newUnion = new AccelerationForm({
+      name: name.trim(),
+      state: state.trim(),
+      district: district ? district.trim() : '',
+      presidentName: presidentName ? presidentName.trim() : '',
+      secretaryName: secretaryName ? secretaryName.trim() : '',
+      email: email.toLowerCase().trim(),
+      phone: phone.trim(),
+      address: address ? address.trim() : `${state} State Union Office`,
+      status: 'approved',
+      role: 'stateunion',
+      password: Math.random().toString(36).slice(-8) // Generate random password
+    });
+
+    await newUnion.save();
+    res.status(201).json({ success: true, message: 'Union created successfully', data: newUnion });
+  } catch (error) {
+    console.error('Error creating union:', error);
+    res.status(500).json({ success: false, error: error.message || 'Failed to create union' });
+  }
+};
+
+// UPDATE APPROVED UNION DETAILS
+exports.updateApprovedUnion = async (req, res) => {
+  try {
+    const AccelerationForm = require('../models/AccelerationForm');
+    const { id } = req.params;
+    const { name, state, district, presidentName, secretaryName, email, phone, address } = req.body;
+
+    // Check if email is being updated and if it belongs to someone else
+    if (email) {
+      const existing = await AccelerationForm.findOne({ 
+        email: email.toLowerCase().trim(),
+        _id: { $ne: id }
+      });
+      if (existing) {
+        return res.status(400).json({ success: false, error: 'Email address is already in use by another organization' });
+      }
+    }
+
+    const updateFields = {
+      name: name ? name.trim() : undefined,
+      state: state ? state.trim() : undefined,
+      district: district ? district.trim() : undefined,
+      presidentName: presidentName ? presidentName.trim() : undefined,
+      secretaryName: secretaryName ? secretaryName.trim() : undefined,
+      email: email ? email.toLowerCase().trim() : undefined,
+      phone: phone ? phone.trim() : undefined,
+      address: address ? address.trim() : undefined
+    };
+
+    // Clean undefined fields
+    Object.keys(updateFields).forEach(key => updateFields[key] === undefined && delete updateFields[key]);
+
+    const updated = await AccelerationForm.findByIdAndUpdate(
+      id,
+      updateFields,
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ success: false, error: 'Union not found' });
+    }
+
+    res.status(200).json({ success: true, message: 'Union updated successfully', data: updated });
+  } catch (error) {
+    console.error('Error updating union:', error);
+    res.status(500).json({ success: false, error: error.message || 'Failed to update union' });
+  }
+};
+
+// DELETE APPROVED UNION
+exports.deleteApprovedUnion = async (req, res) => {
+  try {
+    const AccelerationForm = require('../models/AccelerationForm');
+    const { id } = req.params;
+    
+    // Find the union first to check its email
+    const union = await AccelerationForm.findById(id);
+    if (!union) {
+      return res.status(404).json({ success: false, error: 'Union not found' });
+    }
+
+    // Reuse/trigger the logic of deleting from other collections if email matches
+    const email = union.email;
+    await AccelerationForm.findByIdAndDelete(id);
+    
+    // Delete from Contact collection
+    if (email) {
+      try {
+        const Contact = require('../models/Contact');
+        await Contact.deleteMany({ email: { $regex: new RegExp(`^${email}$`, 'i') } });
+      } catch (e) {
+        // Skip Contact if schema error
+      }
+      
+      try {
+        const Form = require('../models/Form');
+        await Form.deleteMany({ email: { $regex: new RegExp(`^${email}$`, 'i') } });
+      } catch (e) {
+        // Skip Form model if it doesn't exist
+      }
+    }
+
+    res.status(200).json({ success: true, message: 'Union deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting union:', error);
+    res.status(500).json({ success: false, error: error.message || 'Failed to delete union' });
+  }
+};

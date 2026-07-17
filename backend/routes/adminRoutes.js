@@ -45,6 +45,9 @@ router.delete('/deleteCategorySlider/:id', adminController.deleteCategorySlider)
 
 router.get('/getForm', adminController.getForm);
 router.get('/approved-unions/download', adminController.downloadApprovedUnionsExcel);
+router.post('/approved-unions', adminController.createApprovedUnion);
+router.put('/approved-unions/:id', adminController.updateApprovedUnion);
+router.delete('/approved-unions/:id', adminController.deleteApprovedUnion);
 
 router.put('/approveForm', adminController.approveForm)
 router.put('/rejectForm', adminController.rejectForm)
