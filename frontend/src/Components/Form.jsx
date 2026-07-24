@@ -235,7 +235,9 @@ const Form = () => {
         type: "select", 
         options: [
           { value: "White", label: "White" },
+          { value: "White One", label: "White One" },
           { value: "Yellow", label: "Yellow" },
+          { value: "Yellow One", label: "Yellow One" },
           { value: "Green", label: "Green" },
           { value: "Green One", label: "Green One" },
           { value: "Blue", label: "Blue" },

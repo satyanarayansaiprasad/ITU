@@ -4,6 +4,8 @@ import { toast } from 'react-toastify';
 import { Plus, X, Users, Award, Save, History, CheckCircle, XCircle, Clock } from 'lucide-react';
 
 const BELT_LEVELS = [
+  'White',
+  'White One',
   'Yellow',
   'Yellow One',
   'Green',

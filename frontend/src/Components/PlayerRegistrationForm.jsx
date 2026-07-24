@@ -455,7 +455,9 @@ const PlayerRegistrationForm = ({ onBack }) => {
                 >
                   <option value="" disabled>Select Belt Level *</option>
                   <option value="White">White</option>
+                  <option value="White One">White One</option>
                   <option value="Yellow">Yellow</option>
+                  <option value="Yellow One">Yellow One</option>
                   <option value="Green">Green</option>
                   <option value="Green One">Green One</option>
                   <option value="Blue">Blue</option>

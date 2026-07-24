@@ -23,6 +23,8 @@ const beltPromotionSchema = new mongoose.Schema({
       type: String,
       required: true,
       enum: [
+        'White',
+        'White One',
         'Yellow',
         'Yellow One',
         'Green',
