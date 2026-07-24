@@ -76,7 +76,7 @@ Run the QR code generation script to output a high-res static PNG to the Desktop
 node scripts/generateQr.js [optional_target_url]
 ```
 - Output location: `~/Desktop/certificate-verify-qr.png`
-- Default Target URL: `https://itu-india.org/verify-certificate`
+- Default Target URL: `https://www.taekwondounion.com/verify-certificate`
 
 ### 2. Backfilling Player Rank Index
 If new player records are added manually without `rankIndex`, run the backfill script:

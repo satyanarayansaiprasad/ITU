@@ -7,7 +7,7 @@ try {
   QRCode = require('../backend/node_modules/qrcode');
 }
 
-const targetUrl = process.env.VERIFY_URL || process.argv[2] || 'https://itu-india.org/verify-certificate';
+const targetUrl = process.env.VERIFY_URL || process.argv[2] || 'https://www.taekwondounion.com/verify-certificate';
 const outputPath = path.join(os.homedir(), 'Desktop', 'certificate-verify-qr.png');
 
 console.log(`Generating static QR code for verification URL: ${targetUrl}`);
