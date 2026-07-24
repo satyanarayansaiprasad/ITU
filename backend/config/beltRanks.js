@@ -25,7 +25,7 @@ const BELT_RANKS = [
  */
 const getRankIndex = (beltLevel) => {
   if (!beltLevel || typeof beltLevel !== 'string') return -1;
-  const normalized = beltLevel.trim().toLowerCase();
+  const normalized = beltLevel.trim().toLowerCase().replace(/\s+/g, ' ');
   return BELT_RANKS.findIndex(r => r.toLowerCase() === normalized);
 };
 

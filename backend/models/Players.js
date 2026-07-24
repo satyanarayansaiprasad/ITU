@@ -50,7 +50,7 @@ const PlayerSchema = new mongoose.Schema(
     },
     rankIndex: {
       type: Number,
-      default: 0,
+      default: null,
     },
     photo: {
       type: String, // Cloudinary URL

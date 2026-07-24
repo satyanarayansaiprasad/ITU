@@ -53,9 +53,11 @@ const verifyCertificate = async (req, res) => {
       });
     }
 
-    const currentRankIndex = player.rankIndex !== undefined && player.rankIndex !== null && player.rankIndex >= 0
-      ? player.rankIndex
-      : getRankIndex(player.beltLevel);
+    // Determine current rank index dynamically from player's stored beltLevel
+    let currentRankIndex = getRankIndex(player.beltLevel);
+    if (currentRankIndex === -1 && player.rankIndex !== undefined && player.rankIndex !== null && player.rankIndex >= 0) {
+      currentRankIndex = player.rankIndex;
+    }
 
     // Exact Rank Match
     if (submittedRankIndex === currentRankIndex) {
