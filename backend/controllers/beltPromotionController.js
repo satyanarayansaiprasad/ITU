@@ -292,10 +292,13 @@ exports.approveBeltPromotion = async (req, res) => {
     }
 
     // Update player belt levels
+    const { getRankIndex } = require('../config/beltRanks');
     for (const test of promotion.tests) {
       for (const playerData of test.players) {
+        const rankIdx = getRankIndex(test.beltLevel);
         await Player.findByIdAndUpdate(playerData.playerId, {
-          beltLevel: test.beltLevel
+          beltLevel: test.beltLevel,
+          ...(rankIdx !== -1 ? { rankIndex: rankIdx } : {})
         });
       }
     }

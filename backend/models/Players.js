@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { getRankIndex } = require("../config/beltRanks");
 
 const PlayerSchema = new mongoose.Schema(
   {
@@ -47,6 +48,10 @@ const PlayerSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    rankIndex: {
+      type: Number,
+      default: 0,
+    },
     photo: {
       type: String, // Cloudinary URL
       default: null,
@@ -94,8 +99,15 @@ const PlayerSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Generate unique player ID before saving (when approved)
+// Generate unique player ID before saving (when approved) and update rankIndex
 PlayerSchema.pre('save', async function(next) {
+  if (this.isModified('beltLevel') || this.rankIndex === undefined || this.rankIndex === null) {
+    const computedIndex = getRankIndex(this.beltLevel);
+    if (computedIndex !== -1) {
+      this.rankIndex = computedIndex;
+    }
+  }
+
   if (this.isNew && this.status === 'approved' && !this.playerId) {
     // Generate player ID: ITU + timestamp + random 4 digits
     const timestamp = Date.now().toString().slice(-8);
