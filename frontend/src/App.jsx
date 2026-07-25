@@ -47,6 +47,7 @@ import PoliceTrainingManagement from './AdminPanel/Pages/PoliceTrainingManagemen
 import RegistrationForm from './Components/TaekwondoTest/RegistrationForm';
 import TaekwondoTestManagement from './AdminPanel/Pages/TaekwondoTestManagement';
 import VerifyCertificate from './Components/VerifyCertificate';
+import VerifyAffiliation from './Components/VerifyAffiliation';
 
 const App = () => {
   const location = useLocation();
@@ -110,6 +111,7 @@ const App = () => {
         </Route>
         <Route path="/taekwondo-belt-test" element={<RegistrationForm />} />
         <Route path="/verify-certificate" element={<VerifyCertificate />} />
+        <Route path="/verify-affiliation" element={<VerifyAffiliation />} />
       </Routes>
 
       {!isDashboardRoute && <Footer />}

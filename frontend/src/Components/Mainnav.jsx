@@ -1,4 +1,4 @@
-import { Home, Menu, X, MoreHorizontal, Shield, Info, Phone, Activity, Newspaper, Image, Users, User, Lock, UserCog, UserPlus, ChevronDown, ShieldCheck } from "lucide-react";
+import { Home, Menu, X, MoreHorizontal, Shield, Info, Phone, Activity, Newspaper, Image, Users, User, Lock, UserCog, UserPlus, ChevronDown, ShieldCheck, Building2 } from "lucide-react";
 import React, { useState } from "react";
 import { Link } from "react-router-dom"; // Make sure this import is at the top
 import { motion, AnimatePresence } from "framer-motion";
@@ -226,7 +226,8 @@ export default function Mainnav() {
                             { icon: <Newspaper size={16} />, title: "News", path: "/news" },
                             { icon: <Image size={16} />, title: "Gallery", path: "/gallery" },
                             { icon: <User size={16} />, title: "Forms", path: "/forms" },
-                            { icon: <ShieldCheck size={16} />, title: "Verify Certificate", path: "/verify-certificate" }
+                            { icon: <ShieldCheck size={16} />, title: "Verify Certificate", path: "/verify-certificate" },
+                            { icon: <Building2 size={16} />, title: "Verify Affiliation", path: "/verify-affiliation" }
                           ].map((subItem, subIndex) => (
                             <motion.div
                               key={subIndex}
@@ -476,6 +477,7 @@ export default function Mainnav() {
                 {[
                   { icon: <Home size={22} />, title: "Home", path: "/", desc: "Welcome to ITU" },
                   { icon: <ShieldCheck size={22} />, title: "Verify Certificate", path: "/verify-certificate", desc: "Authenticate player certificate" },
+                  { icon: <Building2 size={22} />, title: "Verify Affiliation", path: "/verify-affiliation", desc: "Authenticate union/organization certificate" },
                   { icon: <Shield size={22} />, title: "State Union", path: "/state-union", desc: "Regional offices" },
                   { icon: <Phone size={22} />, title: "Contact", path: "/contact", desc: "Get in touch" },
                   { icon: <Newspaper size={22} />, title: "Blog", path: "/news", desc: "Latest articles & insights" },
