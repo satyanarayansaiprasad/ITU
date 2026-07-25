@@ -88,12 +88,12 @@ const VerifyAffiliation = () => {
                   type="text"
                   value={certificateId}
                   onChange={(e) => setCertificateId(e.target.value)}
-                  placeholder="Enter Certificate ID (e.g. 65e8a... or Certificate No.)"
+                  placeholder="e.g. ITU-6A2D7A40"
                   required
-                  className="w-full px-4 py-3.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all font-mono tracking-wider"
+                  className="w-full px-4 py-3.5 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all font-mono uppercase tracking-wider font-semibold"
                 />
               </div>
-              <p className="text-xs text-gray-400 mt-1">Enter the unique Certificate ID printed on your Union / Organization Affiliation Certificate.</p>
+              <p className="text-xs text-gray-400 mt-1">Enter the unique Certificate ID printed on your Union / Organization Affiliation Certificate (e.g. ITU-6A2D7A40).</p>
             </div>
 
             {/* Action Buttons */}

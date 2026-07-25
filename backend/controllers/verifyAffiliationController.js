@@ -18,22 +18,26 @@ const verifyAffiliation = async (req, res) => {
       });
     }
 
-    const cleanId = certificateId.trim();
-    const escapedId = cleanId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const cleanId = certificateId.trim().toUpperCase();
 
-    // Build query conditions to match against Mongo _id, certificateId, or affiliationId
-    const queryConditions = [
-      { certificateId: { $regex: new RegExp(`^${escapedId}$`, 'i') } },
-      { affiliationId: { $regex: new RegExp(`^${escapedId}$`, 'i') } }
-    ];
+    // Fetch all approved unions from AccelerationForm
+    const approvedUnions = await AccelerationForm.find({ status: 'approved' });
 
-    if (mongoose.Types.ObjectId.isValid(cleanId)) {
-      queryConditions.push({ _id: cleanId });
-    }
+    // Match against ITU-XXXXXXXX format, 8-char hex, _id, or certificateId/affiliationId
+    const union = approvedUnions.find((u) => {
+      const generatedCertId = u._id ? `ITU-${u._id.toString().substring(0, 8).toUpperCase()}` : '';
+      const hexPrefix = u._id ? u._id.toString().substring(0, 8).toUpperCase() : '';
+      const fullMongoId = u._id ? u._id.toString().toUpperCase() : '';
+      const customCertId = u.certificateId ? u.certificateId.toString().trim().toUpperCase() : '';
+      const customAffId = u.affiliationId ? u.affiliationId.toString().trim().toUpperCase() : '';
 
-    const union = await AccelerationForm.findOne({
-      status: 'approved',
-      $or: queryConditions
+      return (
+        cleanId === generatedCertId ||
+        cleanId === hexPrefix ||
+        cleanId === fullMongoId ||
+        cleanId === customCertId ||
+        cleanId === customAffId
+      );
     });
 
     if (!union) {
@@ -45,6 +49,7 @@ const verifyAffiliation = async (req, res) => {
     }
 
     const orgName = union.name || union.presidentName || union.secretaryName || 'Affiliated Union';
+    const displayCertId = `ITU-${union._id.toString().substring(0, 8).toUpperCase()}`;
 
     return res.status(200).json({
       success: true,
@@ -52,7 +57,7 @@ const verifyAffiliation = async (req, res) => {
       message: `🎉 Congratulations to ${orgName}! You are an officially affiliated member of the Indian Taekwondo Union. Thank you, you have a genuine certificate!`,
       union: {
         id: union._id,
-        certificateId: union.certificateId || union.affiliationId || union._id,
+        certificateId: displayCertId,
         name: orgName,
         state: union.state,
         district: union.district || 'N/A',
