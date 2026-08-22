@@ -16,7 +16,7 @@ const beltPromotionSchema = new mongoose.Schema({
   },
   district: {
     type: String,
-    required: true
+    default: ''
   },
   tests: [{
     beltLevel: {

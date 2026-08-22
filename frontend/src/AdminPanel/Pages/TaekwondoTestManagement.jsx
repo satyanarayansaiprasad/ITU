@@ -155,7 +155,10 @@ const TaekwondoTestManagement = () => {
       setDeleting(true);
       const response = await axios.delete(
         `${API_BASE_URL}/api/taekwondo-test/admin/registrations`,
-        { data: { ids: selectedIds } }
+        {
+          data: { ids: selectedIds },
+          headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
+        }
       );
       if (response.data.success) {
         toast.success(response.data.message);

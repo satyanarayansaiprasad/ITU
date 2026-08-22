@@ -4,6 +4,8 @@ import { toast } from 'react-toastify';
 import { Download, CheckCircle, XCircle, Award, Users, Calendar } from 'lucide-react';
 import { indianStatesAndDistricts, getDistrictsForState } from '../../data/indianStatesDistricts';
 
+import { getAuthHeader } from '../../utils/auth';
+
 const BeltPromotionManagement = () => {
   const [selectedState, setSelectedState] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState('');
@@ -62,9 +64,7 @@ const BeltPromotionManagement = () => {
 
       const response = await axios.get(`${API_BASE_URL}/api/belt-promotion/admin/list`, {
         params,
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`
-        }
+        headers: getAuthHeader()
       });
 
       if (response.data.success) {
@@ -84,11 +84,16 @@ const BeltPromotionManagement = () => {
         `${API_BASE_URL}/api/belt-promotion/admin/${promotionId}/download`,
         {
           responseType: 'blob',
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('accessToken')}`
-          }
+          headers: getAuthHeader()
         }
       );
+
+      if (response.data.type === 'application/json') {
+        const text = await response.data.text();
+        const json = JSON.parse(text);
+        toast.error(json.error || 'Failed to download Excel file');
+        return;
+      }
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
@@ -114,9 +119,7 @@ const BeltPromotionManagement = () => {
         `${API_BASE_URL}/api/belt-promotion/admin/${promotionId}/approve`,
         {},
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('accessToken')}`
-          }
+          headers: getAuthHeader()
         }
       );
 
@@ -139,9 +142,7 @@ const BeltPromotionManagement = () => {
         `${API_BASE_URL}/api/belt-promotion/admin/${promotionId}/reject`,
         { reason },
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('accessToken')}`
-          }
+          headers: getAuthHeader()
         }
       );
 

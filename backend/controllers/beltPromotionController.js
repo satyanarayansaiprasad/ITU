@@ -42,7 +42,8 @@ exports.submitBeltPromotion = async (req, res) => {
         }
 
         // Verify player belongs to this union
-        if (player.union.toString() !== unionId.toString()) {
+        const playerUnionId = (player.union?._id || player.union)?.toString();
+        if (!playerUnionId || playerUnionId !== unionId.toString()) {
           throw new Error(`Player ${player.name} does not belong to this union`);
         }
 
@@ -116,9 +117,16 @@ exports.getBeltPromotionsByPlayer = async (req, res) => {
   try {
     const { playerId } = req.params;
 
+    const mongoose = require('mongoose');
+    const isObjectId = mongoose.Types.ObjectId.isValid(playerId);
+    const queryConditions = [{ 'tests.players.playerIdNumber': playerId }];
+    if (isObjectId) {
+      queryConditions.push({ 'tests.players.playerId': playerId });
+    }
+
     // Find all belt promotions where this player is included
     const promotions = await BeltPromotion.find({
-      'tests.players.playerId': playerId
+      $or: queryConditions
     })
       .sort({ createdAt: -1 })
       .populate('unionId', 'name secretaryName state district');
@@ -128,7 +136,7 @@ exports.getBeltPromotionsByPlayer = async (req, res) => {
     promotions.forEach((promotion) => {
       promotion.tests.forEach((test) => {
         const playerData = test.players.find(
-          (p) => p.playerId.toString() === playerId.toString()
+          (p) => (p.playerId && p.playerId.toString() === playerId.toString()) || p.playerIdNumber === playerId
         );
         if (playerData) {
           playerTests.push({
@@ -164,8 +172,8 @@ exports.getBeltPromotions = async (req, res) => {
     const { state, district, unionId } = req.query;
 
     const filter = {};
-    if (state) filter.state = state;
-    if (district) filter.district = district;
+    if (state) filter.state = new RegExp(`^${state.trim()}$`, 'i');
+    if (district) filter.district = new RegExp(`^${district.trim()}$`, 'i');
     if (unionId) filter.unionId = unionId;
 
     const promotions = await BeltPromotion.find(filter)
@@ -295,6 +303,7 @@ exports.approveBeltPromotion = async (req, res) => {
     const { getRankIndex } = require('../config/beltRanks');
     for (const test of promotion.tests) {
       for (const playerData of test.players) {
+        if (!playerData || !playerData.playerId) continue;
         const rankIdx = getRankIndex(test.beltLevel);
         await Player.findByIdAndUpdate(playerData.playerId, {
           beltLevel: test.beltLevel,

@@ -44,7 +44,7 @@ const BeltPromotionForm = ({ unionId }) => {
   const fetchPlayers = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_BASE_URL}/api/user/unions/${unionId}/players`);
+      const response = await axios.get(`${API_BASE_URL}/api/user/unions/${unionId}/players?limit=1000`);
       if (response.data.success) {
         setAvailablePlayers(response.data.data || []);
       }
@@ -78,22 +78,22 @@ const BeltPromotionForm = ({ unionId }) => {
   };
 
   const updateBeltLevel = (index, beltLevel) => {
-    const updatedTests = [...tests];
-    updatedTests[index].beltLevel = beltLevel;
-    setTests(updatedTests);
+    setTests(prev => prev.map((t, i) => i === index ? { ...t, beltLevel } : t));
   };
 
   const togglePlayer = (testIndex, playerId) => {
-    const updatedTests = [...tests];
-    const test = updatedTests[testIndex];
-    
-    if (test.players.includes(playerId)) {
-      test.players = test.players.filter(id => id !== playerId);
-    } else {
-      test.players.push(playerId);
-    }
-    
-    setTests(updatedTests);
+    setTests(prevTests =>
+      prevTests.map((test, i) => {
+        if (i !== testIndex) return test;
+        const exists = test.players.includes(playerId);
+        return {
+          ...test,
+          players: exists
+            ? test.players.filter(id => id !== playerId)
+            : [...test.players, playerId]
+        };
+      })
+    );
   };
 
   const handleSubmit = async (e) => {
