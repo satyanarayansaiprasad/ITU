@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { Plus, X, Users, Award, Save, History, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Plus, X, Users, Award, Save, History, CheckCircle, XCircle, Clock, Search, Filter, CheckSquare, Square, User } from 'lucide-react';
 
 const BELT_LEVELS = [
   'White',
@@ -32,6 +32,8 @@ const BeltPromotionForm = ({ unionId }) => {
   const [submitting, setSubmitting] = useState(false);
   const [submissions, setSubmissions] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedBeltFilter, setSelectedBeltFilter] = useState('');
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
     (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://itu-f4bn.onrender.com');
@@ -96,6 +98,29 @@ const BeltPromotionForm = ({ unionId }) => {
     );
   };
 
+  const selectAllFiltered = (testIndex, filteredPlayerIds) => {
+    setTests(prevTests =>
+      prevTests.map((test, i) => {
+        if (i !== testIndex) return test;
+        const merged = Array.from(new Set([...test.players, ...filteredPlayerIds]));
+        return { ...test, players: merged };
+      })
+    );
+  };
+
+  const deselectAllFiltered = (testIndex, filteredPlayerIds) => {
+    setTests(prevTests =>
+      prevTests.map((test, i) => {
+        if (i !== testIndex) return test;
+        const filteredSet = new Set(filteredPlayerIds);
+        return {
+          ...test,
+          players: test.players.filter(id => !filteredSet.has(id))
+        };
+      })
+    );
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -131,95 +156,193 @@ const BeltPromotionForm = ({ unionId }) => {
     }
   };
 
+  // Filter available players by search query and belt level
+  const filteredPlayers = availablePlayers.filter((player) => {
+    const matchesSearch =
+      !searchQuery.trim() ||
+      player.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      player.playerId?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      player.email?.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesBelt =
+      !selectedBeltFilter ||
+      player.beltLevel?.toLowerCase() === selectedBeltFilter.toLowerCase();
+
+    return matchesSearch && matchesBelt;
+  });
+
   return (
     <div className="bg-white rounded-lg shadow p-6">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold flex items-center gap-2">
+      <div className="mb-6 border-b pb-4">
+        <h2 className="text-2xl font-bold flex items-center gap-2 text-gray-900">
           <Award className="text-blue-600" size={28} />
           Belt Promotion Test
         </h2>
-        <p className="text-gray-600 mt-2">Submit belt promotion tests for your players</p>
+        <p className="text-gray-600 mt-1">Submit belt promotion tests for your approved players</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {tests.map((test, testIndex) => (
-          <div key={testIndex} className="border border-gray-200 rounded-lg p-6 bg-gray-50">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Test {testIndex + 1}</h3>
-              {tests.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeTest(testIndex)}
-                  className="text-red-600 hover:text-red-800"
-                >
-                  <X size={20} />
-                </button>
-              )}
-            </div>
+        {tests.map((test, testIndex) => {
+          const filteredIds = filteredPlayers.map(p => p._id);
+          const allFilteredSelected = filteredIds.length > 0 && filteredIds.every(id => test.players.includes(id));
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Belt Level Selection */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select Belt Level *
-                </label>
-                <select
-                  value={test.beltLevel}
-                  onChange={(e) => updateBeltLevel(testIndex, e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  required
-                >
-                  <option value="">-- Select Belt Level --</option>
-                  {BELT_LEVELS.map((belt) => (
-                    <option key={belt} value={belt}>{belt}</option>
-                  ))}
-                </select>
+          return (
+            <div key={testIndex} className="border border-gray-200 rounded-xl p-6 bg-gray-50 shadow-sm">
+              <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-200">
+                <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                  <span className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm">
+                    {testIndex + 1}
+                  </span>
+                  Test Category #{testIndex + 1}
+                </h3>
+                {tests.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeTest(testIndex)}
+                    className="text-red-600 hover:text-red-800 p-1 rounded-md hover:bg-red-50"
+                    title="Remove test category"
+                  >
+                    <X size={20} />
+                  </button>
+                )}
               </div>
 
-              {/* Player Selection */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select Players * ({test.players.length} selected)
-                </label>
-                <div className="border border-gray-300 rounded-md max-h-48 overflow-y-auto bg-white">
-                  {loading ? (
-                    <div className="p-4 text-center text-gray-500">Loading players...</div>
-                  ) : availablePlayers.length === 0 ? (
-                    <div className="p-4 text-center text-gray-500">No players available</div>
-                  ) : (
-                    <div className="p-2">
-                      {availablePlayers.map((player) => (
-                        <label
-                          key={player._id}
-                          className="flex items-center p-2 hover:bg-blue-50 cursor-pointer rounded"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={test.players.includes(player._id)}
-                            onChange={() => togglePlayer(testIndex, player._id)}
-                            className="mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500"
-                          />
-                          <div className="flex-1">
-                            <div className="font-medium">{player.name}</div>
-                            <div className="text-sm text-gray-500">
-                              ID: {player.playerId} | Current Belt: {player.beltLevel || 'N/A'}
-                            </div>
-                          </div>
-                        </label>
-                      ))}
+              <div className="space-y-6">
+                {/* Belt Level Selection */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-800 mb-2">
+                    Target Belt Level *
+                  </label>
+                  <select
+                    value={test.beltLevel}
+                    onChange={(e) => updateBeltLevel(testIndex, e.target.value)}
+                    className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 font-medium shadow-sm"
+                    required
+                  >
+                    <option value="">-- Select Target Belt Level --</option>
+                    {BELT_LEVELS.map((belt) => (
+                      <option key={belt} value={belt}>{belt}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Player Selection Section */}
+                <div>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                    <label className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                      <Users size={18} className="text-blue-600" />
+                      Select Players ({test.players.length} selected)
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => allFilteredSelected ? deselectAllFiltered(testIndex, filteredIds) : selectAllFiltered(testIndex, filteredIds)}
+                        className="text-xs font-semibold px-3 py-1 bg-white border border-gray-300 text-blue-700 hover:bg-blue-50 rounded-md transition-colors shadow-sm flex items-center gap-1"
+                      >
+                        {allFilteredSelected ? <Square size={14} /> : <CheckSquare size={14} />}
+                        {allFilteredSelected ? 'Deselect All' : 'Select All Filtered'}
+                      </button>
                     </div>
-                  )}
+                  </div>
+
+                  {/* Search and Filter Controls */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                    <div className="relative">
+                      <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="text"
+                        placeholder="Search by player name or ID..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-9 pr-3 py-2 bg-white text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
+                      />
+                    </div>
+                    <div className="relative">
+                      <Filter size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <select
+                        value={selectedBeltFilter}
+                        onChange={(e) => setSelectedBeltFilter(e.target.value)}
+                        className="w-full pl-9 pr-3 py-2 bg-white text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none shadow-sm text-gray-700"
+                      >
+                        <option value="">Filter by Current Belt (All)</option>
+                        {BELT_LEVELS.map((belt) => (
+                          <option key={belt} value={belt}>{belt}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Player Cards Box */}
+                  <div className="border border-gray-300 rounded-lg max-h-72 overflow-y-auto bg-white p-2 divide-y divide-gray-100 shadow-inner">
+                    {loading ? (
+                      <div className="p-8 text-center text-gray-500 flex items-center justify-center gap-2">
+                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-600 border-t-transparent"></div>
+                        <span>Loading approved players...</span>
+                      </div>
+                    ) : filteredPlayers.length === 0 ? (
+                      <div className="p-8 text-center text-gray-500">
+                        <User size={32} className="mx-auto text-gray-300 mb-2" />
+                        <p className="font-medium text-gray-700">No players found</p>
+                        <p className="text-xs text-gray-400 mt-1">Try adjusting your search or belt filter</p>
+                      </div>
+                    ) : (
+                      filteredPlayers.map((player) => {
+                        const isSelected = test.players.includes(player._id);
+                        return (
+                          <label
+                            key={player._id}
+                            className={`flex items-center justify-between p-3 cursor-pointer rounded-lg transition-all ${
+                              isSelected
+                                ? 'bg-blue-50/80 border border-blue-300 shadow-sm'
+                                : 'hover:bg-gray-50 border border-transparent'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3 min-w-0 flex-1">
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => togglePlayer(testIndex, player._id)}
+                                className="h-5 w-5 text-blue-600 focus:ring-blue-500 rounded border-gray-300 cursor-pointer"
+                              />
+                              <div className="min-w-0 flex-1">
+                                <div className="font-bold text-gray-900 text-base truncate">
+                                  {player.name}
+                                </div>
+                                <div className="flex flex-wrap items-center gap-2 mt-1">
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-medium bg-blue-100 text-blue-800">
+                                    ID: {player.playerId || 'N/A'}
+                                  </span>
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-amber-100 text-amber-800">
+                                    Current: {player.beltLevel || 'White'}
+                                  </span>
+                                  {player.dob && (
+                                    <span className="text-xs text-gray-400">
+                                      DOB: {new Date(player.dob).toLocaleDateString()}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </label>
+                        );
+                      })
+                    )}
+                  </div>
+                  <div className="mt-2 text-xs text-gray-500 flex justify-between items-center px-1">
+                    <span>Showing {filteredPlayers.length} of {availablePlayers.length} total players</span>
+                    <span className="font-medium text-blue-700">{test.players.length} selected for this test</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
-        <div className="flex gap-4">
+        <div className="flex gap-4 pt-2">
           <button
             type="button"
             onClick={addTest}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+            className="flex items-center gap-2 px-5 py-2.5 bg-gray-700 text-white rounded-lg font-semibold hover:bg-gray-800 transition-colors shadow-sm"
           >
             <Plus size={18} />
             Add Another Test
@@ -228,7 +351,7 @@ const BeltPromotionForm = ({ unionId }) => {
           <button
             type="submit"
             disabled={submitting}
-            className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+            className="flex items-center gap-2 px-7 py-2.5 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 disabled:opacity-50 transition-colors shadow-md"
           >
             <Save size={18} />
             {submitting ? 'Submitting...' : 'Submit All Tests'}

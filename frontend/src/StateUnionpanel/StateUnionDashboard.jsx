@@ -585,15 +585,19 @@ const StateUnionDashboard = () => {
                                   <User size={20} className="text-gray-400" />
                                 </div>
                               )}
-                              <span className="text-sm font-medium text-gray-900">{player.name}</span>
+                              <span className="text-base font-bold text-gray-900">{player.name}</span>
                             </div>
                           </td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{player.playerId || 'N/A'}</td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{player.email}</td>
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{player.phone}</td>
+                          <td className="px-4 py-4 whitespace-nowrap">
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-mono font-semibold bg-blue-50 text-blue-800 border border-blue-200">
+                              {player.playerId || 'N/A'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-700">{player.email}</td>
+                          <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-700">{player.phone}</td>
                           <td className="px-4 py-4 whitespace-nowrap">
                             {player.password ? (
-                              <span className="text-sm font-mono bg-gray-100 px-2 py-1 rounded text-gray-700">
+                              <span className="text-sm font-mono bg-gray-100 px-2 py-1 rounded text-gray-800 border border-gray-200">
                                 {player.password}
                               </span>
                             ) : (
@@ -601,12 +605,12 @@ const StateUnionDashboard = () => {
                             )}
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap">
-                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                            <span className="px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-amber-100 text-amber-800 border border-amber-200">
                               {player.beltLevel}
                           </span>
                         </td>
 
-                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-700">
                             {player.dob ? new Date(player.dob).toLocaleDateString() : 'N/A'}
                         </td>
                       </tr>

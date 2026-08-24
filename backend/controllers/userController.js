@@ -715,21 +715,39 @@ exports.getPlayersByUnion = async (req, res) => {
       limit = 10 
     } = req.query;
 
-    // Build query
+    // Build robust union query
+    const unionOrg = await AccelerationForm.findById(unionId).catch(() => null);
+    const unionConditions = [{ union: unionId }];
+    const mongoose = require('mongoose');
+    if (mongoose.Types.ObjectId.isValid(unionId)) {
+      unionConditions.push({ union: new mongoose.Types.ObjectId(unionId) });
+    }
+    if (unionOrg) {
+      if (unionOrg.name) unionConditions.push({ unionName: unionOrg.name });
+      if (unionOrg.secretaryName) unionConditions.push({ unionName: unionOrg.secretaryName });
+    }
+
     const query = {
-      union: unionId,
+      $or: unionConditions,
       status: status
     };
 
     // Add search functionality
     if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } },
-        { phone: { $regex: search, $options: 'i' } },
-        { beltLevel: { $regex: search, $options: 'i' } },
-        { playerId: { $regex: search, $options: 'i' } }
+      const searchRegex = { $regex: search, $options: 'i' };
+      query.$and = [
+        { $or: unionConditions },
+        {
+          $or: [
+            { name: searchRegex },
+            { email: searchRegex },
+            { phone: searchRegex },
+            { beltLevel: searchRegex },
+            { playerId: searchRegex }
+          ]
+        }
       ];
+      delete query.$or;
     }
 
     const pageNum = parseInt(page);
