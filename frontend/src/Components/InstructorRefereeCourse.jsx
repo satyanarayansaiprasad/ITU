@@ -395,9 +395,8 @@ export default function InstructorRefereeCourse() {
               <div className="bg-white/10 backdrop-blur-xl p-8 rounded-3xl border border-white/20 shadow-2xl text-center relative overflow-hidden">
                 <div className="absolute top-0 right-0 transform translate-x-4 -translate-y-4 w-24 h-24 bg-orange-500/20 rounded-full blur-2xl"></div>
 
-                <div className="flex items-center justify-center gap-4 mb-6">
+                <div className="flex items-center justify-center mb-6">
                   <img src="/ITU LOGO.png" alt="ITU Logo" className="h-20 w-20 rounded-full border-2 border-orange-400 shadow-md object-cover" />
-                  <img src="/KUKKIWON LOGO.png" alt="Kukkiwon Logo" className="h-16 w-16 object-contain" onError={(e) => e.target.style.display = 'none'} />
                 </div>
 
                 <h3 className="text-xl font-bold text-white mb-2">Indian Taekwondo Union</h3>
