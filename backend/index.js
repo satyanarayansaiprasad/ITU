@@ -164,6 +164,7 @@ app.use('/api/competition', require('./routes/competitionRoutes'));
 app.use('/api/taekwondo-test', require('./routes/taekwondoRoutes'));
 app.use('/api/verify-certificate', require('./routes/verifyCertificateRoutes'));
 app.use('/api/verify-affiliation', require('./routes/verifyAffiliationRoutes'));
+app.use('/api/instructor-referee-course', require('./routes/instructorRefereeRoutes'));
 // Firebase routes disabled - project deleted
 // app.use('/api/firebase', firebaseRoutes);
 app.use('/api/states', statesRoutes); // States and Districts routes (uses static data)

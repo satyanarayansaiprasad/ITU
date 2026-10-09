@@ -1,4 +1,4 @@
-import { Home, Menu, X, MoreHorizontal, Shield, Info, Phone, Activity, Newspaper, Image, Users, User, Lock, UserCog, UserPlus, ChevronDown, ShieldCheck, Building2 } from "lucide-react";
+import { Home, Menu, X, MoreHorizontal, Shield, Info, Phone, Activity, Newspaper, Image, Users, User, Lock, UserCog, UserPlus, ChevronDown, ShieldCheck, Building2, Award } from "lucide-react";
 import React, { useState } from "react";
 import { Link } from "react-router-dom"; // Make sure this import is at the top
 import { motion, AnimatePresence } from "framer-motion";
@@ -223,6 +223,7 @@ export default function Mainnav() {
                           transition={{ duration: 0.2 }}
                         >
                           {[
+                            { icon: <Award size={16} />, title: "Instructor & Referee Course 2026", path: "/national-instructor-referee-course-2026" },
                             { icon: <Newspaper size={16} />, title: "News", path: "/news" },
                             { icon: <Image size={16} />, title: "Gallery", path: "/gallery" },
                             { icon: <User size={16} />, title: "Forms", path: "/forms" },
@@ -476,6 +477,7 @@ export default function Mainnav() {
                 {/* ── Regular flat items ── */}
                 {[
                   { icon: <Home size={22} />, title: "Home", path: "/", desc: "Welcome to ITU" },
+                  { icon: <Award size={22} />, title: "Instructor & Referee Course 2026", path: "/national-instructor-referee-course-2026", desc: "National course registration" },
                   { icon: <ShieldCheck size={22} />, title: "Verify Certificate", path: "/verify-certificate", desc: "Authenticate player certificate" },
                   { icon: <Building2 size={22} />, title: "Verify Affiliation", path: "/verify-affiliation", desc: "Authenticate union/organization certificate" },
                   { icon: <Shield size={22} />, title: "State Union", path: "/state-union", desc: "Regional offices" },

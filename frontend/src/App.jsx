@@ -48,6 +48,8 @@ import RegistrationForm from './Components/TaekwondoTest/RegistrationForm';
 import TaekwondoTestManagement from './AdminPanel/Pages/TaekwondoTestManagement';
 import VerifyCertificate from './Components/VerifyCertificate';
 import VerifyAffiliation from './Components/VerifyAffiliation';
+import InstructorRefereeCourse from './Components/InstructorRefereeCourse';
+import InstructorRefereeCourseManagement from './AdminPanel/Pages/InstructorRefereeCourseManagement';
 
 const App = () => {
   const location = useLocation();
@@ -90,6 +92,7 @@ const App = () => {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/stateuniondashboard" element={<StateUnionDashboard />} />
         <Route path="/playerdashboard" element={<PlayerDashboard />} />
+        <Route path="/national-instructor-referee-course-2026" element={<InstructorRefereeCourse />} />
         {/* ✅ Admin Routes - No Header/Footer */}
         <Route element={<AdminLayout />}>
           <Route path="/admindashboard" element={<ModernAdminDash />} />
@@ -108,6 +111,7 @@ const App = () => {
           <Route path="/admin/competition-registrations" element={<CompetitionManagement />} />
           <Route path="/admin/police-training" element={<PoliceTrainingManagement />} />
           <Route path="/admin/taekwondo-test" element={<TaekwondoTestManagement />} />
+          <Route path="/admin/instructor-referee-course" element={<InstructorRefereeCourseManagement />} />
         </Route>
         <Route path="/taekwondo-belt-test" element={<RegistrationForm />} />
         <Route path="/verify-certificate" element={<VerifyCertificate />} />
