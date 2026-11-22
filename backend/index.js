@@ -168,6 +168,8 @@ app.use('/api/instructor-referee-course', require('./routes/instructorRefereeRou
 // Firebase routes disabled - project deleted
 // app.use('/api/firebase', firebaseRoutes);
 app.use('/api/states', statesRoutes); // States and Districts routes (uses static data)
+app.use('/api/visitors', require('./routes/visitorRoutes'));
+app.use('/api/visitor', require('./routes/visitorRoutes'));
 
 // 404 handler
 app.use((req, res) => {

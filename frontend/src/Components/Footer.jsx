@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import VisitorCounter from "./VisitorCounter";
 import {
   Axe,
   ClipboardCheck,
@@ -208,8 +209,8 @@ const Footer = () => {
       </div>
 
       {/* Bottom Section */}
-      {/* Bottom Section */}
-      <div className="border-t border-gray-600 bg-[#0B2545] pt-4 pb-6">
+      <div className="border-t border-gray-600 bg-[#0B2545] pt-5 pb-6 px-4">
+        <VisitorCounter />
         <p className="text-center text-sm text-gray-400">
           &copy; All Rights Reserved.{" "}
           <a

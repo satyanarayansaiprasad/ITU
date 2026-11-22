@@ -13,6 +13,7 @@ const emailConfig = require('../config/email');
 const { sendEmail } = require('../config/email');
 const getEmailFrom = emailConfig.getEmailFrom;
 const AccelerationForm = require('../models/AccelerationForm');
+const VisitorCounter = require('../models/VisitorCounter');
 const { uploadBufferToCloudinary, deleteFromCloudinary } = require('../config/cloudinary');
 
 const { generateTokens } = require('../utils/jwt');
@@ -2626,7 +2627,8 @@ exports.getDashboardAnalytics = async (req, res) => {
       formsThisMonth,
       postsThisMonth,
       categoryStats,
-      monthlyStats
+      monthlyStats,
+      visitorCounterDoc
     ] = await Promise.all([
       News.countDocuments(),
       Contact.countDocuments(),
@@ -2665,7 +2667,8 @@ exports.getDashboardAnalytics = async (req, res) => {
         },
         { $sort: { "_id.year": 1, "_id.month": 1 } },
         { $limit: 12 }
-      ])
+      ]),
+      VisitorCounter.findOne({ name: 'total_visitors' }).lean()
     ]);
 
     res.status(200).json({
@@ -2676,6 +2679,7 @@ exports.getDashboardAnalytics = async (req, res) => {
           totalContacts,
           totalForms,
           totalGalleryImages,
+          totalVisitors: visitorCounterDoc ? visitorCounterDoc.count : 0,
           contactsThisMonth,
           formsThisMonth,
           postsThisMonth

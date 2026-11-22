@@ -109,6 +109,10 @@ export const API_ENDPOINTS = {
   UPDATE_POLICE_TRAINING: (id) => `${API_BASE_URL}/api/admin/police-training/${id}`,
   DELETE_POLICE_TRAINING: (id) => `${API_BASE_URL}/api/admin/police-training/${id}`,
   DELETE_POLICE_TRAINING_PHOTO: (id, photoId) => `${API_BASE_URL}/api/admin/police-training/${id}/photos/${photoId}`,
+
+  // Visitor Counter endpoints
+  GET_VISITOR_COUNT: `${API_BASE_URL}/api/visitors/count`,
+  RECORD_VISITOR: `${API_BASE_URL}/api/visitors/visit`,
 };
 
 // Helper function for upload URLs
