@@ -214,12 +214,12 @@ const Footer = () => {
         <p className="text-center text-sm text-gray-400">
           &copy; All Rights Reserved.{" "}
           <a
-            href="https://websyonline.com/"
+            href="https://bloodydevelopers.vercel.app/"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:underline text-gray-300"
           >
-            Design and Delivery by WebsyOnline
+            Design and Delivery by Bloody developers
           </a>
         </p>
       </div>
