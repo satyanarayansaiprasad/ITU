@@ -126,13 +126,15 @@ const VisitorCounter = () => {
     };
   }, []);
 
-  // Format count in Indian numbering system (e.g. 125143 -> "1,25,143")
-  const formattedCharacters = (() => {
+  // Format count as digits without commas (at least 6 digits)
+  const formattedDigits = (() => {
     const displayNum = typeof count === 'number' && count >= BASE_INITIAL_COUNT ? count : BASE_INITIAL_COUNT;
-    return displayNum.toLocaleString('en-IN').split('');
+    const countStr = displayNum.toString();
+    const padded = countStr.length < 6 ? countStr.padStart(6, '0') : countStr;
+    return padded.split('');
   })();
 
-  const currentDisplayCount = (typeof count === 'number' && count >= BASE_INITIAL_COUNT ? count : BASE_INITIAL_COUNT).toLocaleString('en-IN');
+  const currentDisplayCount = typeof count === 'number' && count >= BASE_INITIAL_COUNT ? count : BASE_INITIAL_COUNT;
 
   return (
     <div
@@ -163,24 +165,14 @@ const VisitorCounter = () => {
           isLoading ? 'opacity-70 animate-pulse' : 'opacity-100'
         }`}
       >
-        {formattedCharacters.map((char, idx) =>
-          char === ',' ? (
-            <span
-              key={idx}
-              className="font-mono font-bold text-[#D2E3FB] text-sm sm:text-base px-0.5 select-none self-end pb-0.5"
-              aria-hidden="true"
-            >
-              ,
-            </span>
-          ) : (
-            <span
-              key={idx}
-              className="w-5 h-6 sm:w-6 sm:h-7 flex items-center justify-center font-mono font-bold text-sm sm:text-base text-white bg-gradient-to-b from-[#132c4a] via-[#0f243c] to-[#081829] rounded border border-blue-400/25 shadow-sm select-none"
-            >
-              {char}
-            </span>
-          )
-        )}
+        {formattedDigits.map((digit, idx) => (
+          <span
+            key={idx}
+            className="w-5 h-6 sm:w-6 sm:h-7 flex items-center justify-center font-mono font-bold text-sm sm:text-base text-white bg-gradient-to-b from-[#132c4a] via-[#0f243c] to-[#081829] rounded border border-blue-400/25 shadow-sm select-none"
+          >
+            {digit}
+          </span>
+        ))}
       </div>
     </div>
   );
