@@ -3,6 +3,8 @@ import axios from 'axios';
 import { Users } from 'lucide-react';
 import { API_ENDPOINTS } from '../config/api';
 
+const BASE_INITIAL_COUNT = 125143;
+
 // In-flight request cache to prevent duplicate calls during React StrictMode or fast navigation
 let inFlightRequest = null;
 
@@ -42,19 +44,19 @@ const getOrCreateVisitorId = () => {
 };
 
 const VisitorCounter = () => {
-  // Synchronously initialize with cached count to prevent layout shift (CLS = 0)
+  // Synchronously initialize with cached count or base count (1,25,143) to prevent layout shift (CLS = 0)
   const [count, setCount] = useState(() => {
-    if (typeof window === 'undefined') return null;
+    if (typeof window === 'undefined') return BASE_INITIAL_COUNT;
     try {
       const cached = localStorage.getItem('itu_cached_visitor_count');
       const parsed = parseInt(cached, 10);
-      return !isNaN(parsed) && parsed >= 0 ? parsed : null;
+      return !isNaN(parsed) && parsed >= BASE_INITIAL_COUNT ? parsed : BASE_INITIAL_COUNT;
     } catch {
-      return null;
+      return BASE_INITIAL_COUNT;
     }
   });
 
-  const [isLoading, setIsLoading] = useState(count === null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -98,9 +100,10 @@ const VisitorCounter = () => {
         const data = await inFlightRequest;
 
         if (isMounted && data && typeof data.count === 'number') {
-          setCount(data.count);
+          const validCount = Math.max(data.count, BASE_INITIAL_COUNT);
+          setCount(validCount);
           try {
-            localStorage.setItem('itu_cached_visitor_count', data.count.toString());
+            localStorage.setItem('itu_cached_visitor_count', validCount.toString());
           } catch {
             // Ignore storage quota errors
           }
@@ -123,21 +126,19 @@ const VisitorCounter = () => {
     };
   }, []);
 
-  // Format count with at least 6 digits for the odometer display (e.g. "001,429")
-  const formattedDigits = (() => {
-    if (count === null || count === undefined) {
-      return ['0', '0', '0', '0', '0', '0'];
-    }
-    const countStr = count.toString();
-    const padded = countStr.length < 6 ? countStr.padStart(6, '0') : countStr;
-    return padded.split('');
+  // Format count in Indian numbering system (e.g. 125143 -> "1,25,143")
+  const formattedCharacters = (() => {
+    const displayNum = typeof count === 'number' && count >= BASE_INITIAL_COUNT ? count : BASE_INITIAL_COUNT;
+    return displayNum.toLocaleString('en-IN').split('');
   })();
+
+  const currentDisplayCount = (typeof count === 'number' && count >= BASE_INITIAL_COUNT ? count : BASE_INITIAL_COUNT).toLocaleString('en-IN');
 
   return (
     <div
       className="flex flex-col sm:flex-row items-center justify-center gap-2.5 sm:gap-3.5 mb-4 text-center"
       role="status"
-      aria-label={`Total website visitors: ${count !== null ? count : 'Loading'}`}
+      aria-label={`Total website visitors: ${currentDisplayCount}`}
     >
       {/* Badge Container */}
       <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#071b30]/90 border border-blue-400/20 shadow-md backdrop-blur-sm">
@@ -159,17 +160,27 @@ const VisitorCounter = () => {
       {/* Odometer / Counter Display */}
       <div
         className={`inline-flex items-center gap-1 bg-[#051322] px-2.5 py-1 rounded-lg border border-blue-500/30 shadow-inner transition-opacity duration-300 ${
-          isLoading && count === null ? 'opacity-70 animate-pulse' : 'opacity-100'
+          isLoading ? 'opacity-70 animate-pulse' : 'opacity-100'
         }`}
       >
-        {formattedDigits.map((digit, idx) => (
-          <span
-            key={idx}
-            className="w-5 h-6 sm:w-6 sm:h-7 flex items-center justify-center font-mono font-bold text-sm sm:text-base text-white bg-gradient-to-b from-[#132c4a] via-[#0f243c] to-[#081829] rounded border border-blue-400/25 shadow-sm select-none"
-          >
-            {digit}
-          </span>
-        ))}
+        {formattedCharacters.map((char, idx) =>
+          char === ',' ? (
+            <span
+              key={idx}
+              className="font-mono font-bold text-[#D2E3FB] text-sm sm:text-base px-0.5 select-none self-end pb-0.5"
+              aria-hidden="true"
+            >
+              ,
+            </span>
+          ) : (
+            <span
+              key={idx}
+              className="w-5 h-6 sm:w-6 sm:h-7 flex items-center justify-center font-mono font-bold text-sm sm:text-base text-white bg-gradient-to-b from-[#132c4a] via-[#0f243c] to-[#081829] rounded border border-blue-400/25 shadow-sm select-none"
+            >
+              {char}
+            </span>
+          )
+        )}
       </div>
     </div>
   );

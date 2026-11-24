@@ -1,12 +1,40 @@
 const Visitor = require('../models/Visitor');
 const VisitorCounter = require('../models/VisitorCounter');
 
+const BASE_DEFAULT_COUNT = 125143;
+
 /**
- * Helper to get the default base count from environment variable, if configured
+ * Helper to get the base count from environment variable or default 125,143
  */
 const getInitialBaseCount = () => {
   const envCount = parseInt(process.env.INITIAL_VISITOR_COUNT, 10);
-  return !isNaN(envCount) && envCount >= 0 ? envCount : 0;
+  return !isNaN(envCount) && envCount >= 0 ? envCount : BASE_DEFAULT_COUNT;
+};
+
+/**
+ * Helper to ensure the counter is initialized and at least at the base count
+ */
+const getOrEnsureCounter = async () => {
+  const baseCount = getInitialBaseCount();
+  let counter = await VisitorCounter.findOne({ name: 'total_visitors' }).lean();
+
+  if (!counter) {
+    counter = await VisitorCounter.findOneAndUpdate(
+      { name: 'total_visitors' },
+      { $setOnInsert: { count: baseCount } },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    ).lean();
+  } else if (counter.count < baseCount) {
+    // If an existing counter has a lower count than base, update to baseCount
+    counter =
+      (await VisitorCounter.findOneAndUpdate(
+        { name: 'total_visitors', count: { $lt: baseCount } },
+        { $set: { count: baseCount } },
+        { new: true }
+      ).lean()) || counter;
+  }
+
+  return counter;
 };
 
 /**
@@ -15,24 +43,12 @@ const getInitialBaseCount = () => {
  */
 exports.getVisitorCount = async (req, res) => {
   try {
-    let counter = await VisitorCounter.findOne({ name: 'total_visitors' }).lean();
-
-    if (!counter) {
-      // If counter document does not exist yet, check if there are existing visitor records
-      const existingVisitorCount = await Visitor.countDocuments();
-      const initialCount = Math.max(existingVisitorCount, getInitialBaseCount());
-
-      counter = await VisitorCounter.findOneAndUpdate(
-        { name: 'total_visitors' },
-        { $setOnInsert: { count: initialCount } },
-        { upsert: true, new: true, setDefaultsOnInsert: true }
-      ).lean();
-    }
+    const counter = await getOrEnsureCounter();
 
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     return res.status(200).json({
       success: true,
-      count: counter ? counter.count : 0,
+      count: counter ? counter.count : getInitialBaseCount(),
     });
   } catch (error) {
     console.error('Error fetching visitor count:', error);
@@ -91,10 +107,10 @@ exports.recordVisit = async (req, res) => {
         }
       ).catch((err) => console.error('Error updating visitor record:', err));
 
-      let counter = await VisitorCounter.findOne({ name: 'total_visitors' }).lean();
+      const counter = await getOrEnsureCounter();
       return res.status(200).json({
         success: true,
-        count: counter ? counter.count : 0,
+        count: counter ? counter.count : getInitialBaseCount(),
         isNewVisitor: false,
       });
     }
@@ -110,29 +126,28 @@ exports.recordVisit = async (req, res) => {
         visitCount: 1,
       });
 
+      // Ensure counter document exists and is at least at base
+      await getOrEnsureCounter();
+
       // Atomically increment global visitor counter
-      const initialBase = getInitialBaseCount();
       const updatedCounter = await VisitorCounter.findOneAndUpdate(
         { name: 'total_visitors' },
-        {
-          $inc: { count: 1 },
-          $setOnInsert: { name: 'total_visitors' },
-        },
-        { upsert: true, new: true, setDefaultsOnInsert: true }
+        { $inc: { count: 1 } },
+        { new: true }
       ).lean();
 
       return res.status(200).json({
         success: true,
-        count: updatedCounter ? updatedCounter.count : initialBase + 1,
+        count: updatedCounter ? updatedCounter.count : getInitialBaseCount() + 1,
         isNewVisitor: true,
       });
     } catch (createErr) {
       // Handle race condition where two requests with same visitorId arrived simultaneously
       if (createErr.code === 11000) {
-        let counter = await VisitorCounter.findOne({ name: 'total_visitors' }).lean();
+        const counter = await getOrEnsureCounter();
         return res.status(200).json({
           success: true,
-          count: counter ? counter.count : 0,
+          count: counter ? counter.count : getInitialBaseCount(),
           isNewVisitor: false,
         });
       }

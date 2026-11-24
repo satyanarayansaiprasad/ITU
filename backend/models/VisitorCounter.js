@@ -11,7 +11,7 @@ const visitorCounterSchema = new mongoose.Schema(
     count: {
       type: Number,
       required: true,
-      default: 0,
+      default: 125143,
       min: 0,
     },
   },
