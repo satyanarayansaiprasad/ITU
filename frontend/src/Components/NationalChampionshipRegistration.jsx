@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Trophy, 
   ShieldCheck, 
@@ -10,11 +10,20 @@ const NationalChampionshipRegistration = () => {
   const [isLoading, setIsLoading] = useState(true);
   const registrationUrl = "https://www.dosportsglobal.com/event/9th-open-national-taekwondo-championship-2026-qptj";
 
+  // Safety timer to guarantee loading screen dismisses even if onLoad doesn't fire
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="min-h-screen bg-slate-50 py-6 sm:py-10">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Header Banner - Centered, matching user specifications */}
+        {/* Header Banner */}
         <motion.div 
           initial={{ opacity: 0, y: -15 }}
           animate={{ opacity: 1, y: 0 }}
@@ -49,16 +58,16 @@ const NationalChampionshipRegistration = () => {
           </div>
         </motion.div>
 
-        {/* Clean Iframe Frame without address bar, buttons, or external links */}
+        {/* Clean Iframe Frame */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 }}
           className="relative bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden"
         >
-          {/* Loading Indicator */}
+          {/* Loading Indicator with pointer-events-none so it doesn't block interactions */}
           {isLoading && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/95 z-20">
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/95 z-20 pointer-events-none transition-opacity duration-300">
               <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
               <p className="mt-4 text-sm font-semibold text-gray-700">Loading Registration Portal...</p>
               <p className="text-xs text-gray-400 mt-1">Please wait a moment while the portal connects.</p>
