@@ -50,6 +50,7 @@ import VerifyCertificate from './Components/VerifyCertificate';
 import VerifyAffiliation from './Components/VerifyAffiliation';
 import InstructorRefereeCourse from './Components/InstructorRefereeCourse';
 import InstructorRefereeCourseManagement from './AdminPanel/Pages/InstructorRefereeCourseManagement';
+import NationalChampionshipRegistration from './Components/NationalChampionshipRegistration';
 
 const App = () => {
   const location = useLocation();
@@ -93,6 +94,7 @@ const App = () => {
         <Route path="/stateuniondashboard" element={<StateUnionDashboard />} />
         <Route path="/playerdashboard" element={<PlayerDashboard />} />
         <Route path="/national-instructor-referee-course-2026" element={<InstructorRefereeCourse />} />
+        <Route path="/register-for-national-championship" element={<NationalChampionshipRegistration />} />
         {/* ✅ Admin Routes - No Header/Footer */}
         <Route element={<AdminLayout />}>
           <Route path="/admindashboard" element={<ModernAdminDash />} />
